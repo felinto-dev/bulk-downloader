@@ -2,11 +2,11 @@ import { Job } from 'bull';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { OnQueueCompleted, Process, Processor } from '@nestjs/bull';
 
-import { DOWNLOADS_REQUESTS_QUEUE } from '@/consts/queues';
+import { DOWNLOADS_QUEUE } from '@/consts/queues';
 import { DownloadsService } from '@/services/downloads.service';
 
-@Processor(DOWNLOADS_REQUESTS_QUEUE)
-export class DownloadsRequestConsumer {
+@Processor(DOWNLOADS_QUEUE)
+export class DownloadsConsumer {
   constructor(private readonly downloadsService: DownloadsService) {}
 
   @Cron(CronExpression.EVERY_HOUR)

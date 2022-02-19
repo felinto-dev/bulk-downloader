@@ -1,3 +1,3 @@
-import { DownloadsRequestConsumer } from './downloads.consumers';
+import { DownloadsConsumer } from './downloads.consumers';
 
-export const CONSUMERS = [DownloadsRequestConsumer];
+export const CONSUMERS = [DownloadsConsumer];
