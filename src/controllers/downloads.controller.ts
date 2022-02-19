@@ -12,6 +12,8 @@ export class DownloadsController {
 
   @Post()
   requestDownload() {
-    return this.downloadsRequestQueue.add('https://example.com/file.zip');
+    return this.downloadsRequestQueue.add({
+      url: 'https://example.com/file.zip',
+    });
   }
 }
