@@ -53,5 +53,12 @@ services:
     ports:
       - 5001:5001
 
+  bull-board:
+    image: deadly0/bull-board
+    environment:
+      REDIS_HOST: redis
+    ports:
+      - 6001:3000
+
 volumes:
   postgres-data:
