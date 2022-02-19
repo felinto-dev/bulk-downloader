@@ -9,6 +9,9 @@ import { Module } from '@nestjs/common';
         port: 6379,
       },
     }),
+    BullModule.registerQueue({
+      name: 'downloads_request',
+    }),
   ],
 })
 export class AppModule {}
