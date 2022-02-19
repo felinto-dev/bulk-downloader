@@ -45,5 +45,10 @@ services:
   redis:
     image: redis:alpine
 
+  redis-gui:
+    image: marian/rebrow
+    ports:
+      - 5001:5001
+
 volumes:
   postgres-data:
