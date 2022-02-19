@@ -1,4 +1,6 @@
+import * as path from 'path';
 import { Job } from 'bull';
+import Downloader from 'nodejs-file-downloader';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { OnQueueCompleted, Process, Processor } from '@nestjs/bull';
 
@@ -19,6 +21,15 @@ export class DownloadsRequestConsumer {
   })
   async doDownload(job: Job) {
     console.log(`Downloading item... ${job.data.url}`);
+
+    const downloader = new Downloader({
+      url: job.data.url,
+      directory: path.join(process.cwd(), 'tmp'),
+      onProgress: async (downloadProgressPercentage) => {
+        await job.progress(downloadProgressPercentage);
+      },
+    });
+    return downloader.download();
   }
 
   @OnQueueCompleted()

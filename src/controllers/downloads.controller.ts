@@ -13,7 +13,7 @@ export class DownloadsController {
   @Post()
   requestDownload() {
     return this.downloadsRequestQueue.add({
-      url: 'https://example.com/file.zip',
+      url: 'https://speed.hetzner.de/1GB.bin',
     });
   }
 }
