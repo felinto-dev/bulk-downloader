@@ -3,6 +3,8 @@ import { BullModule } from '@nestjs/bull';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import queueConfig from '@/configs/queue.config';
+import { DownloadsController } from '@/controllers/downloads.controller';
+import { DOWNLOADS_REQUESTS_QUEUE } from '@/consts/queues';
 
 @Module({
   imports: [
@@ -23,8 +25,9 @@ import queueConfig from '@/configs/queue.config';
       inject: [ConfigService],
     }),
     BullModule.registerQueue({
-      name: 'downloads_request',
+      name: DOWNLOADS_REQUESTS_QUEUE,
     }),
   ],
+  controllers: [DownloadsController],
 })
 export class AppModule {}
