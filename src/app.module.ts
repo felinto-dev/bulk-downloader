@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bull';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import queueConfig from '@/configs/queue.config';
@@ -16,6 +17,7 @@ import { CONTROLLERS } from '@/controllers';
       isGlobal: true,
       load: [queueConfig],
     }),
+    ScheduleModule.forRoot(),
     BullModule.forRootAsync({
       useFactory: async (configService: ConfigService) => ({
         redis: {
