@@ -7,6 +7,7 @@ import queueConfig from '@/configs/queue.config';
 import { DOWNLOADS_REQUESTS_QUEUE } from '@/consts/queues';
 import { CONSUMERS } from '@/consumers';
 import { CONTROLLERS } from '@/controllers';
+import { SERVICES } from '@/services';
 
 @Module({
   imports: [
@@ -32,6 +33,6 @@ import { CONTROLLERS } from '@/controllers';
     }),
   ],
   controllers: [...CONTROLLERS],
-  providers: [...CONSUMERS],
+  providers: [...CONSUMERS, ...SERVICES],
 })
 export class AppModule {}

@@ -1,13 +1,14 @@
-import * as path from 'path';
 import { Job } from 'bull';
-import Downloader from 'nodejs-file-downloader';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { OnQueueCompleted, Process, Processor } from '@nestjs/bull';
 
 import { DOWNLOADS_REQUESTS_QUEUE } from '@/consts/queues';
+import { DownloadsService } from '@/services/downloads.service';
 
 @Processor(DOWNLOADS_REQUESTS_QUEUE)
 export class DownloadsRequestConsumer {
+  constructor(private readonly downloadsService: DownloadsService) {}
+
   @Cron(CronExpression.EVERY_HOUR)
   async pullJobs() {
     // TODO: Should pull new jobs to queue respecting the concurrency and limits for each hoster.
@@ -20,16 +21,12 @@ export class DownloadsRequestConsumer {
     concurrency: 5, // Global application concurrency
   })
   async doDownload(job: Job) {
-    console.log(`Downloading item... ${job.data.url}`);
-
-    const downloader = new Downloader({
-      url: job.data.url,
-      directory: path.join(process.cwd(), 'tmp'),
-      onProgress: async (downloadProgressPercentage) => {
-        await job.progress(downloadProgressPercentage);
+    return this.downloadsService.download(
+      job.data.url,
+      async (downloadProgress) => {
+        await job.progress(downloadProgress);
       },
-    });
-    return downloader.download();
+    );
   }
 
   @OnQueueCompleted()
