@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bull';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
-import queueConfig from './configs/queue.config';
+import queueConfig from '@/configs/queue.config';
 
 @Module({
   imports: [
