@@ -4,6 +4,7 @@ import { OnQueueCompleted, Process, Processor } from '@nestjs/bull';
 
 import { DOWNLOADS_QUEUE } from '@/consts/queues';
 import { DownloadsService } from '@/services/downloads.service';
+import { GLOBAL_DOWNLOADS_CONCURRENCY } from '@/consts/app';
 
 @Processor(DOWNLOADS_QUEUE)
 export class DownloadsConsumer {
@@ -18,7 +19,7 @@ export class DownloadsConsumer {
   }
 
   @Process({
-    concurrency: 5, // Global application concurrency
+    concurrency: GLOBAL_DOWNLOADS_CONCURRENCY,
   })
   async doDownload(job: Job) {
     return this.downloadsService.download(

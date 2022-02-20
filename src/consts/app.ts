@@ -1,0 +1,1 @@
+export const GLOBAL_DOWNLOADS_CONCURRENCY = 5;
