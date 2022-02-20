@@ -34,12 +34,18 @@ export class HostersRepository {
     // hourly
 
     // daily
-    const dailyAttemps = await this.prisma.download.count({
+    const dailyAttemps = await this.countHosterDailyAttempts(hosterId);
+
+    console.log(hoster.limits);
+    console.log({
+      daily: dailyAttemps,
+    });
+  }
+
+  countHosterDailyAttempts(hosterId: string) {
+    return this.prisma.download.count({
       where: {
         Hoster: { id: hosterId },
-        status: {
-          not: DownloadStatus.PENDING,
-        },
         attemps: {
           none: {
             createdAt: {
@@ -48,11 +54,6 @@ export class HostersRepository {
           },
         },
       },
-    });
-
-    console.log(hoster.limits);
-    console.log({
-      daily: dailyAttemps,
     });
   }
 }
