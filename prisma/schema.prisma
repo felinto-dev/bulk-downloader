@@ -15,12 +15,22 @@ model Hoster {
   name                 String
   authenticationMethod HosterAuthenticationMethod
   concurrency          Int                        @default(1)
-  limits               Json
   downloads            Download[]
+  limits               HosterLimits?
 }
 
 enum HosterAuthenticationMethod {
   FREE
+}
+
+model HosterLimits {
+  id        String   @id @default(uuid())
+  hourly    Int?
+  daily     Int?
+  monthly   Int?
+  updatedAt DateTime @updatedAt
+  hoster    Hoster   @relation(fields: [hosterId], references: [id])
+  hosterId  String   @unique
 }
 
 model Download {

@@ -6,7 +6,9 @@ export const hosters: Prisma.HosterCreateInput[] = [
     name: 'GPLZone',
     authenticationMethod: HosterAuthenticationMethod.FREE,
     limits: {
-      daily: 50,
+      create: {
+        daily: 50,
+      },
     },
   },
   {
@@ -14,8 +16,10 @@ export const hosters: Prisma.HosterCreateInput[] = [
     name: 'File-Examples.com',
     authenticationMethod: HosterAuthenticationMethod.FREE,
     limits: {
-      hourly: 1,
-      daily: 10,
+      create: {
+        hourly: 1,
+        daily: 10,
+      },
     },
   },
   {
@@ -23,14 +27,15 @@ export const hosters: Prisma.HosterCreateInput[] = [
     name: 'File Samples',
     authenticationMethod: HosterAuthenticationMethod.FREE,
     limits: {
-      hourly: 10,
-      daily: 10,
+      create: {
+        hourly: 10,
+        daily: 10,
+      },
     },
   },
   {
     id: 'thinkbroadband.com',
     name: 'Think broad band',
     authenticationMethod: HosterAuthenticationMethod.FREE,
-    limits: {},
   },
 ];
