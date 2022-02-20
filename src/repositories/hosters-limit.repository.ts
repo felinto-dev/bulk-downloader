@@ -9,42 +9,30 @@ export class HostersLimitsRepository {
 
   async countHosterDownloadAttempts(hosterId: string) {
     return {
-      hourly: await this.countHosterHourlyAttempts(hosterId),
-      daily: await this.countHosterDailyAttempts(hosterId),
-      monthly: await this.countHosterMonthlyAttempts(hosterId),
+      hourly: await this.countHosterDownloadsGreatherThanOrEqualDate(
+        hosterId,
+        DateTime.now().set({ minute: 0, second: 0 }).toISO(),
+      ),
+      daily: await this.countHosterDownloadsGreatherThanOrEqualDate(
+        hosterId,
+        DateTime.now().set({ hour: 0, minute: 0, second: 0 }).toISO(),
+      ),
+      monthly: await this.countHosterDownloadsGreatherThanOrEqualDate(
+        hosterId,
+        DateTime.now().set({ day: 1, hour: 0, minute: 0, second: 0 }).toISO(),
+      ),
     };
   }
 
-  private countHosterHourlyAttempts(hosterId: string) {
+  private async countHosterDownloadsGreatherThanOrEqualDate(
+    hosterId: string,
+    date: string,
+  ) {
     return this.prisma.downloadRequestAttempt.count({
       where: {
         hosterId,
         createdAt: {
-          gte: DateTime.now().set({ minute: 0, second: 0 }).toISO(),
-        },
-      },
-    });
-  }
-
-  private countHosterDailyAttempts(hosterId: string) {
-    return this.prisma.downloadRequestAttempt.count({
-      where: {
-        hosterId,
-        createdAt: {
-          gte: DateTime.now().set({ hour: 0, minute: 0, second: 0 }).toISO(),
-        },
-      },
-    });
-  }
-
-  private countHosterMonthlyAttempts(hosterId: string) {
-    return this.prisma.downloadRequestAttempt.count({
-      where: {
-        hosterId,
-        createdAt: {
-          gte: DateTime.now()
-            .set({ day: 1, hour: 0, minute: 0, second: 0 })
-            .toISO(),
+          gte: date,
         },
       },
     });
