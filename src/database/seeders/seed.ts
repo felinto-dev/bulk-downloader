@@ -32,11 +32,13 @@ async function main() {
   await prisma.$transaction([...hostersTransactions, ...downloadsTransactions]);
 }
 
+console.time('seeding duration');
 main()
   .catch((e) => {
     console.error(e);
     process.exit(1);
   })
   .finally(async () => {
+    console.timeEnd('seeding duration');
     await prisma.$disconnect();
   });
