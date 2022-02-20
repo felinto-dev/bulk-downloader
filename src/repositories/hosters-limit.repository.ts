@@ -9,22 +9,22 @@ export class HostersLimitsRepository {
 
   async countHosterDownloadAttempts(hosterId: string) {
     return {
-      thisHour: await this.countHosterDownloadsGreatherThanOrEqualDate(
+      thisHour: await this.countHosterDownloadsAttemptsDidAfter(
         hosterId,
         DateTime.now().set({ minute: 0, second: 0 }).toISO(),
       ),
-      thisDay: await this.countHosterDownloadsGreatherThanOrEqualDate(
+      thisDay: await this.countHosterDownloadsAttemptsDidAfter(
         hosterId,
         DateTime.now().set({ hour: 0, minute: 0, second: 0 }).toISO(),
       ),
-      thisMonth: await this.countHosterDownloadsGreatherThanOrEqualDate(
+      thisMonth: await this.countHosterDownloadsAttemptsDidAfter(
         hosterId,
         DateTime.now().set({ day: 1, hour: 0, minute: 0, second: 0 }).toISO(),
       ),
     };
   }
 
-  private async countHosterDownloadsGreatherThanOrEqualDate(
+  private async countHosterDownloadsAttemptsDidAfter(
     hosterId: string,
     date: string,
   ) {
