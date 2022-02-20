@@ -1,11 +1,10 @@
 import { PrismaClient } from '@prisma/client';
+import { downloads } from './downloads';
 import { hosters } from './hosters';
 const prisma = new PrismaClient();
 
 async function main() {
-  const transactions = [];
-
-  transactions.push(
+  const hostersTransactions = [
     ...hosters.map((hoster) => {
       return prisma.hoster.upsert({
         where: { id: hoster.id },
@@ -13,9 +12,24 @@ async function main() {
         create: hoster,
       });
     }),
-  );
+  ];
 
-  await prisma.$transaction(transactions);
+  const downloadsTransactions = [
+    ...downloads.map((download) => {
+      return prisma.download.upsert({
+        where: {
+          downloadIdByHoster: {
+            downloadId: download.downloadId,
+            hosterId: download.Hoster.connect.id,
+          },
+        },
+        update: {},
+        create: download,
+      });
+    }),
+  ];
+
+  await prisma.$transaction([...hostersTransactions, ...downloadsTransactions]);
 }
 
 main()
