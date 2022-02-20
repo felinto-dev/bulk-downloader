@@ -9,3 +9,34 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Hoster {
+  id                   String                     @id
+  name                 String
+  authenticationMethod HosterAuthenticationMethod
+  limits               Json
+  downloads            Download[]
+}
+
+enum HosterAuthenticationMethod {
+  FREE
+}
+
+model Download {
+  id             String         @id @default(uuid())
+  downloadId     String
+  priority       Int            @default(0)
+  downloadStatus DownloadStatus
+  fingerprint    String
+  Hoster         Hoster         @relation(fields: [hosterId], references: [id])
+  hosterId       String
+
+  @@unique([downloadId, hosterId])
+}
+
+enum DownloadStatus {
+  PENDING
+  WAITING_DOWNLOAD
+  SUCCESS
+  FAILED
+}
