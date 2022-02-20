@@ -24,16 +24,25 @@ enum HosterAuthenticationMethod {
 }
 
 model Download {
-  id          String         @id @default(uuid())
+  id          String                   @id @default(uuid())
   downloadId  String
-  status      DownloadStatus @default(PENDING)
+  status      DownloadStatus           @default(PENDING)
   url         String
-  priority    Int            @default(0)
+  priority    Int                      @default(0)
   fingerprint String
-  Hoster      Hoster         @relation(fields: [hosterId], references: [id])
+  Hoster      Hoster                   @relation(fields: [hosterId], references: [id])
   hosterId    String
+  attemps     DownloadRequestAttempt[]
 
   @@unique(name: "downloadIdByHoster", fields: [downloadId, hosterId])
+}
+
+model DownloadRequestAttempt {
+  id         String   @id @default(uuid())
+  Download   Download @relation(fields: [downloadId], references: [id])
+  downloadId String
+  logs       String?
+  createdAt  DateTime @default(now())
 }
 
 enum DownloadStatus {
