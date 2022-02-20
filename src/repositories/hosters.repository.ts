@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import { Injectable } from '@nestjs/common';
 import { DownloadStatus } from '@prisma/client';
 
@@ -33,18 +34,25 @@ export class HostersRepository {
     // hourly
 
     // daily
-    const dailyCount = await this.prisma.download.count({
+    const dailyAttemps = await this.prisma.download.count({
       where: {
         Hoster: { id: hosterId },
         status: {
-          not: 'PENDING',
+          not: DownloadStatus.PENDING,
+        },
+        attemps: {
+          none: {
+            createdAt: {
+              gte: DateTime.now().toISODate(),
+            },
+          },
         },
       },
     });
 
     console.log(hoster.limits);
     console.log({
-      daily: dailyCount,
+      daily: dailyAttemps,
     });
   }
 }
