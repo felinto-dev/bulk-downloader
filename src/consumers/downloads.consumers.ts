@@ -43,7 +43,7 @@ export class DownloadsConsumer {
   async doDownload(job: Job) {
     return this.downloadsService.download({
       url: job.data.url,
-      onDownloadProgress: async (updatedDownloadProgress: number) =>
+      onDownloadProgress: (updatedDownloadProgress: number) =>
         job.progress(updatedDownloadProgress),
     });
   }
