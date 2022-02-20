@@ -17,6 +17,7 @@ model Hoster {
   concurrency          Int                        @default(1)
   downloads            Download[]
   limits               HosterLimits?
+  downloadsAttempts    DownloadRequestAttempt[]
 }
 
 enum HosterAuthenticationMethod {
@@ -34,7 +35,6 @@ model HosterLimits {
 }
 
 model Download {
-  id          String                   @id @default(uuid())
   downloadId  String
   status      DownloadStatus           @default(PENDING)
   url         String
@@ -44,15 +44,17 @@ model Download {
   hosterId    String
   attemps     DownloadRequestAttempt[]
 
-  @@unique(name: "downloadIdByHoster", fields: [downloadId, hosterId])
+  @@id(name: "downloadIdByHoster", fields: [downloadId, hosterId])
 }
 
 model DownloadRequestAttempt {
   id         String   @id @default(uuid())
-  Download   Download @relation(fields: [downloadId], references: [id])
+  Download   Download @relation(fields: [downloadId, hosterId], references: [downloadId, hosterId])
   downloadId String
   logs       String?
   createdAt  DateTime @default(now())
+  Hoster     Hoster   @relation(fields: [hosterId], references: [id])
+  hosterId   String
 }
 
 enum DownloadStatus {
