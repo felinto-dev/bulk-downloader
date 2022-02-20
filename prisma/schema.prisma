@@ -1,0 +1,43 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Hoster {
+  id                   String                     @id
+  name                 String
+  authenticationMethod HosterAuthenticationMethod
+  limits               Json
+  downloads            Download[]
+}
+
+enum HosterAuthenticationMethod {
+  FREE
+}
+
+model Download {
+  id          String         @id @default(uuid())
+  downloadId  String
+  status      DownloadStatus @default(PENDING)
+  url         String
+  priority    Int            @default(0)
+  fingerprint String
+  Hoster      Hoster         @relation(fields: [hosterId], references: [id])
+  hosterId    String
+
+  @@unique(name: "downloadIdByHoster", fields: [downloadId, hosterId])
+}
+
+enum DownloadStatus {
+  PENDING
+  WAITING_DOWNLOAD
+  SUCCESS
+  FAILED
+}
