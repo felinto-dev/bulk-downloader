@@ -36,17 +36,13 @@ export class HostersRepository {
       },
     });
 
-    const hourlyAttemps =
-      await this.hostersLimitsRepository.countHosterHourlyAttempts(hosterId);
-    const dailyAttemps =
-      await this.hostersLimitsRepository.countHosterDailyAttempts(hosterId);
-    const monthlyAttemps =
-      await this.hostersLimitsRepository.countHosterMonthlyAttempts(hosterId);
+    const downloadAttemps =
+      await this.hostersLimitsRepository.countHosterDownloadAttempts(hosterId);
 
     return {
-      hourly: limits.hourly && limits.hourly - hourlyAttemps,
-      daily: limits.daily && limits.daily - dailyAttemps,
-      monthly: limits.monthly && limits.monthly - monthlyAttemps,
+      hourly: limits.hourly && limits.hourly - downloadAttemps.hourly,
+      daily: limits.daily && limits.daily - downloadAttemps.daily,
+      monthly: limits.monthly && limits.monthly - downloadAttemps.monthly,
     };
   }
 }

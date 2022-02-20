@@ -7,7 +7,15 @@ import { PrismaService } from '@/prisma.service';
 export class HostersLimitsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  countHosterHourlyAttempts(hosterId: string) {
+  async countHosterDownloadAttempts(hosterId: string) {
+    return {
+      hourly: await this.countHosterHourlyAttempts(hosterId),
+      daily: await this.countHosterDailyAttempts(hosterId),
+      monthly: await this.countHosterMonthlyAttempts(hosterId),
+    };
+  }
+
+  private countHosterHourlyAttempts(hosterId: string) {
     return this.prisma.downloadRequestAttempt.count({
       where: {
         hosterId,
@@ -18,7 +26,7 @@ export class HostersLimitsRepository {
     });
   }
 
-  countHosterDailyAttempts(hosterId: string) {
+  private countHosterDailyAttempts(hosterId: string) {
     return this.prisma.downloadRequestAttempt.count({
       where: {
         hosterId,
@@ -29,7 +37,7 @@ export class HostersLimitsRepository {
     });
   }
 
-  countHosterMonthlyAttempts(hosterId: string) {
+  private countHosterMonthlyAttempts(hosterId: string) {
     return this.prisma.downloadRequestAttempt.count({
       where: {
         hosterId,
