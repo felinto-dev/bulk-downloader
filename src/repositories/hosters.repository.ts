@@ -26,63 +26,54 @@ export class HostersRepository {
   }
 
   async getHosterQuotaLeft(hosterId: string) {
-    const hoster = await this.prisma.hoster.findUnique({
+    const { limits } = await this.prisma.hoster.findUnique({
       where: { id: hosterId },
-      select: { limits: true },
+      select: {
+        limits: { select: { hourly: true, daily: true, monthly: true } },
+      },
     });
 
     const hourlyAttemps = await this.countHosterHourlyAttempts(hosterId);
     const dailyAttemps = await this.countHosterDailyAttempts(hosterId);
     const monthlyAttemps = await this.countHosterMonthlyAttempts(hosterId);
 
-    console.log(hoster.limits);
-    console.log({
-      hourlyAttemps,
-      dailyAttemps,
-      monthlyAttemps,
-    });
+    return {
+      hourly: limits.hourly && limits.hourly - hourlyAttemps,
+      daily: limits.daily && limits.daily - dailyAttemps,
+      monthly: limits.monthly && limits.monthly - monthlyAttemps,
+    };
   }
 
   countHosterHourlyAttempts(hosterId: string) {
-    return this.prisma.download.count({
+    return this.prisma.downloadRequestAttempt.count({
       where: {
-        Hoster: { id: hosterId },
-        attemps: {
-          none: {
-            createdAt: {
-              gte: DateTime.now().set({ minute: 0, second: 0 }).toISO(),
-            },
-          },
+        hosterId,
+        createdAt: {
+          gte: DateTime.now().set({ minute: 0, second: 0 }).toISO(),
         },
       },
     });
   }
 
   countHosterDailyAttempts(hosterId: string) {
-    return this.prisma.download.count({
+    return this.prisma.downloadRequestAttempt.count({
       where: {
-        Hoster: { id: hosterId },
-        attemps: {
-          none: {
-            createdAt: {
-              gte: DateTime.now().toISODate(),
-            },
-          },
+        hosterId,
+        createdAt: {
+          gte: DateTime.now().set({ hour: 0, minute: 0, second: 0 }).toISO(),
         },
       },
     });
   }
 
   countHosterMonthlyAttempts(hosterId: string) {
-    return this.prisma.download.count({
+    return this.prisma.downloadRequestAttempt.count({
       where: {
-        Hoster: { id: hosterId },
-        attemps: {
-          none: {
-            createdAt: {
-              gte: DateTime.now().set({ day: 1 }).toISODate(),
-            },
-          },
+        hosterId,
+        createdAt: {
+          gte: DateTime.now()
+            .set({ day: 1, hour: 0, minute: 0, second: 0 })
+            .toISO(),
         },
       },
     });
