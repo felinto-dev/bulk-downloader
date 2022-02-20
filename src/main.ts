@@ -7,8 +7,6 @@ import {
 import { AppModule } from './app.module';
 import { configureApp } from './configure';
 
-declare const module: any;
-
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
@@ -16,10 +14,5 @@ async function bootstrap() {
   );
   configureApp(app);
   await app.listen(3000, '0.0.0.0');
-
-  if (module.hot) {
-    module.hot.accept();
-    module.hot.dispose(() => app.close());
-  }
 }
 bootstrap();
