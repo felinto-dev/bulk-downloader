@@ -14,6 +14,7 @@
     "baseUrl": "src",
     "incremental": true,
     "skipLibCheck": true,
+		"lib": ["esnext"],
     "strictNullChecks": false,
     "noImplicitAny": false,
     "strictBindCallApply": false,
