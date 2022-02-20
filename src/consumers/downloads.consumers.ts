@@ -38,12 +38,11 @@ export class DownloadsConsumer {
     concurrency: GLOBAL_DOWNLOADS_CONCURRENCY,
   })
   async doDownload(job: Job) {
-    return this.downloadsService.download(
-      job.data.url,
-      async (downloadProgress) => {
-        await job.progress(downloadProgress);
-      },
-    );
+    return this.downloadsService.download({
+      url: job.data.url,
+      onDownloadProgress: async (updatedDownloadProgress: number) =>
+        job.progress(updatedDownloadProgress),
+    });
   }
 
   @OnQueueCompleted()
