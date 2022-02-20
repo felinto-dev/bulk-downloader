@@ -9,6 +9,7 @@ import { CONSUMERS } from '@/consumers';
 import { CONTROLLERS } from '@/controllers';
 import { SERVICES } from '@/services';
 import { PrismaService } from './prisma.service';
+import { REPOSITORIES } from './repositories';
 
 @Module({
   imports: [
@@ -34,6 +35,6 @@ import { PrismaService } from './prisma.service';
     }),
   ],
   controllers: [...CONTROLLERS],
-  providers: [PrismaService, ...CONSUMERS, ...SERVICES],
+  providers: [PrismaService, ...CONSUMERS, ...SERVICES, ...REPOSITORIES],
 })
 export class AppModule {}
