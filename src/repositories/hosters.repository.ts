@@ -23,4 +23,28 @@ export class HostersRepository {
       },
     });
   }
+
+  async getHosterQuotaLeft(hosterId: string) {
+    const hoster = await this.prisma.hoster.findUnique({
+      where: { id: hosterId },
+      select: { limits: true },
+    });
+
+    // hourly
+
+    // daily
+    const dailyCount = await this.prisma.download.count({
+      where: {
+        Hoster: { id: hosterId },
+        status: {
+          not: 'PENDING',
+        },
+      },
+    });
+
+    console.log(hoster.limits);
+    console.log({
+      daily: dailyCount,
+    });
+  }
 }
