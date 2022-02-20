@@ -31,14 +31,30 @@ export class HostersRepository {
       select: { limits: true },
     });
 
-    // hourly
-
-    // daily
+    const hourlyAttemps = await this.countHosterHourlyAttempts(hosterId);
     const dailyAttemps = await this.countHosterDailyAttempts(hosterId);
+    const monthlyAttemps = await this.countHosterMonthlyAttempts(hosterId);
 
     console.log(hoster.limits);
     console.log({
-      daily: dailyAttemps,
+      hourlyAttemps,
+      dailyAttemps,
+      monthlyAttemps,
+    });
+  }
+
+  countHosterHourlyAttempts(hosterId: string) {
+    return this.prisma.download.count({
+      where: {
+        Hoster: { id: hosterId },
+        attemps: {
+          none: {
+            createdAt: {
+              gte: DateTime.now().set({ minute: 0, second: 0 }).toISO(),
+            },
+          },
+        },
+      },
     });
   }
 
@@ -50,6 +66,21 @@ export class HostersRepository {
           none: {
             createdAt: {
               gte: DateTime.now().toISODate(),
+            },
+          },
+        },
+      },
+    });
+  }
+
+  countHosterMonthlyAttempts(hosterId: string) {
+    return this.prisma.download.count({
+      where: {
+        Hoster: { id: hosterId },
+        attemps: {
+          none: {
+            createdAt: {
+              gte: DateTime.now().set({ day: 1 }).toISODate(),
             },
           },
         },
