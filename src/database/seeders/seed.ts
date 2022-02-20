@@ -1,19 +1,21 @@
-import { HosterAuthenticationMethod, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+import { hosters } from './hosters';
 const prisma = new PrismaClient();
 
 async function main() {
-  await prisma.hoster.upsert({
-    where: { id: 'gplzone' },
-    update: {},
-    create: {
-      id: 'gplzone',
-      name: 'GPLZone',
-      authenticationMethod: HosterAuthenticationMethod.FREE,
-      limits: {
-        daily: 50,
-      },
-    },
-  });
+  const transactions = [];
+
+  transactions.push(
+    ...hosters.map((hoster) => {
+      return prisma.hoster.upsert({
+        where: { id: hoster.id },
+        update: {},
+        create: hoster,
+      });
+    }),
+  );
+
+  await prisma.$transaction(transactions);
 }
 
 main()
