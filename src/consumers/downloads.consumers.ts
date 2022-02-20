@@ -10,7 +10,6 @@ import {
 import { DOWNLOADS_QUEUE } from '@/consts/queues';
 import { DownloadsService } from '@/services/downloads.service';
 import { GLOBAL_DOWNLOADS_CONCURRENCY } from '@/consts/app';
-import { HostersRepository } from '@/repositories/hosters.repository';
 
 @Processor(DOWNLOADS_QUEUE)
 export class DownloadsConsumer {
@@ -18,29 +17,20 @@ export class DownloadsConsumer {
     @InjectQueue(DOWNLOADS_QUEUE)
     private downloadsRequestQueue: Queue,
     private readonly downloadsService: DownloadsService,
-    private readonly hostersRepository: HostersRepository,
   ) {}
+
+  async jobsActiveQuotaLeft() {
+    return (
+      GLOBAL_DOWNLOADS_CONCURRENCY -
+      (await this.downloadsRequestQueue.getActiveCount())
+    );
+  }
 
   @Cron(CronExpression.EVERY_HOUR)
   async pullJobs() {
-    // TODO: Should pull new jobs to queue respecting the concurrency and limits for each hoster.
-    // If hoster has pending jobs on queue, do nothing.
-    // Must use transactions in db to avoid concurrency issues + Bull.addBulk
     console.log('Pulling jobs to queue from Database...');
-    const jobsActiveQuotaLeft =
-      GLOBAL_DOWNLOADS_CONCURRENCY -
-      (await this.downloadsRequestQueue.getActiveCount());
-
-    if (jobsActiveQuotaLeft >= 1) {
-      for (const hoster of await this.hostersRepository.getInactiveHosters()) {
-        const isThereCredits = Object.values({ ...hoster.limits }).every(
-          (limit: number) => !limit || limit > 0,
-        );
-
-        if (isThereCredits && hoster.concurrency >= 1) {
-          // Should add jobs to queue here...
-        }
-      }
+    if ((await this.jobsActiveQuotaLeft()) < 1) {
+      return;
     }
   }
 
