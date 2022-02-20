@@ -15,6 +15,7 @@
 		"dbaeumer.vscode-eslint",
 		"seatonjiang.gitmoji-vscode",
 		"rangav.vscode-thunder-client",
+		"IronGeek.vscode-env",
 	],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
