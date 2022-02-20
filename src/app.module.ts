@@ -8,6 +8,7 @@ import { DOWNLOADS_QUEUE } from '@/consts/queues';
 import { CONSUMERS } from '@/consumers';
 import { CONTROLLERS } from '@/controllers';
 import { SERVICES } from '@/services';
+import { PrismaService } from './prisma.service';
 
 @Module({
   imports: [
@@ -33,6 +34,6 @@ import { SERVICES } from '@/services';
     }),
   ],
   controllers: [...CONTROLLERS],
-  providers: [...CONSUMERS, ...SERVICES],
+  providers: [PrismaService, ...CONSUMERS, ...SERVICES],
 })
 export class AppModule {}
