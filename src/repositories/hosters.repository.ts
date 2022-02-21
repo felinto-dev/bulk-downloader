@@ -16,7 +16,7 @@ export class HostersRepository {
       where: {
         downloads: {
           none: {
-            status: DownloadStatus.WAITING_DOWNLOAD,
+            status: DownloadStatus.DOWNLOADING,
           },
         },
       },

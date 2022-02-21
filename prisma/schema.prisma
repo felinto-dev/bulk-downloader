@@ -59,7 +59,7 @@ model DownloadRequestAttempt {
 
 enum DownloadStatus {
   PENDING
-  WAITING_DOWNLOAD
+  DOWNLOADING
   SUCCESS
   FAILED
 }
