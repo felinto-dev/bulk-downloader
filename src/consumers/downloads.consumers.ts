@@ -29,7 +29,7 @@ export class DownloadsConsumer {
   }
 
   @Process({ concurrency: GLOBAL_DOWNLOADS_CONCURRENCY })
-  async doDownload(job: Job<DownloadJobDto>) {
+  async onDownload(job: Job<DownloadJobDto>) {
     const { url, downloadId, hosterId } = job.data;
     await this.downloadsRequestsAttemptsRepository.registerDownloadAttempt(
       downloadId,
@@ -43,7 +43,7 @@ export class DownloadsConsumer {
   }
 
   @OnQueueFailed()
-  async markAsFailedAndPullNextJob(job: Job<DownloadJobDto>) {
+  async onDownloadFail(job: Job<DownloadJobDto>) {
     await this.downloadsOrquestrator.categorizeDownloadAndPullNextDownload(
       job,
       DownloadStatus.FAILED,
@@ -51,7 +51,7 @@ export class DownloadsConsumer {
   }
 
   @OnQueueCompleted()
-  async pullNextJob(job: Job<DownloadJobDto>) {
+  async onDownloadSuccess(job: Job<DownloadJobDto>) {
     await this.downloadsOrquestrator.categorizeDownloadAndPullNextDownload(
       job,
       DownloadStatus.SUCCESS,
