@@ -73,10 +73,14 @@ export class DownloadsConsumer {
   }
 
   @OnQueueCompleted()
-  async pullNextJob() {
-    // TODO: Should pull new jobs to queue respecting the limits for each hoster.
-    // If no download requests meet the criteria, do nothing
+  async pullNextJob(job: Job) {
     this.logger.verbose('Download finished!');
     this.logger.verbose('Downloading new item for current hoster...');
+
+    const hosterId = job.data.hosterId;
+    const hosterQuotaLeft = await this.hostersService.getHosterQuotaLeft(
+      hosterId,
+    );
+    await this.addHosterDownloadsRequestsToQueue(hosterId, hosterQuotaLeft);
   }
 }

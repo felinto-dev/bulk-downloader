@@ -21,13 +21,17 @@ export class HostersService {
     return Promise.all(
       hosters.map(async (hoster) => ({
         id: hoster.id,
-        quotaLeft: Math.min(
-          hoster.concurrency,
-          getMinValueFromObjectValues(
-            await this.getHosterLimitsQuotaLeft(hoster.id),
-          ),
-        ),
+        quotaLeft: await this.getHosterQuotaLeft(hoster.id),
       })),
+    );
+  }
+
+  async getHosterQuotaLeft(hosterId: string) {
+    return Math.min(
+      (await this.hostersRepository.getHoster(hosterId)).concurrency,
+      getMinValueFromObjectValues(
+        await this.getHosterLimitsQuotaLeft(hosterId),
+      ),
     );
   }
 
