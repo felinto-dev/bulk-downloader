@@ -9,6 +9,7 @@ export class DownloadsScheduler {
 
   @Cron(CronExpression.EVERY_HOUR)
   async pullDownloadOnHourlyReset() {
-    await this.downloadsOrquestrator.pullDownloads();
+    if ((await this.downloadsOrquestrator.queueActiveDownloadsQuotaLeft()) >= 1)
+      await this.downloadsOrquestrator.pullDownloads();
   }
 }

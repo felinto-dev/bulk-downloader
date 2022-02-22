@@ -19,16 +19,15 @@ export class DownloadsOrquestrator {
     private readonly hostersService: HostersService,
   ) {}
 
-  private async queueActiveDownloadsQuotaLeft() {
+  async queueActiveDownloadsQuotaLeft() {
     return GLOBAL_DOWNLOADS_CONCURRENCY - (await this.queue.getActiveCount());
   }
 
   async pullDownloads() {
     this.logger.verbose('Pulling jobs to queue from Database...');
-    if ((await this.queueActiveDownloadsQuotaLeft()) >= 1) {
-      for (const hoster of await this.hostersService.getInactiveHostersWithQuotaLeft()) {
-        await this.pullDownloadsByHoster(hoster.id);
-      }
+    const hosters = await this.hostersService.getInactiveHostersWithQuotaLeft();
+    for (const hoster of hosters) {
+      await this.pullDownloadsByHoster(hoster.id);
     }
   }
 
