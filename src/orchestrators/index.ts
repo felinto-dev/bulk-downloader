@@ -1,3 +1,3 @@
-import { DownloadOrquestrator } from './download.orchestrator';
+import { DownloadsOrquestrator } from './downloads.orchestrator';
 
-export const ORCHESTRATORS = [DownloadOrquestrator];
+export const ORCHESTRATORS = [DownloadsOrquestrator];
