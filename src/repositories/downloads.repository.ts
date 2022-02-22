@@ -12,7 +12,7 @@ export class DownloadsRepository {
       where: { hosterId: id, status: 'PENDING' },
       orderBy: [{ priority: 'desc' }, { attemps: { _count: 'asc' } }],
       take: limit,
-      select: { url: true },
+      select: { url: true, downloadId: true, hosterId: true },
     });
   }
 

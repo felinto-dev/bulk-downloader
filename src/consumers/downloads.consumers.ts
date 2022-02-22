@@ -59,7 +59,15 @@ export class DownloadsConsumer {
       this.logger.verbose(
         `adding jobs for ${hosterId}... ${JSON.stringify(jobs)}`,
       );
-      // add job bulk
+      await this.queue.addBulk(
+        jobs.map((job) => ({
+          data: {
+            url: job.url,
+            hosterId: job.hosterId,
+            downloadId: job.downloadId,
+          },
+        })),
+      );
     }
   }
 
