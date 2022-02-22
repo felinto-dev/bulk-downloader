@@ -10,6 +10,7 @@ import { PrismaService } from '@/prisma.service';
 import { REPOSITORIES } from '@/repositories';
 import { configModuleConfig } from '@/configs/config-module.config';
 import { bullConfig, BULL_QUEUES } from '@/configs/bull.config';
+import { ORCHESTRATORS } from './orchestrators';
 
 @Module({
   imports: [
@@ -19,6 +20,12 @@ import { bullConfig, BULL_QUEUES } from '@/configs/bull.config';
     ...BULL_QUEUES,
   ],
   controllers: [...CONTROLLERS],
-  providers: [PrismaService, ...CONSUMERS, ...SERVICES, ...REPOSITORIES],
+  providers: [
+    PrismaService,
+    ...CONSUMERS,
+    ...SERVICES,
+    ...REPOSITORIES,
+    ...ORCHESTRATORS,
+  ],
 })
 export class AppModule {}
