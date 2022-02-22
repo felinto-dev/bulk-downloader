@@ -19,6 +19,7 @@
 		"Prisma.prisma",
 		"kisstkondoros.vscode-codemetrics",
 		"Gruntfuggly.todo-tree",
+		"pflannery.vscode-versionlens",
 	],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
