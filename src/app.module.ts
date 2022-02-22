@@ -11,6 +11,7 @@ import { REPOSITORIES } from '@/repositories';
 import { configModuleConfig } from '@/configs/config-module.config';
 import { bullConfig, BULL_QUEUES } from '@/configs/bull.config';
 import { ORCHESTRATORS } from './orchestrators';
+import { SCHEDULES } from './schedulers';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ORCHESTRATORS } from './orchestrators';
     ...SERVICES,
     ...REPOSITORIES,
     ...ORCHESTRATORS,
+    ...SCHEDULES,
   ],
 })
 export class AppModule {}

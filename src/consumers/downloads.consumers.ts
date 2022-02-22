@@ -6,7 +6,6 @@ import {
 } from '@nestjs/bull';
 import { Job } from 'bull';
 import { DownloadStatus } from '@prisma/client';
-import { Cron, CronExpression } from '@nestjs/schedule';
 
 import { DOWNLOADS_QUEUE } from '@/consts/queues';
 import { DownloadsService } from '@/services/downloads.service';
@@ -22,11 +21,6 @@ export class DownloadsConsumer {
     private readonly downloadsRequestsAttemptsRepository: DownloadsRequestsAttemptsRepository,
     private readonly downloadsOrquestrator: DownloadsOrquestrator,
   ) {}
-
-  @Cron(CronExpression.EVERY_HOUR)
-  async pullJobs() {
-    await this.downloadsOrquestrator.pullDownloads();
-  }
 
   @Process({ concurrency: GLOBAL_DOWNLOADS_CONCURRENCY })
   async onDownload(job: Job<DownloadJobDto>) {
