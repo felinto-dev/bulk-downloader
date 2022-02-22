@@ -35,10 +35,9 @@ export class HostersRepository {
   }
 
   async getHosterQuotaLeft(hosterId: string) {
-    const hosterLimits = await this.prisma.hosterLimits.findUnique({
-      where: { hosterId },
-      select: { hourly: true, daily: true, monthly: true },
-    });
+    const hosterLimits = await this.hostersLimitsRepository.getHosterLimits(
+      hosterId,
+    );
 
     const downloadAttemps =
       await this.hostersLimitsRepository.countHosterDownloadAttempts(hosterId);

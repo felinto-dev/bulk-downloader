@@ -7,6 +7,13 @@ import { PrismaService } from '@/prisma.service';
 export class HostersLimitsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  async getHosterLimits(hosterId: string) {
+    return this.prisma.hosterLimits.findUnique({
+      where: { hosterId },
+      select: { hourly: true, daily: true, monthly: true },
+    });
+  }
+
   async countHosterDownloadAttempts(hosterId: string) {
     return {
       hourly: await this.countHosterDownloadsAttemptsDidAfter(
