@@ -9,7 +9,9 @@ export class DownloadsRepository {
   async getPendingDownloadsByHosterId(id: string, limit?: number) {
     return this.prisma.download.findMany({
       where: { hosterId: id, status: 'PENDING' },
+      orderBy: [{ priority: 'desc' }, { attemps: { _count: 'asc' } }],
       take: limit,
+      select: { url: true },
     });
   }
 }
