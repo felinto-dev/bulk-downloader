@@ -29,11 +29,11 @@ export class HostersService {
   async getHosterQuotaLeft(hosterId: string) {
     return subtractObjects(
       await this.hostersLimitsRepository.getHosterLimits(hosterId),
-      await this.countHosterDownloadAttempts(hosterId),
+      await this.countHosterDownloadsAttempts(hosterId),
     );
   }
 
-  async countHosterDownloadAttempts(hosterId: string) {
+  async countHosterDownloadsAttempts(hosterId: string) {
     return {
       hourly:
         await this.hostersLimitsRepository.countHosterDownloadsAttemptsDidAfter(
