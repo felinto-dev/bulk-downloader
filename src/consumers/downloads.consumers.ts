@@ -13,6 +13,7 @@ import { DownloadsService } from '@/services/downloads.service';
 import { GLOBAL_DOWNLOADS_CONCURRENCY } from '@/consts/app';
 import { HostersService } from '@/services/hosters.service';
 import { DownloadsRepository } from '@/repositories/downloads.repository';
+import { DownloadJobDto } from '@/interfaces/download.job.dto';
 
 @Processor(DOWNLOADS_QUEUE)
 export class DownloadsConsumer {
@@ -61,23 +62,23 @@ export class DownloadsConsumer {
   }
 
   @Process({ concurrency: GLOBAL_DOWNLOADS_CONCURRENCY })
-  async doDownload(job: Job) {
+  async doDownload(job: Job<DownloadJobDto>) {
     // add download attempt
     // download status = downloading
-
+    const { url } = job.data;
     await this.downloadsService.download({
-      url: job.data.url,
+      url,
       onDownloadProgress: (updatedDownloadProgress: number) =>
         job.progress(updatedDownloadProgress),
     });
   }
 
   @OnQueueCompleted()
-  async pullNextJob(job: Job) {
+  async pullNextJob(job: Job<DownloadJobDto>) {
     this.logger.verbose('Download finished!');
     this.logger.verbose('Downloading new item for current hoster...');
 
-    const hosterId = job.data.hosterId;
+    const { hosterId } = job.data;
     const hosterQuotaLeft = await this.hostersService.getHosterQuotaLeft(
       hosterId,
     );
