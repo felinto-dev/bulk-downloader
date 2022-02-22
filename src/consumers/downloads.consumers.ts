@@ -1,6 +1,7 @@
 import {
   InjectQueue,
   OnQueueCompleted,
+  OnQueueFailed,
   Process,
   Processor,
 } from '@nestjs/bull';
@@ -83,6 +84,20 @@ export class DownloadsConsumer {
       onDownloadProgress: (updatedDownloadProgress: number) =>
         job.progress(updatedDownloadProgress),
     });
+  }
+
+  @OnQueueFailed()
+  async markAsFailedAndPullNextJob(job: Job<DownloadJobDto>) {
+    const { hosterId, downloadId } = job.data;
+    await this.downloadsRepository.changeDownloadStatus(
+      downloadId,
+      hosterId,
+      'FAILED',
+    );
+    const hosterQuotaLeft = await this.hostersService.getHosterQuotaLeft(
+      hosterId,
+    );
+    await this.addHosterDownloadsRequestsToQueue(hosterId, hosterQuotaLeft);
   }
 
   @OnQueueCompleted()
