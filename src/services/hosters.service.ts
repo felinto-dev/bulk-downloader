@@ -11,7 +11,6 @@ export class HostersService {
 
     return hosters
       .map((hoster) => {
-        // console.log(Object.values(hoster.limits).filter((limit) => !!limit));
         if (hoster.concurrency === 0) {
           return;
         }
