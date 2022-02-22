@@ -27,21 +27,21 @@ export class DownloadsOrquestrator {
     this.logger.verbose('Pulling jobs to queue from Database...');
     if ((await this.queueActiveDownloadsQuotaLeft()) >= 1) {
       for (const hoster of await this.hostersService.getInactiveHostersWithQuotaLeft()) {
-        await this.pullDownloadsByHoster(hoster.id, hoster.quotaLeft);
+        await this.pullDownloadsByHoster(hoster.id);
       }
     }
   }
 
-  async pullDownloadsByHoster(hosterId: string, quotaLeft: number) {
-    const hosterQuota = Math.min(
-      quotaLeft,
+  async pullDownloadsByHoster(hosterId: string) {
+    const downloadsQuota = Math.min(
+      await this.hostersService.getHosterQuotaLeft(hosterId),
       await this.queueActiveDownloadsQuotaLeft(),
     );
 
-    if (hosterQuota >= 1) {
+    if (downloadsQuota >= 1) {
       const jobs = await this.downloadsRepository.getPendingDownloadsByHosterId(
         hosterId,
-        hosterQuota,
+        downloadsQuota,
       );
       this.logger.verbose(
         `adding jobs for ${hosterId}... ${JSON.stringify(jobs)}`,
@@ -68,9 +68,6 @@ export class DownloadsOrquestrator {
       hosterId,
       downloadStatus,
     );
-    const hosterQuotaLeft = await this.hostersService.getHosterQuotaLeft(
-      hosterId,
-    );
-    await this.pullDownloadsByHoster(hosterId, hosterQuotaLeft);
+    await this.pullDownloadsByHoster(hosterId);
   }
 }
