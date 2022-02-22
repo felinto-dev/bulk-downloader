@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 
 import { PrismaService } from '@/prisma.service';
 import { HostersLimitsRepository } from './hosters-limit.repository';
+import { subtractObjects } from '@/utils/objects';
 
 @Injectable()
 export class HostersRepository {
@@ -35,19 +36,9 @@ export class HostersRepository {
   }
 
   async getHosterQuotaLeft(hosterId: string) {
-    const hosterLimits = await this.hostersLimitsRepository.getHosterLimits(
-      hosterId,
+    return subtractObjects(
+      await this.hostersLimitsRepository.getHosterLimits(hosterId),
+      await this.hostersLimitsRepository.countHosterDownloadAttempts(hosterId),
     );
-
-    const downloadAttemps =
-      await this.hostersLimitsRepository.countHosterDownloadAttempts(hosterId);
-
-    return {
-      hourly:
-        hosterLimits.hourly && hosterLimits.hourly - downloadAttemps.hourly,
-      daily: hosterLimits.daily && hosterLimits.daily - downloadAttemps.daily,
-      monthly:
-        hosterLimits.monthly && hosterLimits.monthly - downloadAttemps.monthly,
-    };
   }
 }
