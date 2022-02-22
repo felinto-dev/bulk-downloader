@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { DownloadStatus } from '@prisma/client';
 
 import { PrismaService } from '@/prisma.service';
 
@@ -12,6 +13,25 @@ export class DownloadsRepository {
       orderBy: [{ priority: 'desc' }, { attemps: { _count: 'asc' } }],
       take: limit,
       select: { url: true },
+    });
+  }
+
+  async changeDownloadStatus(
+    downloadId: string,
+    hosterId: string,
+    newDownloadStatus: DownloadStatus,
+  ) {
+    await this.prisma.download.update({
+      where: {
+        downloadIdByHoster: {
+          downloadId,
+          hosterId,
+        },
+      },
+      data: {
+        status: newDownloadStatus,
+      },
+      select: {},
     });
   }
 }

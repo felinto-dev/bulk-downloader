@@ -14,6 +14,7 @@ import { GLOBAL_DOWNLOADS_CONCURRENCY } from '@/consts/app';
 import { HostersService } from '@/services/hosters.service';
 import { DownloadsRepository } from '@/repositories/downloads.repository';
 import { DownloadJobDto } from '@/interfaces/download.job.dto';
+import { DownloadsRequestsAttemptsRepository } from '@/repositories/downloads-requests-attempts.repository';
 
 @Processor(DOWNLOADS_QUEUE)
 export class DownloadsConsumer {
@@ -24,6 +25,7 @@ export class DownloadsConsumer {
     private readonly downloadsService: DownloadsService,
     private readonly hostersService: HostersService,
     private readonly downloadsRepository: DownloadsRepository,
+    private readonly downloadsRequestsAttemptsRepository: DownloadsRequestsAttemptsRepository,
   ) {}
 
   private async jobsActiveQuotaLeft() {
@@ -63,9 +65,11 @@ export class DownloadsConsumer {
 
   @Process({ concurrency: GLOBAL_DOWNLOADS_CONCURRENCY })
   async doDownload(job: Job<DownloadJobDto>) {
-    // add download attempt
-    // download status = downloading
-    const { url } = job.data;
+    const { url, downloadId, hosterId } = job.data;
+    await this.downloadsRequestsAttemptsRepository.addDownloadAttempt(
+      downloadId,
+      hosterId,
+    );
     await this.downloadsService.download({
       url,
       onDownloadProgress: (updatedDownloadProgress: number) =>
@@ -78,7 +82,12 @@ export class DownloadsConsumer {
     this.logger.verbose('Download finished!');
     this.logger.verbose('Downloading new item for current hoster...');
 
-    const { hosterId } = job.data;
+    const { hosterId, downloadId } = job.data;
+    await this.downloadsRepository.changeDownloadStatus(
+      downloadId,
+      hosterId,
+      'SUCCESS',
+    );
     const hosterQuotaLeft = await this.hostersService.getHosterQuotaLeft(
       hosterId,
     );
