@@ -18,6 +18,7 @@
 		"IronGeek.vscode-env",
 		"Prisma.prisma",
 		"kisstkondoros.vscode-codemetrics",
+		"Gruntfuggly.todo-tree",
 	],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
