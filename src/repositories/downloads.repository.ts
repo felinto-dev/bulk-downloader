@@ -31,7 +31,6 @@ export class DownloadsRepository {
       data: {
         status: newDownloadStatus,
       },
-      select: {},
     });
   }
 }
