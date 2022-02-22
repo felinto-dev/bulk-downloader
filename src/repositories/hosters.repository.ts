@@ -19,13 +19,6 @@ export class HostersRepository {
       select: {
         id: true,
         concurrency: true,
-        limits: {
-          select: {
-            hourly: true,
-            daily: true,
-            monthly: true,
-          },
-        },
       },
     });
   }

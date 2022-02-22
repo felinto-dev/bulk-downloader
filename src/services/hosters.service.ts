@@ -3,7 +3,11 @@ import { Injectable } from '@nestjs/common';
 
 import { HostersRepository } from '@/repositories/hosters.repository';
 import { HostersLimitsRepository } from '@/repositories/hosters-limit.repository';
-import { subtractObjects } from '@/utils/objects';
+import {
+  getMinValueFromObjectValues,
+  isObjectEmpty,
+  subtractObjects,
+} from '@/utils/objects';
 
 @Injectable()
 export class HostersService {
@@ -12,25 +16,29 @@ export class HostersService {
     private readonly hostersLimitsRepository: HostersLimitsRepository,
   ) {}
 
-  async getInactiveHosters() {
+  async getInactiveHostersWithQuotaLeft() {
     const hosters = await this.hostersRepository.getInactiveHosters();
-
-    return hosters
-      .map((hoster) => {
-        if (hoster.concurrency === 0) {
-          return;
-        }
-
-        return hoster;
-      })
-      .filter((hoster) => !!hoster);
+    return Promise.all(
+      hosters.map(async (hoster) => ({
+        id: hoster.id,
+        quotaLeft: Math.min(
+          hoster.concurrency,
+          getMinValueFromObjectValues(await this.getHosterQuotaLeft(hoster.id)),
+        ),
+      })),
+    );
   }
 
   async getHosterQuotaLeft(hosterId: string) {
-    return subtractObjects(
-      await this.hostersLimitsRepository.getHosterLimits(hosterId),
-      await this.countHosterDownloadsAttempts(hosterId),
+    const hosterLimits = await this.hostersLimitsRepository.getHosterLimits(
+      hosterId,
     );
+    const downloadsAttempts = await this.countHosterDownloadsAttempts(hosterId);
+
+    // TODO: A Hoster Limits object can be created without hourly limits, etc.
+    if (hosterLimits && !isObjectEmpty(hosterLimits)) {
+      return subtractObjects(hosterLimits, downloadsAttempts);
+    }
   }
 
   async countHosterDownloadsAttempts(hosterId: string) {
