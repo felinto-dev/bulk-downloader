@@ -45,11 +45,10 @@ export class HostersRepository {
 
     return {
       hourly:
-        hosterLimits.hourly && hosterLimits.hourly - downloadAttemps.thisHour,
-      daily: hosterLimits.daily && hosterLimits.daily - downloadAttemps.thisDay,
+        hosterLimits.hourly && hosterLimits.hourly - downloadAttemps.hourly,
+      daily: hosterLimits.daily && hosterLimits.daily - downloadAttemps.daily,
       monthly:
-        hosterLimits.monthly &&
-        hosterLimits.monthly - downloadAttemps.thisMonth,
+        hosterLimits.monthly && hosterLimits.monthly - downloadAttemps.monthly,
     };
   }
 }

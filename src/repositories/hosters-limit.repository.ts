@@ -9,15 +9,15 @@ export class HostersLimitsRepository {
 
   async countHosterDownloadAttempts(hosterId: string) {
     return {
-      thisHour: await this.countHosterDownloadsAttemptsDidAfter(
+      hourly: await this.countHosterDownloadsAttemptsDidAfter(
         hosterId,
         DateTime.now().set({ minute: 0, second: 0 }).toISO(),
       ),
-      thisDay: await this.countHosterDownloadsAttemptsDidAfter(
+      daily: await this.countHosterDownloadsAttemptsDidAfter(
         hosterId,
         DateTime.now().set({ hour: 0, minute: 0, second: 0 }).toISO(),
       ),
-      thisMonth: await this.countHosterDownloadsAttemptsDidAfter(
+      monthly: await this.countHosterDownloadsAttemptsDidAfter(
         hosterId,
         DateTime.now().set({ day: 1, hour: 0, minute: 0, second: 0 }).toISO(),
       ),
