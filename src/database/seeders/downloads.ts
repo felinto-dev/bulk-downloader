@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 
 // Path alias does not works because ts-node-dev and Prisma CLI cannot recognize
-import { generateUuid } from '../../utils/generate-uuid';
+import { generateUuid } from '../../utils/crypto';
 
 export const downloads: Prisma.DownloadCreateInput[] = [
   {
