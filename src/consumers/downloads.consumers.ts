@@ -25,7 +25,7 @@ export class DownloadsConsumer {
 
   @Cron(CronExpression.EVERY_HOUR)
   async pullJobs() {
-    await this.downloadsOrquestrator.pullJobs();
+    await this.downloadsOrquestrator.pullDownloads();
   }
 
   @Process({ concurrency: GLOBAL_DOWNLOADS_CONCURRENCY })
@@ -44,7 +44,7 @@ export class DownloadsConsumer {
 
   @OnQueueFailed()
   async markAsFailedAndPullNextJob(job: Job<DownloadJobDto>) {
-    await this.downloadsOrquestrator.categorizeDownloadAndPullNextJob(
+    await this.downloadsOrquestrator.categorizeDownloadAndPullNextDownload(
       job,
       DownloadStatus.FAILED,
     );
@@ -52,7 +52,7 @@ export class DownloadsConsumer {
 
   @OnQueueCompleted()
   async pullNextJob(job: Job<DownloadJobDto>) {
-    await this.downloadsOrquestrator.categorizeDownloadAndPullNextJob(
+    await this.downloadsOrquestrator.categorizeDownloadAndPullNextDownload(
       job,
       DownloadStatus.SUCCESS,
     );

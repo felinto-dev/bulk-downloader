@@ -19,24 +19,24 @@ export class DownloadsOrquestrator {
     private readonly hostersService: HostersService,
   ) {}
 
-  private async jobsActiveQuotaLeft() {
+  private async queueActiveDownloadsQuotaLeft() {
     return GLOBAL_DOWNLOADS_CONCURRENCY - (await this.queue.getActiveCount());
   }
 
-  async pullJobs() {
+  async pullDownloads() {
     this.logger.verbose('Pulling jobs to queue from Database...');
-    if ((await this.jobsActiveQuotaLeft()) >= 1) {
+    if ((await this.queueActiveDownloadsQuotaLeft()) >= 1) {
       for (const hoster of await this.hostersService.getInactiveHostersWithQuotaLeft()) {
-        await this.addHosterDownloadsRequestsToQueue(
-          hoster.id,
-          hoster.quotaLeft,
-        );
+        await this.pullDownloadsByHoster(hoster.id, hoster.quotaLeft);
       }
     }
   }
 
-  async addHosterDownloadsRequestsToQueue(hosterId: string, quotaLeft: number) {
-    const hosterQuota = Math.min(quotaLeft, await this.jobsActiveQuotaLeft());
+  async pullDownloadsByHoster(hosterId: string, quotaLeft: number) {
+    const hosterQuota = Math.min(
+      quotaLeft,
+      await this.queueActiveDownloadsQuotaLeft(),
+    );
 
     if (hosterQuota >= 1) {
       const jobs = await this.downloadsRepository.getPendingDownloadsByHosterId(
@@ -58,7 +58,7 @@ export class DownloadsOrquestrator {
     }
   }
 
-  async categorizeDownloadAndPullNextJob(
+  async categorizeDownloadAndPullNextDownload(
     job: Job<DownloadJobDto>,
     downloadStatus: DownloadStatus,
   ) {
@@ -71,6 +71,6 @@ export class DownloadsOrquestrator {
     const hosterQuotaLeft = await this.hostersService.getHosterQuotaLeft(
       hosterId,
     );
-    await this.addHosterDownloadsRequestsToQueue(hosterId, hosterQuotaLeft);
+    await this.pullDownloadsByHoster(hosterId, hosterQuotaLeft);
   }
 }
