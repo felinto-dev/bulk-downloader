@@ -15,7 +15,7 @@ export class HostersRepository {
     });
   }
 
-  getHosters() {
+  findProblematicHosters() {
     return this.prisma.hoster.findMany({
       where: {
         downloads: {
@@ -29,7 +29,7 @@ export class HostersRepository {
         _count: true,
         downloads: {
           where: {
-            status: 'PENDING',
+            status: { in: ['PENDING', 'FAILED'] },
           },
           take: GLOBAL_DOWNLOADS_CONCURRENCY,
         },

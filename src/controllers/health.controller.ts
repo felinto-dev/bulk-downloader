@@ -33,7 +33,7 @@ export class HealthController {
         downloadsAttempts:
           await this.downloadsRequestsAttempts.countDownloadsAttempts(),
       },
-      hosters: await this.hostersRepository.getHosters(),
+      hosters: await this.hostersRepository.findProblematicHosters(),
     };
   }
 }
