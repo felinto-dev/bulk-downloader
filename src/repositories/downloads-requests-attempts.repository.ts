@@ -6,6 +6,10 @@ import { PrismaService } from '@/prisma.service';
 export class DownloadsRequestsAttemptsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  async countDownloadsAttempts() {
+    return this.prisma.downloadRequestAttempt.count();
+  }
+
   async registerDownloadAttempt(downloadId: string, hosterId: string) {
     const addDownloadAttempt = this.prisma.downloadRequestAttempt.create({
       data: {
