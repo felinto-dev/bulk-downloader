@@ -16,26 +16,26 @@ export class HostersService {
     private readonly hostersLimitsRepository: HostersLimitsRepository,
   ) {}
 
-  async getInactiveHostersWithQuotaLeft() {
-    const hosters = await this.hostersRepository.getInactiveHosters();
+  async findInactiveHostersWithQuotaLeft() {
+    const hosters = await this.hostersRepository.findInactiveHosters();
     return Promise.all(
       hosters.map(async (hoster) => ({
         id: hoster.id,
-        quotaLeft: await this.getHosterQuotaLeft(hoster.id),
+        quotaLeft: await this.countHosterQuotaLeft(hoster.id),
       })),
     );
   }
 
-  async getHosterQuotaLeft(hosterId: string) {
+  async countHosterQuotaLeft(hosterId: string) {
     return Math.min(
-      (await this.hostersRepository.getHoster(hosterId)).concurrency,
+      (await this.hostersRepository.findHoster(hosterId)).concurrency,
       getMinValueFromObjectValues(
-        await this.getHosterLimitsQuotaLeft(hosterId),
+        await this.countHosterLimitsQuotaLeft(hosterId),
       ),
     );
   }
 
-  async getHosterLimitsQuotaLeft(hosterId: string) {
+  async countHosterLimitsQuotaLeft(hosterId: string) {
     const hosterLimits = await this.hostersLimitsRepository.getHosterLimits(
       hosterId,
     );

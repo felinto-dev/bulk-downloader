@@ -25,7 +25,8 @@ export class DownloadsOrquestrator {
 
   async pullDownloads() {
     this.logger.verbose('Pulling jobs to queue from Database...');
-    const hosters = await this.hostersService.getInactiveHostersWithQuotaLeft();
+    const hosters =
+      await this.hostersService.findInactiveHostersWithQuotaLeft();
     for (const hoster of hosters) {
       await this.pullDownloadsByHoster(hoster.id);
     }
@@ -33,7 +34,7 @@ export class DownloadsOrquestrator {
 
   async pullDownloadsByHoster(hosterId: string) {
     const downloadsQuota = Math.min(
-      await this.hostersService.getHosterQuotaLeft(hosterId),
+      await this.hostersService.countHosterQuotaLeft(hosterId),
       await this.queueActiveDownloadsQuotaLeft(),
     );
 

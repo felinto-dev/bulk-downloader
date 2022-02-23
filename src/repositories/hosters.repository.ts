@@ -8,14 +8,14 @@ import { GLOBAL_DOWNLOADS_CONCURRENCY } from '@/consts/app';
 export class HostersRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  getHoster(hosterId: string) {
+  findHoster(hosterId: string) {
     return this.prisma.hoster.findUnique({
       where: { id: hosterId },
       select: { concurrency: true },
     });
   }
 
-  getInactiveHosters() {
+  findInactiveHosters() {
     return this.prisma.hoster.findMany({
       where: {
         downloads: {
