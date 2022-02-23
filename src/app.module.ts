@@ -12,6 +12,7 @@ import { configModuleConfig } from '@/configs/config-module.config';
 import { bullConfig, BULL_QUEUES } from '@/configs/bull.config';
 import { ORCHESTRATORS } from './orchestrators';
 import { SCHEDULES } from './schedulers';
+import { LOGGERS } from './logger';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { SCHEDULES } from './schedulers';
     ...REPOSITORIES,
     ...ORCHESTRATORS,
     ...SCHEDULES,
+    ...LOGGERS,
   ],
 })
 export class AppModule {}
