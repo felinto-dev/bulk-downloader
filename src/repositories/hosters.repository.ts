@@ -29,7 +29,7 @@ export class HostersRepository {
         _count: true,
         downloads: {
           where: {
-            status: { in: ['PENDING', 'FAILED'] },
+            status: 'PENDING',
           },
           take: GLOBAL_DOWNLOADS_CONCURRENCY,
         },
