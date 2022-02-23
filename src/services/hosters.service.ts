@@ -26,12 +26,12 @@ export class HostersService {
     return Math.min(
       (await this.hostersRepository.findHoster(hosterId)).concurrency,
       getMinValueFromObjectValues(
-        await this.countHosterLimitsQuotaLeft(hosterId),
+        await this.listHosterLimitsQuotaLeft(hosterId),
       ),
     );
   }
 
-  async countHosterLimitsQuotaLeft(hosterId: string) {
+  async listHosterLimitsQuotaLeft(hosterId: string) {
     const hosterLimits = await this.hostersLimitsRepository.getHosterLimits(
       hosterId,
     );
