@@ -3,11 +3,7 @@ import { Injectable } from '@nestjs/common';
 
 import { HostersRepository } from '@/repositories/hosters.repository';
 import { HostersLimitsRepository } from '@/repositories/hosters-limit.repository';
-import {
-  getMinValueFromObjectValues,
-  isObjectEmpty,
-  subtractObjects,
-} from '@/utils/objects';
+import { getMinValueFromObjectValues, subtractObjects } from '@/utils/objects';
 
 @Injectable()
 export class HostersService {
@@ -40,11 +36,7 @@ export class HostersService {
       hosterId,
     );
     const downloadsAttempts = await this.countHosterDownloadsAttempts(hosterId);
-
-    // TODO: A Hoster Limits object can be created without hourly limits, etc.
-    if (hosterLimits && !isObjectEmpty(hosterLimits)) {
-      return subtractObjects(hosterLimits, downloadsAttempts);
-    }
+    return hosterLimits && subtractObjects(hosterLimits, downloadsAttempts);
   }
 
   async countHosterDownloadsAttempts(hosterId: string) {
