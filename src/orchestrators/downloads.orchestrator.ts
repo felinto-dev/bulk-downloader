@@ -9,6 +9,7 @@ import { DownloadJobDto } from '@/interfaces/download.job.dto';
 import { DownloadsRepository } from '@/repositories/downloads.repository';
 import { HostersService } from '@/services/hosters.service';
 import { DownloadsLogger } from '@/logger/downloads.logger';
+import { replaceNegativeValuesWithZero } from '@/utils/math';
 
 @Injectable()
 export class DownloadsOrquestrator implements OnModuleInit {
@@ -39,12 +40,12 @@ export class DownloadsOrquestrator implements OnModuleInit {
   }
 
   async pullDownloadsByHoster(hosterId: string) {
-    let downloadsQuotaLeft = Math.min(
-      await this.hostersService.countHosterQuotaLeft(hosterId),
-      await this.queueActiveDownloadsQuotaLeft(),
+    const downloadsQuotaLeft = replaceNegativeValuesWithZero(
+      Math.min(
+        await this.hostersService.countHosterQuotaLeft(hosterId),
+        await this.queueActiveDownloadsQuotaLeft(),
+      ),
     );
-
-    downloadsQuotaLeft = Math.max(downloadsQuotaLeft, 0);
 
     const jobs = await this.downloadsRepository.getPendingDownloadsByHosterId(
       hosterId,
@@ -66,10 +67,6 @@ export class DownloadsOrquestrator implements OnModuleInit {
         },
       })),
     );
-
-    if (downloadsQuotaLeft === 0) {
-      await this.pullDownloads();
-    }
   }
 
   async categorizeDownloadAndPullNextDownload(
