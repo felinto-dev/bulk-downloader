@@ -24,9 +24,13 @@ export class DownloadsOrquestrator {
   }
 
   async pullDownloads() {
-    this.logger.verbose('Pulling jobs to queue from Database...');
     const hosters =
       await this.hostersService.findInactiveHostersWithQuotaLeft();
+    this.logger.log(
+      `Pulling downloads from database to queue from ${
+        hosters.length
+      } hosters: ${hosters.map((hoster) => hoster.id).join(', ')}`,
+    );
     for (const hoster of hosters) {
       await this.pullDownloadsByHoster(hoster.id);
     }
