@@ -35,15 +35,18 @@ export class DownloadsOrquestrator implements OnModuleInit {
     await this.downloadsLogger.pullDownloadsForAllHosters(hosters);
 
     for (const hoster of hosters) {
-      await this.pullDownloadsByHoster(hoster.id);
+      await this.pullDownloadsByHoster(
+        hoster.id,
+        await this.queueActiveDownloadsQuotaLeft(),
+      );
     }
   }
 
-  async pullDownloadsByHoster(hosterId: string) {
+  async pullDownloadsByHoster(hosterId: string, downloadsLimit: number) {
     const downloadsQuotaLeft = replaceNegativeValuesWithZero(
       Math.min(
         await this.hostersService.countHosterQuotaLeft(hosterId),
-        await this.queueActiveDownloadsQuotaLeft(),
+        downloadsLimit,
       ),
     );
 
@@ -79,6 +82,6 @@ export class DownloadsOrquestrator implements OnModuleInit {
       hosterId,
       downloadStatus,
     );
-    await this.pullDownloadsByHoster(hosterId);
+    await this.pullDownloadsByHoster(hosterId, 1);
   }
 }
