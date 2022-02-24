@@ -1,7 +1,7 @@
 import { Job, Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
 import { DownloadStatus } from '@prisma/client';
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { GLOBAL_DOWNLOADS_CONCURRENCY } from '@/consts/app';
 import { DOWNLOADS_QUEUE } from '@/consts/queues';
@@ -12,17 +12,13 @@ import { DownloadsLogger } from '@/logger/downloads.logger';
 import { replaceNegativeValuesWithZero } from '@/utils/math';
 
 @Injectable()
-export class DownloadsOrquestrator implements OnModuleInit {
+export class DownloadsOrquestrator {
   constructor(
     @InjectQueue(DOWNLOADS_QUEUE) private readonly queue: Queue,
     private readonly downloadsRepository: DownloadsRepository,
     private readonly hostersService: HostersService,
     private readonly downloadsLogger: DownloadsLogger,
   ) {}
-
-  async onModuleInit() {
-    await this.pullDownloads();
-  }
 
   async queueActiveDownloadsQuotaLeft() {
     return GLOBAL_DOWNLOADS_CONCURRENCY - (await this.queue.getActiveCount());
