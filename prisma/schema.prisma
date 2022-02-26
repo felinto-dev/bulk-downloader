@@ -18,6 +18,7 @@ model Hoster {
   downloads            Download[]
   limits               HosterLimits?
   downloadsAttempts    DownloadRequestAttempt[]
+  releaseAt            DateTime                   @default(now())
 }
 
 enum HosterAuthenticationMethod {
