@@ -12,14 +12,21 @@ export class HostersService {
     private readonly hostersLimitsRepository: HostersLimitsRepository,
   ) {}
 
-  async findInactiveHostersWithQuotaLeft() {
-    const hosters = await this.hostersRepository.findInactiveHosters();
-    return Promise.all(
-      hosters.map(async (hoster) => ({
-        id: hoster.id,
-        quotaLeft: await this.countHosterQuotaLeft(hoster.id),
-      })),
-    );
+  async findHosterReadyToPull() {
+    const hoster = await this.hostersRepository.findHosterReadyToPull();
+
+    if (!hoster) {
+      // increase releaseAt
+      // return itself
+    }
+
+    // return Promise.all(
+    //   hosters.map(async (hoster) => ({
+    //     id: hoster.id,
+    //     quotaLeft: await this.countHosterQuotaLeft(hoster.id),
+    //   })),
+    // );
+    return [];
   }
 
   async countHosterQuotaLeft(hosterId: string) {

@@ -25,8 +25,7 @@ export class DownloadsOrquestrator {
   }
 
   async pullDownloads() {
-    const hosters =
-      await this.hostersService.findInactiveHostersWithQuotaLeft();
+    const hosters = await this.hostersService.findHosterReadyToPull();
 
     await this.downloadsLogger.pullDownloadsForAllHosters(hosters);
 
