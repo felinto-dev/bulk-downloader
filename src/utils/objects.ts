@@ -9,12 +9,9 @@ export interface SimpleObject {
 }
 
 // TODO: Use TypeScript generics for objA, objB and return
-export const subtractObjects = (
-  objA: SimpleObject,
-  objB: SimpleObject,
-): SimpleObject =>
-  Object.keys(removeNullObjectValues(objA)).reduce((a, k) => {
-    a[k] = objA[k] - objB[k];
+export const subtractObjects = <T extends SimpleObject>(objA: T, objB: T) =>
+  Object.keys(objA).reduce<SimpleObject>((a, k) => {
+    a[k] = (objA[k] ?? 0) - (objB[k] ?? 0);
     return a;
   }, {});
 

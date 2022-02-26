@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { HostersLimitsRepository } from '@/repositories/hosters-limit.repository';
 import { HostersRepository } from '@/repositories/hosters.repository';
 import { getMinValueFromObjectValues, subtractObjects } from '@/utils/objects';
+import { HosterLimits } from '@/interfaces/hoster-limits';
 
 @Injectable()
 export class HostersLimitsService {
@@ -21,12 +22,15 @@ export class HostersLimitsService {
     );
   }
 
-  async listHosterLimitsQuotaLeft(hosterId: string) {
+  async listHosterLimitsQuotaLeft(hosterId: string): Promise<HosterLimits> {
     const hosterLimits = await this.hostersLimitsRepository.getHosterLimits(
       hosterId,
     );
     const downloadsAttempts = await this.countHosterDownloadsAttempts(hosterId);
-    return hosterLimits && subtractObjects(hosterLimits, downloadsAttempts);
+    return (
+      hosterLimits &&
+      subtractObjects<HosterLimits>(hosterLimits, downloadsAttempts)
+    );
   }
 
   async countHosterDownloadsAttempts(hosterId: string) {
