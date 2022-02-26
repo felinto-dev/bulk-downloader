@@ -10,6 +10,7 @@ import { DownloadsRepository } from '@/repositories/downloads.repository';
 import { HostersService } from '@/services/hosters.service';
 import { DownloadsLogger } from '@/logger/downloads.logger';
 import { replaceNegativeValuesWithZero } from '@/utils/math';
+import { HostersLimitsService } from '@/services/hosters-limits.service';
 
 @Injectable()
 export class DownloadsOrquestrator {
@@ -18,6 +19,7 @@ export class DownloadsOrquestrator {
     private readonly downloadsRepository: DownloadsRepository,
     private readonly hostersService: HostersService,
     private readonly downloadsLogger: DownloadsLogger,
+    private readonly hostersLimitsService: HostersLimitsService,
   ) {}
 
   async queueActiveDownloadsQuotaLeft() {
@@ -40,7 +42,7 @@ export class DownloadsOrquestrator {
   async pullDownloadsByHoster(hosterId: string, downloadsLimit: number) {
     const downloadsQuotaLeft = replaceNegativeValuesWithZero(
       Math.min(
-        await this.hostersService.countHosterQuotaLeft(hosterId),
+        await this.hostersLimitsService.countHosterQuotaLeft(hosterId),
         downloadsLimit,
       ),
     );
