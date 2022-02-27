@@ -1,16 +1,21 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 
 import { HostersRepository } from '@/repositories/hosters.repository';
 import { HostersLimitsService } from './hosters-limits.service';
 import { releaseAtDateFrame } from '@/consts/release-at-date-frame';
 import { checkValueExistsInObjectValues } from '@/utils/objects';
+import { HosterLimits } from '@/interfaces/hoster-limits';
 
 @Injectable()
-export class HostersService {
+export class HostersService implements OnModuleInit {
   constructor(
     private readonly hostersRepository: HostersRepository,
     private readonly hosterLimitsService: HostersLimitsService,
   ) {}
+
+  async onModuleInit() {
+    console.log(await this.findHosterReadyToPull());
+  }
 
   // Casos de parada:
   // 1. Hoster não encontrado
@@ -26,23 +31,24 @@ export class HostersService {
     const hosterLimits =
       await this.hosterLimitsService.listHosterLimitsQuotaLeft(hoster.id);
 
-    if (!hosterLimits) {
-      return hoster;
-    }
+    let releaseAtDuration: Date = releaseAtDateFrame['hourly']; // ⚠️ The goal is to prevent hoster from getting twice if this function is called concurrently.
 
-    let releaseAtDuration: Date = releaseAtDateFrame['hourly']; // should dont be executed on hourly concurrent cron
-
-    for (const [dateFrame, limit] of Object.entries(hosterLimits)) {
-      if (limit === 0) {
-        releaseAtDuration = releaseAtDateFrame[dateFrame];
+    if (hosterLimits) {
+      releaseAtDuration = this.calculateReleaseAtDateFrame(hosterLimits);
+      if (checkValueExistsInObjectValues(hosterLimits, 0)) {
+        return this.findHosterReadyToPull();
       }
-    }
-
-    if (checkValueExistsInObjectValues(hosterLimits, 0)) {
-      return this.findHosterReadyToPull();
     }
 
     await this.hostersRepository.updateReleaseAt(hoster.id, releaseAtDuration);
     return hoster;
+  }
+
+  private calculateReleaseAtDateFrame(hosterLimits: HosterLimits) {
+    for (const [dateFrame, limit] of Object.entries(hosterLimits)) {
+      if (limit === 0) {
+        return releaseAtDateFrame[dateFrame];
+      }
+    }
   }
 }
