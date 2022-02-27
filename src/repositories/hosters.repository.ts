@@ -51,7 +51,7 @@ export class HostersRepository {
     });
   }
 
-  findHosterReadyToPull() {
+  findHosterToPull() {
     return this.prisma.hoster.findFirst({
       where: {
         concurrency: { gte: 1 },

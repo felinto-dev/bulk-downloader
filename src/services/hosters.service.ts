@@ -12,7 +12,7 @@ export class HostersService {
   ) {}
 
   async findHosterReadyToPull() {
-    const hoster = await this.hostersRepository.findHosterReadyToPull();
+    const hoster = await this.hostersRepository.findHosterToPull();
 
     if (!hoster) {
       return null;
