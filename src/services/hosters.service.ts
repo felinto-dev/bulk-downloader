@@ -1,8 +1,8 @@
-import { DateTime } from 'luxon';
 import { Injectable } from '@nestjs/common';
 
 import { HostersRepository } from '@/repositories/hosters.repository';
 import { HostersLimitsService } from './hosters-limits.service';
+import { releaseAtDateFrame } from '@/consts/release-at-date-frame';
 
 @Injectable()
 export class HostersService {
@@ -25,18 +25,12 @@ export class HostersService {
       return hoster;
     }
 
-    let releaseAtDuration: Date = DateTime.now().plus({ hour: 1 }).toJSDate();
+    let releaseAtDuration: Date = releaseAtDateFrame['hourly'];
 
-    if (hosterLimits.monthly === 0) {
-      releaseAtDuration = DateTime.now().plus({ month: 1 }).toJSDate();
-    }
-
-    if (hosterLimits.daily === 0) {
-      releaseAtDuration = DateTime.now().plus({ day: 1 }).toJSDate();
-    }
-
-    if (hosterLimits.hourly === 0) {
-      releaseAtDuration = DateTime.now().plus({ hour: 1 }).toJSDate();
+    for (const [dateFrame, limit] of Object.entries(hosterLimits)) {
+      if (limit === 0) {
+        releaseAtDuration = releaseAtDateFrame[dateFrame];
+      }
     }
 
     if (Object.values(hosterLimits).some((limit: number) => limit === 0)) {
