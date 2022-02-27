@@ -78,7 +78,7 @@ export class HostersRepository {
     });
   }
 
-  async updateReleaseAt(hosterId: string, newReleaseAt: string) {
+  async updateReleaseAt(hosterId: string, newReleaseAt: Date) {
     await this.prisma.$transaction([
       this.prisma.hoster.update({
         where: { id: hosterId },

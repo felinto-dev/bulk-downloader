@@ -28,7 +28,7 @@ export class HostersService {
     if (hosterLimits.monthly === 0) {
       await this.hostersRepository.updateReleaseAt(
         hoster.id,
-        DateTime.now().plus({ month: 1 }).toISO(),
+        DateTime.now().plus({ month: 1 }).toJSDate(),
       );
       return this.findHosterReadyToPull();
     }
@@ -36,7 +36,7 @@ export class HostersService {
     if (hosterLimits.daily === 0) {
       await this.hostersRepository.updateReleaseAt(
         hoster.id,
-        DateTime.now().plus({ day: 1 }).toISO(),
+        DateTime.now().plus({ day: 1 }).toJSDate(),
       );
       return this.findHosterReadyToPull();
     }
@@ -44,14 +44,14 @@ export class HostersService {
     if (hosterLimits.hourly === 0) {
       await this.hostersRepository.updateReleaseAt(
         hoster.id,
-        DateTime.now().plus({ hour: 1 }).toISO(),
+        DateTime.now().plus({ hour: 1 }).toJSDate(),
       );
       return this.findHosterReadyToPull();
     }
 
     await this.hostersRepository.updateReleaseAt(
       hoster.id,
-      DateTime.now().plus({ month: 1 }).toISO(),
+      DateTime.now().plus({ month: 1 }).toJSDate(),
     ); // should dont be executed on hourly concurrent cron
     return hoster;
   }
