@@ -25,34 +25,25 @@ export class HostersService {
       return hoster;
     }
 
+    let releaseAtDuration: Date = DateTime.now().plus({ hour: 1 }).toJSDate();
+
     if (hosterLimits.monthly === 0) {
-      await this.hostersRepository.updateReleaseAt(
-        hoster.id,
-        DateTime.now().plus({ month: 1 }).toJSDate(),
-      );
-      return this.findHosterReadyToPull();
+      releaseAtDuration = DateTime.now().plus({ month: 1 }).toJSDate();
     }
 
     if (hosterLimits.daily === 0) {
-      await this.hostersRepository.updateReleaseAt(
-        hoster.id,
-        DateTime.now().plus({ day: 1 }).toJSDate(),
-      );
-      return this.findHosterReadyToPull();
+      releaseAtDuration = DateTime.now().plus({ day: 1 }).toJSDate();
     }
 
     if (hosterLimits.hourly === 0) {
-      await this.hostersRepository.updateReleaseAt(
-        hoster.id,
-        DateTime.now().plus({ hour: 1 }).toJSDate(),
-      );
+      releaseAtDuration = DateTime.now().plus({ hour: 1 }).toJSDate();
+    }
+
+    if (Object.values(hosterLimits).some((limit: number) => limit === 0)) {
       return this.findHosterReadyToPull();
     }
 
-    await this.hostersRepository.updateReleaseAt(
-      hoster.id,
-      DateTime.now().plus({ month: 1 }).toJSDate(),
-    ); // should dont be executed on hourly concurrent cron
+    await this.hostersRepository.updateReleaseAt(hoster.id, releaseAtDuration); // should dont be executed on hourly concurrent cron
     return hoster;
   }
 }
