@@ -31,16 +31,16 @@ export class HostersService implements OnModuleInit {
     const hosterLimits =
       await this.hosterLimitsService.listHosterLimitsQuotaLeft(hoster.id);
 
-    let releaseAtDuration: Date = releaseAtDateFrame['hourly']; // ⚠️ The goal is to prevent hoster from getting twice if this function is called concurrently.
-
     if (hosterLimits) {
-      releaseAtDuration = this.calculateReleaseAtDateFrame(hosterLimits);
       if (checkValueExistsInObjectValues(hosterLimits, 0)) {
         return this.findHosterReadyToPull();
       }
     }
 
-    await this.hostersRepository.updateReleaseAt(hoster.id, releaseAtDuration);
+    await this.hostersRepository.updateReleaseAt(
+      hoster.id,
+      this.calculateReleaseAtDateFrame(hosterLimits),
+    );
     return hoster;
   }
 
@@ -50,5 +50,9 @@ export class HostersService implements OnModuleInit {
         return releaseAtDateFrame[dateFrame];
       }
     }
+
+    // TODO: Avoid magic string
+    // ⚠️ The goal is to prevent hoster from getting twice if this function is called concurrently.
+    return releaseAtDateFrame['hourly'];
   }
 }
