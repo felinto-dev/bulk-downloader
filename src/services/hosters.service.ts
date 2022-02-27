@@ -31,10 +31,8 @@ export class HostersService implements OnModuleInit {
     const hosterLimits =
       await this.hosterLimitsService.listHosterLimitsQuotaLeft(hoster.id);
 
-    if (hosterLimits) {
-      if (checkValueExistsInObjectValues(hosterLimits, 0)) {
-        return this.findHosterReadyToPull();
-      }
+    if (hosterLimits && checkValueExistsInObjectValues(hosterLimits, 0)) {
+      return this.findHosterReadyToPull();
     }
 
     await this.hostersRepository.updateReleaseAt(
