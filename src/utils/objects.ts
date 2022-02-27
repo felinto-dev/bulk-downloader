@@ -4,18 +4,16 @@ export const removeNullObjectValues = (obj: Record<string, unknown>) =>
     {},
   );
 
-export interface SimpleObject {
-  [key: string]: number;
-}
-
-// TODO: Use TypeScript generics for objA, objB and return
-export const subtractObjects = <T extends SimpleObject>(objA: T, objB: T) =>
-  Object.keys(objA).reduce<SimpleObject>((a, k) => {
-    a[k] = (objA[k] ?? 0) - (objB[k] ?? 0);
+export const subtractObjects = <K extends PropertyKey>(
+  objA: Record<K, number>,
+  objB: Record<K, number>,
+) =>
+  (Object.keys(removeNullObjectValues(objA)) as K[]).reduce((a, k) => {
+    a[k] = objA[k] - objB[k];
     return a;
-  }, {});
+  }, {} as { [P in K]: number });
 
-export const getMinValueFromObjectValues = (obj: SimpleObject): number =>
+export const getMinValueFromObjectValues = (obj: object): number =>
   Math.min(...Object.values(obj || {}).filter((value) => !!value));
 
 export const isObjectEmpty = (obj: Record<string, unknown>) =>

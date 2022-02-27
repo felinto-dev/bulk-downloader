@@ -1,6 +1,4 @@
-import { SimpleObject } from '@/utils/objects';
-
-export interface HosterLimits extends SimpleObject {
+export interface HosterLimits {
   monthly: number;
   daily: number;
   hourly: number;

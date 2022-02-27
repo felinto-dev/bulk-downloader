@@ -27,10 +27,7 @@ export class HostersLimitsService {
       hosterId,
     );
     const downloadsAttempts = await this.countHosterDownloadsAttempts(hosterId);
-    return (
-      hosterLimits &&
-      subtractObjects<HosterLimits>(hosterLimits, downloadsAttempts)
-    );
+    return hosterLimits && subtractObjects(hosterLimits, downloadsAttempts);
   }
 
   async countHosterDownloadsAttempts(hosterId: string) {
