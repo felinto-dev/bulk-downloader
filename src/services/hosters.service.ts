@@ -43,16 +43,14 @@ export class HostersService implements OnModuleInit {
   }
 
   private calculateReleaseAtDateFrame(hosterLimits: HosterLimits) {
-    // TODO: Avoid magic string
-    // ⚠️ The goal is to prevent hoster from getting twice if this function is called concurrently.
-    if (!hosterLimits) {
-      return releaseAtDateFrame['hourly'];
-    }
-
-    for (const [dateFrame, limit] of Object.entries(hosterLimits)) {
+    for (const [dateFrame, limit] of Object.entries(hosterLimits || {})) {
       if (limit === 0) {
         return releaseAtDateFrame[dateFrame];
       }
     }
+
+    // TODO: Avoid magic string
+    // ⚠️ The goal is to prevent hoster from getting twice if this function is called concurrently.
+    return releaseAtDateFrame['hourly'];
   }
 }
