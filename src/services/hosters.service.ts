@@ -36,11 +36,9 @@ export class HostersService implements OnModuleInit {
       this.calculateReleaseAtDateFrame(hosterLimits),
     );
 
-    if (checkIfNumberExistsInObjectValues(hosterLimits, 0)) {
-      return this.findHosterReadyToPull();
-    }
-
-    return hoster;
+    return checkIfNumberExistsInObjectValues(hosterLimits, 0)
+      ? this.findHosterReadyToPull()
+      : hoster;
   }
 
   private calculateReleaseAtDateFrame(hosterLimits: HosterLimits) {
