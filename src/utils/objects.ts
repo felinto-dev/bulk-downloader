@@ -1,5 +1,5 @@
-export const removeNullObjectValues = (obj: Record<string, unknown>) =>
-  Object.entries(obj).reduce(
+export const removeNullObjectValues = (obj: object): object =>
+  Object.entries(obj || {}).reduce(
     (a, [k, v]) => (v === null ? a : ((a[k] = v), a)),
     {},
   );
@@ -14,7 +14,7 @@ export const subtractObjects = <K extends PropertyKey>(
   }, {} as { [P in K]: number });
 
 export const getMinValueFromObjectValues = (obj: object): number =>
-  Math.min(...Object.values(obj || {}).filter((value) => !!value));
+  Math.min(...Object.values(removeNullObjectValues(obj) || {}));
 
 export const checkIfNumberExistsInObjectValues = (
   obj: object,
