@@ -5,6 +5,7 @@ import { HostersLimitsService } from './hosters-limits.service';
 import { releaseAtDateFrame } from '@/consts/release-at-date-frame';
 import { checkIfNumberExistsInObjectValues } from '@/utils/objects';
 import { HosterLimits } from '@/interfaces/hoster-limits';
+import { HosterReadyToPull } from '@/interfaces/hoster-ready-to-pull.interface';
 
 @Injectable()
 export class HostersService {
@@ -17,7 +18,7 @@ export class HostersService {
     return checkIfNumberExistsInObjectValues(hosterLimits, 0);
   }
 
-  async findHosterReadyToPull() {
+  async findHosterReadyToPull(): Promise<HosterReadyToPull> {
     const hoster = await this.hostersRepository.findHosterToPull();
 
     if (!hoster) {

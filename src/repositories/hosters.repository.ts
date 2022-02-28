@@ -4,6 +4,7 @@ import { DownloadStatus } from '@prisma/client';
 
 import { PrismaService } from '@/prisma.service';
 import { GLOBAL_DOWNLOADS_CONCURRENCY } from '@/consts/app';
+import { HosterReadyToPull } from '@/interfaces/hoster-ready-to-pull.interface';
 
 @Injectable()
 export class HostersRepository {
@@ -51,7 +52,7 @@ export class HostersRepository {
     });
   }
 
-  findHosterToPull() {
+  findHosterToPull(): Promise<HosterReadyToPull> {
     return this.prisma.hoster.findFirst({
       where: {
         concurrency: { gte: 1 },
