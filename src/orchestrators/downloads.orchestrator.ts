@@ -27,14 +27,12 @@ export class DownloadsOrquestrator {
   }
 
   async pullDownloads() {
-    // const hosters = await this.hostersService.findHosterReadyToPull();
-    // await this.downloadsLogger.pullDownloadsForAllHosters(hosters);
-    // for (const hoster of hosters) {
-    //   await this.pullDownloadsByHoster(
-    //     hoster.id,
-    //     await this.queueActiveDownloadsQuotaLeft(),
-    //   );
-    // }
+    const hoster = await this.hostersService.findHosterReadyToPull();
+    const concurrencyLimit = await this.queueActiveDownloadsQuotaLeft();
+    if (concurrencyLimit >= 1) {
+      await this.pullDownloadsByHoster(hoster.id, concurrencyLimit);
+      return this.pullDownloads();
+    }
   }
 
   async pullDownloadsByHoster(hosterId: string, downloadsLimit: number) {
