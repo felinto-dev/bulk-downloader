@@ -38,11 +38,11 @@ export class DownloadsOrquestrator {
     }
   }
 
-  async pullDownloadsByHoster(hosterId: string, downloadsLimit: number) {
+  async pullDownloadsByHoster(hosterId: string, concurrency = 1) {
     const downloadsQuotaLeft = replaceNegativeValuesWithZero(
       Math.min(
         await this.hostersLimitsService.countHosterQuotaLeft(hosterId),
-        downloadsLimit,
+        concurrency,
       ),
     );
 
@@ -85,6 +85,6 @@ export class DownloadsOrquestrator {
       hosterId,
       downloadStatus,
     );
-    await this.pullDownloadsByHoster(hosterId, 1);
+    await this.pullDownloadsByHoster(hosterId);
   }
 }
