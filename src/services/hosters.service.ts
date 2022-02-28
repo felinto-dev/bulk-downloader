@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { HostersRepository } from '@/repositories/hosters.repository';
 import { HostersLimitsService } from './hosters-limits.service';
@@ -7,24 +7,16 @@ import { checkIfNumberExistsInObjectValues } from '@/utils/objects';
 import { HosterLimits } from '@/interfaces/hoster-limits';
 
 @Injectable()
-export class HostersService implements OnModuleInit {
+export class HostersService {
   constructor(
     private readonly hostersRepository: HostersRepository,
     private readonly hosterLimitsService: HostersLimitsService,
   ) {}
 
-  async onModuleInit() {
-    console.log(await this.findHosterReadyToPull());
-  }
-
   private isTheHosterLimitQuotaEmpty(hosterLimits: HosterLimits): boolean {
     return checkIfNumberExistsInObjectValues(hosterLimits, 0);
   }
 
-  // Casos de parada:
-  // 1. Hoster não encontrado
-  // 2. Hoster sem limite definido
-  //
   async findHosterReadyToPull() {
     const hoster = await this.hostersRepository.findHosterToPull();
 
