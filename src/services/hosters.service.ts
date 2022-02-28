@@ -3,7 +3,7 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { HostersRepository } from '@/repositories/hosters.repository';
 import { HostersLimitsService } from './hosters-limits.service';
 import { releaseAtDateFrame } from '@/consts/release-at-date-frame';
-import { checkValueExistsInObjectValues } from '@/utils/objects';
+import { checkIfNumberExistsInObjectValues } from '@/utils/objects';
 import { HosterLimits } from '@/interfaces/hoster-limits';
 
 @Injectable()
@@ -31,7 +31,7 @@ export class HostersService implements OnModuleInit {
     const hosterLimits =
       await this.hosterLimitsService.listHosterLimitsQuotaLeft(hoster.id);
 
-    if (checkValueExistsInObjectValues(hosterLimits, 0)) {
+    if (checkIfNumberExistsInObjectValues(hosterLimits, 0)) {
       return this.findHosterReadyToPull();
     }
 

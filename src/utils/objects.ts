@@ -16,9 +16,9 @@ export const subtractObjects = <K extends PropertyKey>(
 export const getMinValueFromObjectValues = (obj: object): number =>
   Math.min(...Object.values(obj || {}).filter((value) => !!value));
 
-export const checkValueExistsInObjectValues = (
+export const checkIfNumberExistsInObjectValues = (
   obj: object,
-  value: any,
+  value: number,
 ): boolean => Object.values(obj || {}).some((element) => element === value);
 
 export const isObjectEmpty = (obj: Record<string, unknown>) =>
