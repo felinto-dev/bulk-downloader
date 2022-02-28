@@ -31,15 +31,19 @@ export class DownloadsOrquestrator {
 
   async pullDownloads() {
     const hoster = await this.hostersService.findHosterReadyToPull();
-    const concurrencyLimit = await this.queueActiveDownloadsQuotaLeft();
-    if (concurrencyLimit >= 1) {
-      await this.pullDownloadsByHoster(hoster.id, concurrencyLimit);
+    const queueActiveDownloadsRemainingQuota =
+      await this.queueActiveDownloadsQuotaLeft();
+    if (hoster && queueActiveDownloadsRemainingQuota >= 1) {
+      await this.pullDownloadsByHoster(
+        hoster.id,
+        Math.min(queueActiveDownloadsRemainingQuota, hoster.concurrency),
+      );
       return this.pullDownloads();
     }
   }
 
   async pullDownloadsByHoster(hosterId: string, concurrency = 1) {
-    const downloadsQuotaLeft = replaceNegativeValuesWithZero(
+    const hosterQuotaLeft = replaceNegativeValuesWithZero(
       Math.min(
         await this.hostersLimitsService.countHosterQuotaLeft(hosterId),
         concurrency,
@@ -48,12 +52,12 @@ export class DownloadsOrquestrator {
 
     const jobs = await this.downloadsRepository.getPendingDownloadsByHosterId(
       hosterId,
-      downloadsQuotaLeft,
+      hosterQuotaLeft,
     );
 
     await this.downloadsLogger.pullDownloadsByHoster(
       hosterId,
-      downloadsQuotaLeft,
+      hosterQuotaLeft,
       jobs,
     );
 
@@ -66,6 +70,10 @@ export class DownloadsOrquestrator {
         },
       })),
     );
+
+    if (jobs.length === 0) {
+      return this.pullDownloads();
+    }
 
     // TODO: Avoid magic string
     // ⚠️ The goal is to prevent hoster from getting twice if this function is called concurrently.
