@@ -31,14 +31,15 @@ export class HostersService implements OnModuleInit {
     const hosterLimits =
       await this.hosterLimitsService.listHosterLimitsQuotaLeft(hoster.id);
 
-    if (checkIfNumberExistsInObjectValues(hosterLimits, 0)) {
-      return this.findHosterReadyToPull();
-    }
-
     await this.hostersRepository.updateReleaseAt(
       hoster.id,
       this.calculateReleaseAtDateFrame(hosterLimits),
     );
+
+    if (checkIfNumberExistsInObjectValues(hosterLimits, 0)) {
+      return this.findHosterReadyToPull();
+    }
+
     return hoster;
   }
 
