@@ -17,6 +17,10 @@ export class HostersService implements OnModuleInit {
     console.log(await this.findHosterReadyToPull());
   }
 
+  private isTheHosterLimitQuotaEmpty(hosterLimits: HosterLimits): boolean {
+    return checkIfNumberExistsInObjectValues(hosterLimits, 0);
+  }
+
   // Casos de parada:
   // 1. Hoster não encontrado
   // 2. Hoster sem limite definido
@@ -36,7 +40,7 @@ export class HostersService implements OnModuleInit {
       this.calculateReleaseAtDateFrame(hosterLimits),
     );
 
-    return checkIfNumberExistsInObjectValues(hosterLimits, 0)
+    return this.isTheHosterLimitQuotaEmpty(hosterLimits)
       ? this.findHosterReadyToPull()
       : hoster;
   }
