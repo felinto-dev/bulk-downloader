@@ -1,7 +1,7 @@
 import { Job, Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
-import { DownloadStatus } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
+import { DownloadStatus } from '@prisma/client';
 
 import { GLOBAL_DOWNLOADS_CONCURRENCY } from '@/consts/app';
 import { DOWNLOADS_QUEUE } from '@/consts/queues';
@@ -11,8 +11,6 @@ import { HostersService } from '@/services/hosters.service';
 import { DownloadsLogger } from '@/logger/downloads.logger';
 import { replaceNegativeValuesWithZero } from '@/utils/math';
 import { HostersLimitsService } from '@/services/hosters-limits.service';
-import { HostersRepository } from '@/repositories/hosters.repository';
-import { releaseAtDateFrame } from '@/consts/release-at-date-frame';
 
 @Injectable()
 export class DownloadsOrquestrator {
@@ -21,7 +19,6 @@ export class DownloadsOrquestrator {
     private readonly downloadsRepository: DownloadsRepository,
     private readonly hostersService: HostersService,
     private readonly downloadsLogger: DownloadsLogger,
-    private readonly hostersRepository: HostersRepository,
     private readonly hostersLimitsService: HostersLimitsService,
   ) {}
 
@@ -73,13 +70,6 @@ export class DownloadsOrquestrator {
     if (jobs.length === 0) {
       return this.pullDownloads();
     }
-
-    // TODO: Avoid magic string
-    // ⚠️ The goal is to prevent hoster from getting twice if this function is called concurrently.
-    await this.hostersRepository.updateReleaseAt(
-      hosterId,
-      releaseAtDateFrame['hourly'],
-    );
   }
 
   async categorizeDownloadAndPullNextDownload(
