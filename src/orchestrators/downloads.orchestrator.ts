@@ -42,7 +42,7 @@ export class DownloadsOrquestrator {
   }
 
   async pullDownloadsByHosterId(hosterId: string, concurrency = 1) {
-    const downloadsQuotaLeft = replaceNegativeValuesWithZero(
+    const downloadsConcurrencyLimit = replaceNegativeValuesWithZero(
       Math.min(
         await this.hostersLimitsService.countHosterLimitsQuotaLeft(hosterId),
         concurrency,
@@ -51,12 +51,12 @@ export class DownloadsOrquestrator {
 
     const jobs = await this.downloadsRepository.getPendingDownloadsByHosterId(
       hosterId,
-      downloadsQuotaLeft,
+      downloadsConcurrencyLimit,
     );
 
     await this.downloadsLogger.pullDownloadsByHoster(
       hosterId,
-      downloadsQuotaLeft,
+      downloadsConcurrencyLimit,
       jobs,
     );
 
