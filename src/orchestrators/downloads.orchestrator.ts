@@ -9,7 +9,7 @@ import { DownloadJobDto } from '@/interfaces/download.job.dto';
 import { DownloadsRepository } from '@/repositories/downloads.repository';
 import { HostersService } from '@/services/hosters.service';
 import { DownloadsLogger } from '@/logger/downloads.logger';
-import { replaceNegativeValuesWithZero } from '@/utils/math';
+import { replaceNegativeValueWithZero } from '@/utils/math';
 import { HostersLimitsService } from '@/services/hosters-limits.service';
 import { PendingDownload } from '@/interfaces/pending-download';
 
@@ -41,7 +41,7 @@ export class DownloadsOrquestrator {
   }
 
   async pullDownloadsByHosterId(hosterId: string, concurrency = 1) {
-    const downloadsConcurrencyLimit = replaceNegativeValuesWithZero(
+    const downloadsConcurrencyLimit = replaceNegativeValueWithZero(
       Math.min(
         await this.hostersLimitsService.countHosterLimitsQuotaLeft(hosterId),
         concurrency,
