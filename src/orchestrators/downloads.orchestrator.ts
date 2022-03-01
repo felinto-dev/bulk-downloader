@@ -62,7 +62,7 @@ export class DownloadsOrquestrator {
     await this.addPendingDownloadsToQueue(pendingDownloads);
 
     if (pendingDownloads.length === 0) {
-      return this.pullDownloads();
+      await this.pullDownloads();
     }
   }
 
