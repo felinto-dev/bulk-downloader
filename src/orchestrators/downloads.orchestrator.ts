@@ -11,6 +11,7 @@ import { HostersService } from '@/services/hosters.service';
 import { DownloadsLogger } from '@/logger/downloads.logger';
 import { replaceNegativeValuesWithZero } from '@/utils/math';
 import { HostersLimitsService } from '@/services/hosters-limits.service';
+import { PendingDownload } from '@/interfaces/pending-download';
 
 @Injectable()
 export class DownloadsOrquestrator {
@@ -58,19 +59,25 @@ export class DownloadsOrquestrator {
       pendingDownloads,
     );
 
-    await this.queue.addBulk(
-      pendingDownloads.map((job) => ({
-        data: {
-          url: job.url,
-          hosterId: job.hosterId,
-          downloadId: job.downloadId,
-        },
-      })),
-    );
+    await this.addPendingDownloadsToQueue(pendingDownloads);
 
     if (pendingDownloads.length === 0) {
       return this.pullDownloads();
     }
+  }
+
+  private async addPendingDownloadsToQueue(
+    pendingDownloads: PendingDownload[],
+  ) {
+    await this.queue.addBulk(
+      pendingDownloads.map((download) => ({
+        data: {
+          url: download.url,
+          hosterId: download.hosterId,
+          downloadId: download.downloadId,
+        },
+      })),
+    );
   }
 
   async categorizeDownloadAndPullNextDownload(
