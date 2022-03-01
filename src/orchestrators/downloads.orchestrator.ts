@@ -30,19 +30,18 @@ export class DownloadsOrquestrator {
   }
 
   async pullDownloads() {
+    const activeJobsCount = await this.queueActiveDownloadsQuotaLeft();
+
     const hoster = await this.hostersService.findHosterReadyToPull();
-    const queueActiveDownloadsRemainingQuota =
-      await this.queueActiveDownloadsQuotaLeft();
-    if (hoster && queueActiveDownloadsRemainingQuota >= 1) {
-      await this.pullDownloadsByHoster(
-        hoster.id,
-        Math.min(queueActiveDownloadsRemainingQuota, hoster.concurrency),
-      );
+
+    if (hoster && activeJobsCount >= 1) {
+      hoster.concurrency = Math.min(activeJobsCount, hoster.concurrency);
+      await this.pullDownloadsByHosterId(hoster.id, hoster.concurrency);
       return this.pullDownloads();
     }
   }
 
-  async pullDownloadsByHoster(hosterId: string, concurrency = 1) {
+  async pullDownloadsByHosterId(hosterId: string, concurrency = 1) {
     const downloadsQuotaLeft = replaceNegativeValuesWithZero(
       Math.min(
         await this.hostersLimitsService.countHosterLimitsQuotaLeft(hosterId),
@@ -93,6 +92,6 @@ export class DownloadsOrquestrator {
       hosterId,
       downloadStatus,
     );
-    await this.pullDownloadsByHoster(hosterId);
+    await this.pullDownloadsByHosterId(hosterId);
   }
 }
