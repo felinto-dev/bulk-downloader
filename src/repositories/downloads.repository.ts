@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DownloadStatus } from '@prisma/client';
 
 import { PrismaService } from '@/prisma.service';
+import { PendingDownload } from '@/interfaces/pending-download';
 
 @Injectable()
 export class DownloadsRepository {
@@ -17,7 +18,10 @@ export class DownloadsRepository {
     });
   }
 
-  async getPendingDownloadsByHosterId(id: string, limit?: number) {
+  async getPendingDownloadsByHosterId(
+    id: string,
+    limit?: number,
+  ): Promise<PendingDownload[]> {
     return this.prisma.download.findMany({
       where: { hosterId: id, status: 'PENDING' },
       orderBy: [{ priority: 'desc' }, { attemps: { _count: 'asc' } }],

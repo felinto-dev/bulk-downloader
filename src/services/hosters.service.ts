@@ -1,61 +1,55 @@
-import { DateTime } from 'luxon';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 import { HostersRepository } from '@/repositories/hosters.repository';
-import { HostersLimitsRepository } from '@/repositories/hosters-limit.repository';
-import { getMinValueFromObjectValues, subtractObjects } from '@/utils/objects';
+import { HostersLimitsService } from './hosters-limits.service';
+import { releaseAtDateFrame } from '@/consts/release-at-date-frame';
+import { checkIfNumberExistsInObjectValues } from '@/utils/objects';
+import { HosterLimits } from '@/interfaces/hoster-limits';
+import { HosterReadyToPull } from '@/interfaces/hoster-ready-to-pull.interface';
 
 @Injectable()
 export class HostersService {
   constructor(
     private readonly hostersRepository: HostersRepository,
-    private readonly hostersLimitsRepository: HostersLimitsRepository,
+    private readonly hosterLimitsService: HostersLimitsService,
   ) {}
 
-  async findInactiveHostersWithQuotaLeft() {
-    const hosters = await this.hostersRepository.findInactiveHosters();
-    return Promise.all(
-      hosters.map(async (hoster) => ({
-        id: hoster.id,
-        quotaLeft: await this.countHosterQuotaLeft(hoster.id),
-      })),
-    );
+  private readonly logger: Logger = new Logger(HostersService.name);
+
+  private isTheHosterLimitQuotaEmpty(hosterLimits: HosterLimits): boolean {
+    return checkIfNumberExistsInObjectValues(hosterLimits, 0);
   }
 
-  async countHosterQuotaLeft(hosterId: string) {
-    return Math.min(
-      (await this.hostersRepository.findHoster(hosterId)).concurrency,
-      getMinValueFromObjectValues(
-        await this.listHosterLimitsQuotaLeft(hosterId),
-      ),
+  async findHosterReadyToPull(): Promise<HosterReadyToPull> {
+    const hoster = await this.hostersRepository.findHosterToPull();
+
+    if (!hoster) {
+      return null;
+    }
+
+    const hosterLimits =
+      await this.hosterLimitsService.listHosterLimitsQuotaLeft(hoster.id);
+
+    const releaseAt = this.calculateReleaseAtDateFrame(hosterLimits);
+    await this.hostersRepository.updateReleaseAt(hoster.id, releaseAt);
+    this.logger.verbose(
+      `${hoster.id} will be released at ${releaseAt.toISOString()} for pull`,
     );
+
+    return this.isTheHosterLimitQuotaEmpty(hosterLimits)
+      ? this.findHosterReadyToPull()
+      : hoster;
   }
 
-  async listHosterLimitsQuotaLeft(hosterId: string) {
-    const hosterLimits = await this.hostersLimitsRepository.getHosterLimits(
-      hosterId,
-    );
-    const downloadsAttempts = await this.countHosterDownloadsAttempts(hosterId);
-    return hosterLimits && subtractObjects(hosterLimits, downloadsAttempts);
-  }
+  private calculateReleaseAtDateFrame(hosterLimits: HosterLimits): Date {
+    for (const [dateFrame, limit] of Object.entries(hosterLimits || {})) {
+      if (limit === 0) {
+        return releaseAtDateFrame[dateFrame];
+      }
+    }
 
-  async countHosterDownloadsAttempts(hosterId: string) {
-    return {
-      hourly:
-        await this.hostersLimitsRepository.countHosterDownloadsAttemptsDidAfter(
-          hosterId,
-          DateTime.now().set({ minute: 0, second: 0 }).toISO(),
-        ),
-      daily:
-        await this.hostersLimitsRepository.countHosterDownloadsAttemptsDidAfter(
-          hosterId,
-          DateTime.now().set({ hour: 0, minute: 0, second: 0 }).toISO(),
-        ),
-      monthly:
-        await this.hostersLimitsRepository.countHosterDownloadsAttemptsDidAfter(
-          hosterId,
-          DateTime.now().set({ day: 1, hour: 0, minute: 0, second: 0 }).toISO(),
-        ),
-    };
+    // TODO: Avoid magic string
+    // ⚠️ The goal is to prevent hoster from getting twice if this function is called concurrently.
+    return releaseAtDateFrame['hourly'];
   }
 }

@@ -1,71 +1,97 @@
 import { Job, Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { DownloadStatus } from '@prisma/client';
-import { Injectable } from '@nestjs/common';
 
 import { GLOBAL_DOWNLOADS_CONCURRENCY } from '@/consts/app';
 import { DOWNLOADS_QUEUE } from '@/consts/queues';
 import { DownloadJobDto } from '@/interfaces/download.job.dto';
 import { DownloadsRepository } from '@/repositories/downloads.repository';
 import { HostersService } from '@/services/hosters.service';
-import { DownloadsLogger } from '@/logger/downloads.logger';
-import { replaceNegativeValuesWithZero } from '@/utils/math';
+import { replaceNegativeValueWithZero } from '@/utils/math';
+import { HostersLimitsService } from '@/services/hosters-limits.service';
+import { PendingDownload } from '@/interfaces/pending-download';
 
 @Injectable()
-export class DownloadsOrquestrator {
+export class DownloadsOrquestrator implements OnModuleInit {
   constructor(
     @InjectQueue(DOWNLOADS_QUEUE) private readonly queue: Queue,
     private readonly downloadsRepository: DownloadsRepository,
     private readonly hostersService: HostersService,
-    private readonly downloadsLogger: DownloadsLogger,
+    private readonly hostersLimitsService: HostersLimitsService,
   ) {}
+
+  onModuleInit() {
+    this.pullDownloads();
+  }
+
+  private readonly logger: Logger = new Logger(DownloadsOrquestrator.name);
 
   async queueActiveDownloadsQuotaLeft() {
     return GLOBAL_DOWNLOADS_CONCURRENCY - (await this.queue.getActiveCount());
   }
 
   async pullDownloads() {
-    const hosters =
-      await this.hostersService.findInactiveHostersWithQuotaLeft();
+    this.logger.verbose(
+      `Starting pull downloads at ${new Date().toLocaleTimeString()}`,
+    );
+    const hoster = await this.hostersService.findHosterReadyToPull();
 
-    await this.downloadsLogger.pullDownloadsForAllHosters(hosters);
-
-    for (const hoster of hosters) {
-      await this.pullDownloadsByHoster(
-        hoster.id,
+    if (hoster) {
+      hoster.concurrency = Math.min(
+        hoster.concurrency,
         await this.queueActiveDownloadsQuotaLeft(),
       );
+      await this.pullDownloadsByHosterId(hoster.id, hoster.concurrency);
+      return this.pullDownloads();
     }
   }
 
-  async pullDownloadsByHoster(hosterId: string, downloadsLimit: number) {
-    const downloadsQuotaLeft = replaceNegativeValuesWithZero(
+  async pullDownloadsByHosterId(hosterId: string, concurrency = 1) {
+    const downloadsConcurrencyLimit = replaceNegativeValueWithZero(
       Math.min(
-        await this.hostersService.countHosterQuotaLeft(hosterId),
-        downloadsLimit,
+        await this.hostersLimitsService.countHosterLimitsQuotaLeft(hosterId),
+        concurrency,
       ),
     );
 
-    const jobs = await this.downloadsRepository.getPendingDownloadsByHosterId(
-      hosterId,
-      downloadsQuotaLeft,
-    );
+    const pendingDownloads =
+      await this.downloadsRepository.getPendingDownloadsByHosterId(
+        hosterId,
+        downloadsConcurrencyLimit,
+      );
 
-    await this.downloadsLogger.pullDownloadsByHoster(
-      hosterId,
-      downloadsQuotaLeft,
-      jobs,
+    this.logger.verbose(
+      `Adding ${downloadsConcurrencyLimit} pending download(s) for hoster id "${hosterId}":`,
     );
+    await this.addPendingDownloadsToQueue(pendingDownloads);
 
-    await this.queue.addBulk(
-      jobs.map((job) => ({
-        data: {
-          url: job.url,
-          hosterId: job.hosterId,
-          downloadId: job.downloadId,
-        },
-      })),
-    );
+    if (pendingDownloads.length === 0) {
+      this.logger.verbose(
+        `There are no more downloads available for hoster id "${hosterId}", so the spot will be offered to another hoster.`,
+      );
+      await this.pullDownloads();
+    }
+  }
+
+  private async addPendingDownloadsToQueue(
+    pendingDownloads: PendingDownload[],
+  ) {
+    const canBeProcessedInstantly =
+      (await this.queueActiveDownloadsQuotaLeft()) >= pendingDownloads.length;
+
+    if (canBeProcessedInstantly) {
+      this.logger.verbose(JSON.stringify(pendingDownloads));
+      await this.queue.addBulk(
+        pendingDownloads.map((download) => ({
+          data: {
+            url: download.url,
+            hosterId: download.hosterId,
+            downloadId: download.downloadId,
+          },
+        })),
+      );
+    }
   }
 
   async categorizeDownloadAndPullNextDownload(
@@ -78,6 +104,6 @@ export class DownloadsOrquestrator {
       hosterId,
       downloadStatus,
     );
-    await this.pullDownloadsByHoster(hosterId, 1);
+    await this.pullDownloadsByHosterId(hosterId);
   }
 }

@@ -1,8 +1,10 @@
+import { DateTime } from 'luxon';
 import { Injectable } from '@nestjs/common';
 import { DownloadStatus } from '@prisma/client';
 
 import { PrismaService } from '@/prisma.service';
 import { GLOBAL_DOWNLOADS_CONCURRENCY } from '@/consts/app';
+import { HosterReadyToPull } from '@/interfaces/hoster-ready-to-pull.interface';
 
 @Injectable()
 export class HostersRepository {
@@ -50,37 +52,39 @@ export class HostersRepository {
     });
   }
 
-  findInactiveHosters() {
-    return this.prisma.hoster.findMany({
+  findHosterToPull(): Promise<HosterReadyToPull> {
+    return this.prisma.hoster.findFirst({
       where: {
+        concurrency: { gte: 1 },
         downloads: {
-          none: {
-            status: DownloadStatus.DOWNLOADING,
-          },
           some: {
             status: DownloadStatus.PENDING,
           },
+          none: {
+            status: DownloadStatus.DOWNLOADING,
+          },
         },
+        releaseAt: { lte: DateTime.now().toISO() },
       },
       orderBy: [
-        {
-          concurrency: 'desc',
-        },
-        {
-          downloads: { _count: 'desc' },
-        },
-        {
-          limits: { hourly: 'desc' },
-        },
-        {
-          downloadsAttempts: { _count: 'asc' },
-        },
+        { limits: { monthly: 'asc' } },
+        { limits: { daily: 'asc' } },
+        { limits: { hourly: 'asc' } },
+        { concurrency: 'asc' },
       ],
-      take: GLOBAL_DOWNLOADS_CONCURRENCY,
       select: {
         id: true,
         concurrency: true,
       },
     });
+  }
+
+  async updateReleaseAt(hosterId: string, newReleaseAt: Date) {
+    await this.prisma.$transaction([
+      this.prisma.hoster.update({
+        where: { id: hosterId },
+        data: { releaseAt: newReleaseAt },
+      }),
+    ]);
   }
 }

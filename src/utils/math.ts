@@ -1,2 +1,2 @@
-export const replaceNegativeValuesWithZero = (number: number) =>
+export const replaceNegativeValueWithZero = (number: number) =>
   Math.max(number, 0);
