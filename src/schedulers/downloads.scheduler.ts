@@ -7,9 +7,8 @@ import { DownloadsOrquestrator } from '@/orchestrators/downloads.orchestrator';
 export class DownloadsScheduler {
   constructor(private readonly downloadsOrquestrator: DownloadsOrquestrator) {}
 
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_30_MINUTES)
   async pullDownloadOnHourlyReset() {
-    if ((await this.downloadsOrquestrator.queueActiveDownloadsQuotaLeft()) >= 1)
-      await this.downloadsOrquestrator.pullDownloads();
+    await this.downloadsOrquestrator.pullDownloads();
   }
 }

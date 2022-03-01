@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 import { HostersRepository } from '@/repositories/hosters.repository';
 import { HostersLimitsService } from './hosters-limits.service';
@@ -14,6 +14,8 @@ export class HostersService {
     private readonly hosterLimitsService: HostersLimitsService,
   ) {}
 
+  private readonly logger: Logger = new Logger(HostersService.name);
+
   private isTheHosterLimitQuotaEmpty(hosterLimits: HosterLimits): boolean {
     return checkIfNumberExistsInObjectValues(hosterLimits, 0);
   }
@@ -28,9 +30,10 @@ export class HostersService {
     const hosterLimits =
       await this.hosterLimitsService.listHosterLimitsQuotaLeft(hoster.id);
 
-    await this.hostersRepository.updateReleaseAt(
-      hoster.id,
-      this.calculateReleaseAtDateFrame(hosterLimits),
+    const releaseAt = this.calculateReleaseAtDateFrame(hosterLimits);
+    await this.hostersRepository.updateReleaseAt(hoster.id, releaseAt);
+    this.logger.verbose(
+      `${hoster.id} will be released at ${releaseAt.toISOString()} for pull`,
     );
 
     return this.isTheHosterLimitQuotaEmpty(hosterLimits)
@@ -38,7 +41,7 @@ export class HostersService {
       : hoster;
   }
 
-  private calculateReleaseAtDateFrame(hosterLimits: HosterLimits) {
+  private calculateReleaseAtDateFrame(hosterLimits: HosterLimits): Date {
     for (const [dateFrame, limit] of Object.entries(hosterLimits || {})) {
       if (limit === 0) {
         return releaseAtDateFrame[dateFrame];
