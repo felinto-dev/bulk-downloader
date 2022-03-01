@@ -46,19 +46,20 @@ export class DownloadsOrquestrator {
       ),
     );
 
-    const jobs = await this.downloadsRepository.getPendingDownloadsByHosterId(
-      hosterId,
-      downloadsConcurrencyLimit,
-    );
+    const pendingDownloads =
+      await this.downloadsRepository.getPendingDownloadsByHosterId(
+        hosterId,
+        downloadsConcurrencyLimit,
+      );
 
     await this.downloadsLogger.pullDownloadsByHoster(
       hosterId,
       downloadsConcurrencyLimit,
-      jobs,
+      pendingDownloads,
     );
 
     await this.queue.addBulk(
-      jobs.map((job) => ({
+      pendingDownloads.map((job) => ({
         data: {
           url: job.url,
           hosterId: job.hosterId,
@@ -67,7 +68,7 @@ export class DownloadsOrquestrator {
       })),
     );
 
-    if (jobs.length === 0) {
+    if (pendingDownloads.length === 0) {
       return this.pullDownloads();
     }
   }
