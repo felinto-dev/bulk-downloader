@@ -10,7 +10,7 @@ import { DownloadsRepository } from '@/repositories/downloads.repository';
 import { HostersService } from '@/services/hosters.service';
 import { replaceNegativeValueWithZero } from '@/utils/math';
 import { HostersLimitsService } from '@/services/hosters-limits.service';
-import { PendingDownload } from '@/interfaces/pending-download';
+import { PendingDownload } from '@/database/interfaces/pending-download';
 
 @Injectable()
 export class DownloadsOrquestrator implements OnModuleInit {

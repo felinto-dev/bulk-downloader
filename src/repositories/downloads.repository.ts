@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DownloadStatus } from '@prisma/client';
 
 import { PrismaService } from '@/prisma.service';
-import { PendingDownload } from '@/interfaces/pending-download';
+import { PendingDownload } from '@/database/interfaces/pending-download';
 
 @Injectable()
 export class DownloadsRepository {
