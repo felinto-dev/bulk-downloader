@@ -1,6 +1,4 @@
 export class DownloadJobDto {
-  id: string;
-
   url: string;
 
   hosterId: string;

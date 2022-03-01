@@ -15,7 +15,7 @@ import { PendingDownload } from '@/interfaces/pending-download';
 @Injectable()
 export class DownloadsOrquestrator implements OnModuleInit {
   constructor(
-    @InjectQueue(DOWNLOADS_QUEUE) private readonly queue: Queue,
+    @InjectQueue(DOWNLOADS_QUEUE) private readonly queue: Queue<DownloadJobDto>,
     private readonly downloadsRepository: DownloadsRepository,
     private readonly hostersService: HostersService,
     private readonly hostersLimitsService: HostersLimitsService,
@@ -64,7 +64,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
     this.logger.verbose(
       `Adding ${downloadsConcurrencyLimit} pending download(s) for hoster id "${hosterId}":`,
     );
-    await this.addPendingDownloadsToQueue(pendingDownloads);
+    await this.addBulkDownloadsToQueue(pendingDownloads);
 
     if (pendingDownloads.length === 0) {
       this.logger.verbose(
@@ -74,21 +74,17 @@ export class DownloadsOrquestrator implements OnModuleInit {
     }
   }
 
-  private async addPendingDownloadsToQueue(
-    pendingDownloads: PendingDownload[],
-  ) {
-    const canBeProcessedInstantly =
-      (await this.queueActiveDownloadsQuotaLeft()) >= pendingDownloads.length;
-
-    if (canBeProcessedInstantly) {
-      this.logger.verbose(JSON.stringify(pendingDownloads));
+  private async addBulkDownloadsToQueue(downloads: PendingDownload[]) {
+    if ((await this.queueActiveDownloadsQuotaLeft()) >= downloads.length) {
+      this.logger.verbose(JSON.stringify(downloads));
       await this.queue.addBulk(
-        pendingDownloads.map((download) => ({
+        downloads.map((download) => ({
           data: {
             url: download.url,
             hosterId: download.hosterId,
             downloadId: download.downloadId,
           },
+          opts: { jobId: `${download.hosterId}/${download.downloadId}` },
         })),
       );
     }
