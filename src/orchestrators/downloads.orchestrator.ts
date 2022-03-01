@@ -28,12 +28,13 @@ export class DownloadsOrquestrator {
   }
 
   async pullDownloads() {
-    const activeJobsCount = await this.queueActiveDownloadsQuotaLeft();
-
     const hoster = await this.hostersService.findHosterReadyToPull();
 
-    if (hoster && activeJobsCount >= 1) {
-      hoster.concurrency = Math.min(activeJobsCount, hoster.concurrency);
+    if (hoster) {
+      hoster.concurrency = Math.min(
+        hoster.concurrency,
+        await this.queueActiveDownloadsQuotaLeft(),
+      );
       await this.pullDownloadsByHosterId(hoster.id, hoster.concurrency);
       return this.pullDownloads();
     }
@@ -69,15 +70,20 @@ export class DownloadsOrquestrator {
   private async addPendingDownloadsToQueue(
     pendingDownloads: PendingDownload[],
   ) {
-    await this.queue.addBulk(
-      pendingDownloads.map((download) => ({
-        data: {
-          url: download.url,
-          hosterId: download.hosterId,
-          downloadId: download.downloadId,
-        },
-      })),
-    );
+    const canBeProcessedInstantly =
+      (await this.queueActiveDownloadsQuotaLeft()) >= pendingDownloads.length;
+
+    if (canBeProcessedInstantly) {
+      await this.queue.addBulk(
+        pendingDownloads.map((download) => ({
+          data: {
+            url: download.url,
+            hosterId: download.hosterId,
+            downloadId: download.downloadId,
+          },
+        })),
+      );
+    }
   }
 
   async categorizeDownloadAndPullNextDownload(
