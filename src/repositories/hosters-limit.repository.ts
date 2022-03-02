@@ -3,7 +3,7 @@ import { PrismaPromise } from '@prisma/client';
 
 import { PrismaService } from '@/prisma.service';
 import { startOfDay, startOfHour, startOfMonth } from '@/utils/date';
-import { HosterLimits } from '@/interfaces/hoster-limits';
+import { HosterLimits } from '@/dto/hoster-limits.dto';
 
 @Injectable()
 export class HostersLimitsRepository {

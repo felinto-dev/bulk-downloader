@@ -5,7 +5,7 @@ import { DownloadStatus } from '@prisma/client';
 
 import { GLOBAL_DOWNLOADS_CONCURRENCY } from '@/consts/app';
 import { DOWNLOADS_QUEUE } from '@/consts/queues';
-import { DownloadJobDto } from '@/interfaces/download.job.dto';
+import { DownloadJobDto } from '@/dto/download.job.dto';
 import { DownloadsRepository } from '@/repositories/downloads.repository';
 import { HostersService } from '@/services/hosters.service';
 import { replaceNegativeValueWithZero } from '@/utils/math';

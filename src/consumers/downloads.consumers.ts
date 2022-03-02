@@ -10,7 +10,7 @@ import { DownloadStatus } from '@prisma/client';
 import { DOWNLOADS_QUEUE } from '@/consts/queues';
 import { DownloadsService } from '@/services/downloads.service';
 import { GLOBAL_DOWNLOADS_CONCURRENCY } from '@/consts/app';
-import { DownloadJobDto } from '@/interfaces/download.job.dto';
+import { DownloadJobDto } from '@/dto/download.job.dto';
 import { DownloadsRequestsAttemptsRepository } from '@/repositories/downloads-requests-attempts.repository';
 import { DownloadsOrquestrator } from '@/orchestrators/downloads.orchestrator';
 

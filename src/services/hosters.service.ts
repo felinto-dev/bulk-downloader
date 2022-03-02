@@ -4,7 +4,7 @@ import { HostersRepository } from '@/repositories/hosters.repository';
 import { HostersLimitsService } from './hosters-limits.service';
 import { releaseAtDateFrame } from '@/consts/release-at-date-frame';
 import { checkIfNumberExistsInObjectValues } from '@/utils/objects';
-import { HosterLimits } from '@/interfaces/hoster-limits';
+import { HosterLimits } from '@/dto/hoster-limits.dto';
 import { HosterReadyToPull } from '@/database/interfaces/hoster-ready-to-pull.interface';
 import { CreateHosterInput } from '@/inputs/create-hoster.input';
 
