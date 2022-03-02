@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Put } from '@nestjs/common';
 
 import { CreateHosterInput } from '@/inputs/create-hoster.input';
 import { HostersService } from '@/services/hosters.service';
@@ -7,8 +7,8 @@ import { HostersService } from '@/services/hosters.service';
 export class HostersController {
   constructor(private readonly hostersService: HostersService) {}
 
-  @Post()
-  async createHoster(@Body() hoster: CreateHosterInput) {
+  @Put()
+  async upsertHoster(@Body() hoster: CreateHosterInput) {
     return this.hostersService.upsertHoster(hoster);
   }
 }

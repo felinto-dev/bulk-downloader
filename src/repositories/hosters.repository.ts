@@ -26,8 +26,14 @@ export class HostersRepository {
       update: {
         name: hoster.name,
         concurrency: hoster.concurrencyConnections,
-        limits: { update: hoster.limits },
+        limits: {
+          upsert: {
+            create: hoster.limits,
+            update: hoster.limits,
+          },
+        },
       },
+      include: { limits: true },
     });
   }
 
