@@ -3,10 +3,26 @@ import { DownloadStatus } from '@prisma/client';
 
 import { PrismaService } from '@/prisma.service';
 import { PendingDownload } from '@/database/interfaces/pending-download';
+import { AddDownloadRequestInput } from '@/inputs/add-download-request.input';
 
 @Injectable()
 export class DownloadsRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  async addDownloadRequest(downloadRequest: AddDownloadRequestInput) {
+    return this.prisma.download.create({
+      data: {
+        url: downloadRequest.url,
+        downloadId: downloadRequest.downloadId,
+        fingerprint: downloadRequest.fingerprint,
+        Hoster: {
+          connect: {
+            id: downloadRequest.hosterId,
+          },
+        },
+      },
+    });
+  }
 
   async countNotPendingDownloads() {
     return this.prisma.download.count({

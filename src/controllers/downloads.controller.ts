@@ -1,19 +1,14 @@
-import { Queue } from 'bull';
-import { InjectQueue } from '@nestjs/bull';
-import { Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 
-import { DOWNLOADS_QUEUE } from '@/consts/queues';
+import { DownloadsService } from '@/services/downloads.service';
+import { AddDownloadRequestInput } from '@/inputs/add-download-request.input';
 
 @Controller('downloads')
 export class DownloadsController {
-  constructor(
-    @InjectQueue(DOWNLOADS_QUEUE) private downloadsRequestQueue: Queue,
-  ) {}
+  constructor(private readonly downloadsService: DownloadsService) {}
 
   @Post()
-  requestDownload() {
-    return this.downloadsRequestQueue.add({
-      url: 'https://speed.hetzner.de/1GB.bin',
-    });
+  addDownloadRequest(@Body() downloadRequest: AddDownloadRequestInput) {
+    return this.downloadsService.addDownloadRequest(downloadRequest);
   }
 }
