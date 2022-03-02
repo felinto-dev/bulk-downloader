@@ -17,8 +17,8 @@ export class HostersService {
 
   private readonly logger: Logger = new Logger(HostersService.name);
 
-  async createHoster(hoster: CreateHosterInput) {
-    return this.hostersRepository.createHoster(hoster);
+  async upsertHoster(hoster: CreateHosterInput) {
+    return this.hostersRepository.upsertHoster(hoster);
   }
 
   private isTheHosterLimitQuotaEmpty(hosterLimits: HosterLimits): boolean {

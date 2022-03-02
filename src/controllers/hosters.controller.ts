@@ -9,6 +9,6 @@ export class HostersController {
 
   @Post()
   async createHoster(@Body() hoster: CreateHosterInput) {
-    return this.hostersService.createHoster(hoster);
+    return this.hostersService.upsertHoster(hoster);
   }
 }

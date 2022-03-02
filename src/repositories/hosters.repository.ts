@@ -11,9 +11,10 @@ import { CreateHosterInput } from '@/inputs/create-hoster.input';
 export class HostersRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  createHoster(hoster: CreateHosterInput) {
-    return this.prisma.hoster.create({
-      data: {
+  upsertHoster(hoster: CreateHosterInput) {
+    return this.prisma.hoster.upsert({
+      where: { id: hoster.id },
+      create: {
         id: hoster.id,
         name: hoster.name,
         authenticationMethod: hoster.credentialsStrategy,
@@ -21,6 +22,11 @@ export class HostersRepository {
         limits: {
           create: hoster.limits,
         },
+      },
+      update: {
+        name: hoster.name,
+        concurrency: hoster.concurrencyConnections,
+        limits: { update: hoster.limits },
       },
     });
   }
