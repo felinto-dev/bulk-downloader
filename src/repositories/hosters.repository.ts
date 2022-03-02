@@ -4,7 +4,7 @@ import { DownloadStatus } from '@prisma/client';
 
 import { PrismaService } from '@/prisma.service';
 import { GLOBAL_DOWNLOADS_CONCURRENCY } from '@/consts/app';
-import { HosterReadyToPull } from '@/interfaces/hoster-ready-to-pull.interface';
+import { HosterReadyToPull } from '@/database/interfaces/hoster-ready-to-pull.interface';
 
 @Injectable()
 export class HostersRepository {
