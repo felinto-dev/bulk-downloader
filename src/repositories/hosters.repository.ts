@@ -5,10 +5,25 @@ import { DownloadStatus } from '@prisma/client';
 import { PrismaService } from '@/prisma.service';
 import { GLOBAL_DOWNLOADS_CONCURRENCY } from '@/consts/app';
 import { HosterReadyToPull } from '@/database/interfaces/hoster-ready-to-pull.interface';
+import { CreateHosterInput } from '@/inputs/create-hoster.input';
 
 @Injectable()
 export class HostersRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  createHoster(hoster: CreateHosterInput) {
+    return this.prisma.hoster.create({
+      data: {
+        id: hoster.id,
+        name: hoster.name,
+        authenticationMethod: hoster.credentialsStrategy,
+        concurrency: hoster.concurrencyConnections,
+        limits: {
+          create: hoster.limits,
+        },
+      },
+    });
+  }
 
   findHoster(hosterId: string) {
     return this.prisma.hoster.findUnique({

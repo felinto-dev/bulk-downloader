@@ -6,6 +6,7 @@ import { releaseAtDateFrame } from '@/consts/release-at-date-frame';
 import { checkIfNumberExistsInObjectValues } from '@/utils/objects';
 import { HosterLimits } from '@/interfaces/hoster-limits';
 import { HosterReadyToPull } from '@/database/interfaces/hoster-ready-to-pull.interface';
+import { CreateHosterInput } from '@/inputs/create-hoster.input';
 
 @Injectable()
 export class HostersService {
@@ -15,6 +16,10 @@ export class HostersService {
   ) {}
 
   private readonly logger: Logger = new Logger(HostersService.name);
+
+  async createHoster(hoster: CreateHosterInput) {
+    return this.hostersRepository.createHoster(hoster);
+  }
 
   private isTheHosterLimitQuotaEmpty(hosterLimits: HosterLimits): boolean {
     return checkIfNumberExistsInObjectValues(hosterLimits, 0);
