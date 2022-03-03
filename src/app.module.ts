@@ -12,6 +12,7 @@ import { configModuleConfig } from '@/configs/config-module.config';
 import { bullConfig, BULL_QUEUES } from '@/configs/bull.config';
 import { ORCHESTRATORS } from './orchestrators';
 import { SCHEDULES } from './schedulers';
+import { VALIDATORS } from './validators';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { SCHEDULES } from './schedulers';
     ...CONSUMERS,
     ...SERVICES,
     ...REPOSITORIES,
+    ...VALIDATORS,
     ...ORCHESTRATORS,
     ...SCHEDULES,
   ],
