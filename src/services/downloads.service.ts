@@ -1,5 +1,5 @@
-import * as path from 'path';
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import Downloader from 'nodejs-file-downloader';
 
 import { DownloadParams } from '@/interfaces/download-params.interface';
@@ -8,7 +8,10 @@ import { DownloadsRepository } from '@/repositories/downloads.repository';
 
 @Injectable()
 export class DownloadsService {
-  constructor(private readonly downloadsRepository: DownloadsRepository) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly downloadsRepository: DownloadsRepository,
+  ) {}
 
   async addDownloadRequest(download: AddDownloadRequestInput) {
     return this.downloadsRepository.addDownloadRequest(download);
@@ -17,7 +20,7 @@ export class DownloadsService {
   async download(params: DownloadParams) {
     const downloader = new Downloader({
       url: params.url,
-      directory: path.join(process.cwd(), 'tmp'),
+      directory: await this.configService.get('app.downloads_directory'),
       onProgress: async (downloadProgressPercentage) => {
         if (params.onDownloadProgress) {
           await params.onDownloadProgress(+downloadProgressPercentage);

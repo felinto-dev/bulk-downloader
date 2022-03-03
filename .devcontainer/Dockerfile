@@ -10,6 +10,11 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 # ARG EXTRA_NODE_VERSION=10
 # RUN su node -c "source /usr/local/share/nvm/nvm.sh && nvm install ${EXTRA_NODE_VERSION}"
 
+ARG DOWNLOADS_DIRECTORY
+ENV DOWNLOADS_DIRECTORY ${DOWNLOADS_DIRECTORY}
+RUN mkdir ${DOWNLOADS_DIRECTORY}
+RUN chown node:node ${DOWNLOADS_DIRECTORY}
+
 # [Optional] Uncomment if you want to install more global node modules
 RUN su node -c "npm install -g npm"
 RUN su node -c "npm install -g @nestjs/cli"
