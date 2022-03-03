@@ -39,7 +39,7 @@ model Download {
   status      DownloadStatus           @default(PENDING)
   url         String
   priority    Int                      @default(0)
-  fingerprint String
+  fingerprint String?
   Hoster      Hoster                   @relation(fields: [hosterId], references: [id])
   hosterId    String
   attemps     DownloadRequestAttempt[]
