@@ -37,13 +37,6 @@ export class HostersRepository {
     });
   }
 
-  findHoster(hosterId: string) {
-    return this.prisma.hoster.findUnique({
-      where: { id: hosterId },
-      select: { concurrency: true },
-    });
-  }
-
   getHosterById(hosterId: string) {
     return this.prisma.hoster.findUnique({
       where: { id: hosterId },
