@@ -17,7 +17,7 @@ export class DownloadsService {
     return this.downloadsRepository.addDownloadRequest(download);
   }
 
-  async download(params: DownloadParams) {
+  async downloadFile(params: DownloadParams) {
     const downloader = new Downloader({
       url: params.url,
       directory: await this.configService.get('app.downloads_directory'),

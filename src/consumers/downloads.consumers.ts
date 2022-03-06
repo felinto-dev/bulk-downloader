@@ -29,7 +29,7 @@ export class DownloadsConsumer {
       downloadId,
       hosterId,
     );
-    await this.downloadsService.download({
+    await this.downloadsService.downloadFile({
       url,
       onDownloadProgress: (updatedDownloadProgress: number) =>
         job.progress(updatedDownloadProgress),
