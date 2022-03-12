@@ -11,4 +11,9 @@ export class DownloadsController {
   addDownloadRequest(@Body() downloadRequest: AddDownloadRequestInput) {
     return this.downloadsService.addDownloadRequest(downloadRequest);
   }
+
+  @Post('bulk')
+  addBulkDownloadRequest(@Body() downloadRequests: AddDownloadRequestInput[]) {
+    return this.downloadsService.addBulkDownloadRequest(downloadRequests);
+  }
 }

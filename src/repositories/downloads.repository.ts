@@ -9,7 +9,7 @@ import { AddDownloadRequestInput } from '@/inputs/add-download-request.input';
 export class DownloadsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async addDownloadRequest(downloadRequest: AddDownloadRequestInput) {
+  addDownloadRequest(downloadRequest: AddDownloadRequestInput) {
     return this.prisma.download.create({
       data: {
         url: downloadRequest.url,
@@ -22,6 +22,13 @@ export class DownloadsRepository {
         },
       },
     });
+  }
+
+  async addBulkDownloadRequest(downloadRequests: AddDownloadRequestInput[]) {
+    const transactions = downloadRequests.map((downloadRequest) =>
+      this.addDownloadRequest(downloadRequest),
+    );
+    await this.prisma.$transaction([...transactions]);
   }
 
   async countNotPendingDownloads() {
