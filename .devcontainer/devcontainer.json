@@ -14,7 +14,6 @@
 	"extensions": [
 		"dbaeumer.vscode-eslint",
 		"seatonjiang.gitmoji-vscode",
-		"rangav.vscode-thunder-client",
 		"IronGeek.vscode-env",
 		"Prisma.prisma",
 		"kisstkondoros.vscode-codemetrics",
