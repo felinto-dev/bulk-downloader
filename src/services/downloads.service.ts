@@ -14,7 +14,7 @@ export class DownloadsService {
   ) {}
 
   async addDownloadRequest(download: AddDownloadRequestInput) {
-    await this.downloadsRepository.addDownloadRequest(download);
+    await this.downloadsRepository.upsertDownloadRequest(download);
   }
 
   async addBulkDownloadRequest(downloads: AddDownloadRequestInput[]) {

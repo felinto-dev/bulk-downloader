@@ -9,9 +9,15 @@ import { AddDownloadRequestInput } from '@/inputs/add-download-request.input';
 export class DownloadsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  addDownloadRequest(downloadRequest: AddDownloadRequestInput) {
-    return this.prisma.download.create({
-      data: {
+  upsertDownloadRequest(downloadRequest: AddDownloadRequestInput) {
+    return this.prisma.download.upsert({
+      where: {
+        downloadIdByHoster: {
+          downloadId: downloadRequest.downloadId,
+          hosterId: downloadRequest.hosterId,
+        },
+      },
+      create: {
         url: downloadRequest.url,
         downloadId: downloadRequest.downloadId,
         fingerprint: downloadRequest.fingerprint,
@@ -21,12 +27,16 @@ export class DownloadsRepository {
           },
         },
       },
+      update: {
+        // FIX: Should change download status for PENDING again!
+        fingerprint: downloadRequest.fingerprint,
+      },
     });
   }
 
   async addBulkDownloadRequest(downloadRequests: AddDownloadRequestInput[]) {
     const transactions = downloadRequests.map((downloadRequest) =>
-      this.addDownloadRequest(downloadRequest),
+      this.upsertDownloadRequest(downloadRequest),
     );
     await this.prisma.$transaction([...transactions]);
   }
