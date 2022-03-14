@@ -10,7 +10,7 @@ import { configureApp } from './configure-app';
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
-    new FastifyAdapter(),
+    new FastifyAdapter({ bodyLimit: 1048576 * 50 }), // 50 MB
   );
   configureApp(app);
   await app.listen(3000, '0.0.0.0');
