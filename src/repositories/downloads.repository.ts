@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DownloadStatus } from '@prisma/client';
+import { DownloadStatus, HosterAuthenticationMethod } from '@prisma/client';
 
 import { PrismaService } from '@/prisma.service';
 import { PendingDownload } from '@/database/interfaces/pending-download';
@@ -22,8 +22,13 @@ export class DownloadsRepository {
         downloadId: downloadRequest.downloadId,
         fingerprint: downloadRequest.fingerprint,
         Hoster: {
-          connect: {
-            id: downloadRequest.hosterId,
+          connectOrCreate: {
+            where: { id: downloadRequest.hosterId },
+            create: {
+              id: downloadRequest.hosterId,
+              name: downloadRequest.hosterId,
+              authenticationMethod: HosterAuthenticationMethod.FREE,
+            },
           },
         },
       },
