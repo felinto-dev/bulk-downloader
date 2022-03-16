@@ -10,10 +10,12 @@ export class DownloadsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async upsertDownloadRequest(downloadRequest: AddDownloadRequestInput) {
-    const foundDownload = await this.prisma.download.findFirst({
+    const foundDownload = await this.prisma.download.findUnique({
       where: {
-        downloadId: downloadRequest.downloadId,
-        hosterId: downloadRequest.hosterId,
+        downloadIdByHoster: {
+          downloadId: downloadRequest.downloadId,
+          hosterId: downloadRequest.hosterId,
+        },
       },
     });
 
