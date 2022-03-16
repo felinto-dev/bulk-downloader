@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Downloader from 'nodejs-file-downloader';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 
 import { DownloadParams } from '@/interfaces/download-params.interface';
 import { AddDownloadRequestInput } from '@/inputs/add-download-request.input';
@@ -13,12 +13,12 @@ export class DownloadsService {
     private readonly downloadsRepository: DownloadsRepository,
   ) {}
 
-  async addDownloadRequest(download: AddDownloadRequestInput) {
+  async upsertDownloadRequest(download: AddDownloadRequestInput) {
     await this.downloadsRepository.upsertDownloadRequest(download);
   }
 
-  async addBulkDownloadRequest(downloads: AddDownloadRequestInput[]) {
-    return this.downloadsRepository.addBulkDownloadRequest(downloads);
+  async upsertBulkDownloadRequest() {
+    throw new InternalServerErrorException('Method not implemented!');
   }
 
   async downloadFile(params: DownloadParams) {

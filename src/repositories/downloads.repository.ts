@@ -9,15 +9,37 @@ import { AddDownloadRequestInput } from '@/inputs/add-download-request.input';
 export class DownloadsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  upsertDownloadRequest(downloadRequest: AddDownloadRequestInput) {
-    return this.prisma.download.upsert({
+  async upsertDownloadRequest(downloadRequest: AddDownloadRequestInput) {
+    const foundDownload = await this.prisma.download.findFirst({
       where: {
-        downloadIdByHoster: {
-          downloadId: downloadRequest.downloadId,
-          hosterId: downloadRequest.hosterId,
-        },
+        downloadId: downloadRequest.downloadId,
+        hosterId: downloadRequest.hosterId,
       },
-      create: {
+    });
+
+    if (!foundDownload) {
+      await this.addDownloadRequest(downloadRequest);
+    }
+
+    if (foundDownload.fingerprint !== downloadRequest.fingerprint) {
+      await this.prisma.download.update({
+        where: {
+          downloadIdByHoster: {
+            downloadId: downloadRequest.downloadId,
+            hosterId: downloadRequest.hosterId,
+          },
+        },
+        data: {
+          status: DownloadStatus.PENDING,
+          fingerprint: downloadRequest.fingerprint,
+        },
+      });
+    }
+  }
+
+  private async addDownloadRequest(downloadRequest: AddDownloadRequestInput) {
+    return this.prisma.download.create({
+      data: {
         url: downloadRequest.url,
         downloadId: downloadRequest.downloadId,
         fingerprint: downloadRequest.fingerprint,
@@ -32,18 +54,7 @@ export class DownloadsRepository {
           },
         },
       },
-      update: {
-        // FIX: Should change download status for PENDING again!
-        fingerprint: downloadRequest.fingerprint,
-      },
     });
-  }
-
-  async addBulkDownloadRequest(downloadRequests: AddDownloadRequestInput[]) {
-    const transactions = downloadRequests.map((downloadRequest) =>
-      this.upsertDownloadRequest(downloadRequest),
-    );
-    await this.prisma.$transaction([...transactions]);
   }
 
   async countNotPendingDownloads() {

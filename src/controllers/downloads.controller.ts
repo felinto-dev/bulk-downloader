@@ -18,8 +18,10 @@ export class DownloadsController {
   private readonly logger: Logger = new Logger(DownloadsController.name);
 
   @Post()
-  addDownloadRequest(@Body() downloadRequest: AddDownloadRequestInput) {
-    return this.downloadsService.addDownloadRequest(downloadRequest);
+  async upsertDownloadRequest(
+    @Body() downloadRequest: AddDownloadRequestInput,
+  ) {
+    await this.downloadsService.upsertDownloadRequest(downloadRequest);
   }
 
   @Post('bulk')
@@ -31,6 +33,7 @@ export class DownloadsController {
     this.logger.verbose(
       `A bulk add download request with ${downloadRequests.length} valid items was received!`,
     );
-    this.downloadsService.addBulkDownloadRequest(downloadRequests);
+    // TODO: Disable support for add bulk requests
+    // this.downloadsService.addBulkDownloadRequest(downloadRequests);
   }
 }
