@@ -21,6 +21,11 @@ export class DownloadsController {
   async upsertDownloadRequest(
     @Body() downloadRequest: AddDownloadRequestInput,
   ) {
+    this.logger.verbose(
+      `New add download request was received:\n${JSON.stringify(
+        downloadRequest,
+      )}`,
+    );
     await this.downloadsService.upsertDownloadRequest(downloadRequest);
   }
 

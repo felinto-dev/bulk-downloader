@@ -20,7 +20,7 @@ export class DownloadsRepository {
     });
 
     if (!foundDownload) {
-      await this.addDownloadRequest(downloadRequest);
+      return this.addDownloadRequest(downloadRequest);
     }
 
     if (foundDownload.fingerprint !== downloadRequest.fingerprint) {
