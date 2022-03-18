@@ -2,7 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import { DynamicModule } from '@nestjs/common';
 import { BullModule, SharedBullAsyncConfiguration } from '@nestjs/bull';
 
-import { DOWNLOADS_QUEUE } from '@/consts/queues';
+import { DOWNLOADS_QUEUE, DOWNLOADS_REQUESTS_QUEUE } from '@/consts/queues';
 
 export const bullConfig: SharedBullAsyncConfiguration = {
   useFactory: async (configService: ConfigService) => ({
@@ -17,5 +17,8 @@ export const bullConfig: SharedBullAsyncConfiguration = {
 export const BULL_QUEUES: DynamicModule[] = [
   BullModule.registerQueue({
     name: DOWNLOADS_QUEUE,
+  }),
+  BullModule.registerQueue({
+    name: DOWNLOADS_REQUESTS_QUEUE,
   }),
 ];
