@@ -1,18 +1,18 @@
-import { ConfigService } from '@nestjs/config';
-import Downloader from 'nodejs-file-downloader';
-import {
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-} from '@nestjs/common';
-
-import { DownloadParams } from '@/interfaces/download-params.interface';
+import { DOWNLOADS_REQUESTS_QUEUE } from '@/consts/queues';
 import { AddDownloadRequestInput } from '@/inputs/add-download-request.input';
+import { DownloadParams } from '@/interfaces/download-params.interface';
 import { DownloadsRepository } from '@/repositories/downloads.repository';
+import { InjectQueue } from '@nestjs/bull';
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { Queue } from 'bull';
+import Downloader from 'nodejs-file-downloader';
 
 @Injectable()
 export class DownloadsService {
   constructor(
+    @InjectQueue(DOWNLOADS_REQUESTS_QUEUE)
+    private readonly queue: Queue<AddDownloadRequestInput>,
     private readonly configService: ConfigService,
     private readonly downloadsRepository: DownloadsRepository,
   ) {}
@@ -30,7 +30,15 @@ export class DownloadsService {
     this.logger.verbose(
       `A bulk add download request with ${downloadRequests.length} valid items was received!`,
     );
-    throw new InternalServerErrorException('Method not implemented!');
+    await this.queue.addBulk(
+      downloadRequests.map((downloadRequest) => ({
+        data: downloadRequest,
+        opts: {
+          jobId: `${downloadRequest.hosterId}/${downloadRequest.downloadId}`,
+          removeOnComplete: true,
+        },
+      })),
+    );
   }
 
   async downloadFile(params: DownloadParams) {
