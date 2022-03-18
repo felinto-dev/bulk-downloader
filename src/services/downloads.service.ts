@@ -26,7 +26,10 @@ export class DownloadsService {
     await this.downloadsRepository.upsertDownloadRequest(download);
   }
 
-  async upsertBulkDownloadRequest() {
+  async upsertBulkDownloadRequest(downloadRequests: AddDownloadRequestInput[]) {
+    this.logger.verbose(
+      `A bulk add download request with ${downloadRequests.length} valid items was received!`,
+    );
     throw new InternalServerErrorException('Method not implemented!');
   }
 

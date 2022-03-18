@@ -23,14 +23,10 @@ export class DownloadsController {
 
   @Post('bulk')
   @HttpCode(HttpStatus.NO_CONTENT)
-  addBulkDownloadRequest(
+  async addBulkDownloadRequest(
     @Body(new ParseArrayPipe({ items: AddDownloadRequestInput }))
     downloadRequests: AddDownloadRequestInput[],
   ) {
-    console.log(
-      `A bulk add download request with ${downloadRequests.length} valid items was received!`,
-    );
-    // TODO: Disable support for add bulk requests
-    // this.downloadsService.addBulkDownloadRequest(downloadRequests);
+    await this.downloadsService.upsertBulkDownloadRequest(downloadRequests);
   }
 }
