@@ -1,6 +1,10 @@
 import { ConfigService } from '@nestjs/config';
 import Downloader from 'nodejs-file-downloader';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 
 import { DownloadParams } from '@/interfaces/download-params.interface';
 import { AddDownloadRequestInput } from '@/inputs/add-download-request.input';
@@ -13,7 +17,12 @@ export class DownloadsService {
     private readonly downloadsRepository: DownloadsRepository,
   ) {}
 
+  private readonly logger: Logger = new Logger(DownloadsService.name);
+
   async upsertDownloadRequest(download: AddDownloadRequestInput) {
+    this.logger.verbose(
+      `New add download request was received:\n${JSON.stringify(download)}`,
+    );
     await this.downloadsRepository.upsertDownloadRequest(download);
   }
 
