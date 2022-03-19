@@ -44,7 +44,7 @@ export class DownloadsConsumer {
   }
 
   @OnQueueCompleted()
-  async onDownloadSuccess(job: Job<DownloadJobDto>) {
+  async onDownloadCompleted(job: Job<DownloadJobDto>) {
     await this.downloadsOrquestrator.categorizeDownloadAndPullNextDownload(
       job,
       DownloadStatus.SUCCESS,
