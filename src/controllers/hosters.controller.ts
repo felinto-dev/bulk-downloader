@@ -1,7 +1,6 @@
-import { Body, Controller, Put } from '@nestjs/common';
-
 import { CreateHosterInput } from '@/inputs/create-hoster.input';
 import { HostersService } from '@/services/hosters.service';
+import { Body, Controller, Put } from '@nestjs/common';
 
 @Controller('hosters')
 export class HostersController {

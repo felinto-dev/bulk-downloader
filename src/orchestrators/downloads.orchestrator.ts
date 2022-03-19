@@ -1,16 +1,15 @@
-import { Job, Queue } from 'bull';
+import { GLOBAL_DOWNLOADS_CONCURRENCY } from '@/consts/app';
+import { DOWNLOADS_QUEUE } from '@/consts/queues';
+import { PendingDownload } from '@/database/interfaces/pending-download';
+import { DownloadJobDto } from '@/dto/download.job.dto';
+import { DownloadsRepository } from '@/repositories/downloads.repository';
+import { HostersLimitsService } from '@/services/hosters-limits.service';
+import { HostersService } from '@/services/hosters.service';
+import { replaceNegativeValueWithZero } from '@/utils/math';
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { DownloadStatus } from '@prisma/client';
-
-import { GLOBAL_DOWNLOADS_CONCURRENCY } from '@/consts/app';
-import { DOWNLOADS_QUEUE } from '@/consts/queues';
-import { DownloadJobDto } from '@/dto/download.job.dto';
-import { DownloadsRepository } from '@/repositories/downloads.repository';
-import { HostersService } from '@/services/hosters.service';
-import { replaceNegativeValueWithZero } from '@/utils/math';
-import { HostersLimitsService } from '@/services/hosters-limits.service';
-import { PendingDownload } from '@/database/interfaces/pending-download';
+import { Job, Queue } from 'bull';
 
 @Injectable()
 export class DownloadsOrquestrator implements OnModuleInit {

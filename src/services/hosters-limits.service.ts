@@ -1,8 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
-
+import { HosterLimits } from '@/dto/hoster-limits.dto';
 import { HostersLimitsRepository } from '@/repositories/hosters-limit.repository';
 import { getMinValueFromObjectValues, subtractObjects } from '@/utils/objects';
-import { HosterLimits } from '@/dto/hoster-limits.dto';
+import { Injectable, Logger } from '@nestjs/common';
 
 @Injectable()
 export class HostersLimitsService {

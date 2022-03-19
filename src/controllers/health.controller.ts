@@ -1,11 +1,10 @@
-import { Queue } from 'bull';
+import { DOWNLOADS_QUEUE } from '@/consts/queues';
+import { DownloadsRequestsAttemptsRepository } from '@/repositories/downloads-requests-attempts.repository';
+import { DownloadsRepository } from '@/repositories/downloads.repository';
+import { HostersRepository } from '@/repositories/hosters.repository';
 import { InjectQueue } from '@nestjs/bull';
 import { Controller, Get } from '@nestjs/common';
-
-import { DOWNLOADS_QUEUE } from '@/consts/queues';
-import { HostersRepository } from '@/repositories/hosters.repository';
-import { DownloadsRepository } from '@/repositories/downloads.repository';
-import { DownloadsRequestsAttemptsRepository } from '@/repositories/downloads-requests-attempts.repository';
+import { Queue } from 'bull';
 
 @Controller('health')
 export class HealthController {

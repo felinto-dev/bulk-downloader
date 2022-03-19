@@ -1,6 +1,5 @@
-import { useContainer } from 'class-validator';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-
+import { useContainer } from 'class-validator';
 import { AppModule } from './app.module';
 import { classValidatorConfig } from './configs/class-validator';
 

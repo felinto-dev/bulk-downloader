@@ -1,4 +1,4 @@
-import { Prisma, HosterAuthenticationMethod } from '@prisma/client';
+import { HosterAuthenticationMethod, Prisma } from '@prisma/client';
 
 export const hosters: Prisma.HosterCreateInput[] = [
   {

@@ -1,12 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common';
-
-import { HostersRepository } from '@/repositories/hosters.repository';
-import { HostersLimitsService } from './hosters-limits.service';
 import { releaseAtDateFrame } from '@/consts/release-at-date-frame';
-import { checkIfNumberExistsInObjectValues } from '@/utils/objects';
-import { HosterLimits } from '@/dto/hoster-limits.dto';
 import { HosterReadyToPull } from '@/database/interfaces/hoster-ready-to-pull.interface';
+import { HosterLimits } from '@/dto/hoster-limits.dto';
 import { CreateHosterInput } from '@/inputs/create-hoster.input';
+import { HostersRepository } from '@/repositories/hosters.repository';
+import { checkIfNumberExistsInObjectValues } from '@/utils/objects';
+import { Injectable, Logger } from '@nestjs/common';
+import { HostersLimitsService } from './hosters-limits.service';
 
 @Injectable()
 export class HostersService {

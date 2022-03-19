@@ -1,9 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaPromise } from '@prisma/client';
-
+import { HosterLimits } from '@/dto/hoster-limits.dto';
 import { PrismaService } from '@/prisma.service';
 import { startOfDay, startOfHour, startOfMonth } from '@/utils/date';
-import { HosterLimits } from '@/dto/hoster-limits.dto';
+import { Injectable } from '@nestjs/common';
+import { PrismaPromise } from '@prisma/client';
 
 @Injectable()
 export class HostersLimitsRepository {

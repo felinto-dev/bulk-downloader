@@ -1,7 +1,6 @@
+import { DownloadsOrquestrator } from '@/orchestrators/downloads.orchestrator';
 import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-
-import { DownloadsOrquestrator } from '@/orchestrators/downloads.orchestrator';
 
 @Injectable()
 export class DownloadsScheduler {

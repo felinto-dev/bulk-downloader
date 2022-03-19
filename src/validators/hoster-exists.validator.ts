@@ -1,10 +1,9 @@
+import { HostersRepository } from '@/repositories/hosters.repository';
+import { Injectable } from '@nestjs/common';
 import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { Injectable } from '@nestjs/common';
-
-import { HostersRepository } from '@/repositories/hosters.repository';
 
 @Injectable()
 @ValidatorConstraint({ name: 'HosterExists', async: true })

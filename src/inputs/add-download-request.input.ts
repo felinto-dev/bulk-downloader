@@ -1,9 +1,4 @@
-import {
-	IsNumber,
-	IsOptional,
-	IsUrl,
-	Matches
-} from 'class-validator';
+import { IsNumber, IsOptional, IsUrl, Matches } from 'class-validator';
 
 export class AddDownloadRequestInput {
   @IsUrl()

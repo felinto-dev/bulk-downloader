@@ -1,11 +1,10 @@
-import { DateTime } from 'luxon';
-import { Injectable } from '@nestjs/common';
-import { DownloadStatus } from '@prisma/client';
-
-import { PrismaService } from '@/prisma.service';
 import { GLOBAL_DOWNLOADS_CONCURRENCY } from '@/consts/app';
 import { HosterReadyToPull } from '@/database/interfaces/hoster-ready-to-pull.interface';
 import { CreateHosterInput } from '@/inputs/create-hoster.input';
+import { PrismaService } from '@/prisma.service';
+import { Injectable } from '@nestjs/common';
+import { DownloadStatus } from '@prisma/client';
+import { DateTime } from 'luxon';
 
 @Injectable()
 export class HostersRepository {

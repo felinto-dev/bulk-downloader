@@ -1,3 +1,6 @@
+import { GLOBAL_DOWNLOADS_CONCURRENCY } from '@/consts/app';
+import { HosterAuthenticationMethod } from '@prisma/client';
+import { Type } from 'class-transformer';
 import {
   IsDefined,
   IsEnum,
@@ -8,10 +11,6 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
-import { HosterAuthenticationMethod } from '@prisma/client';
-
-import { GLOBAL_DOWNLOADS_CONCURRENCY } from '@/consts/app';
 import { HosterLimits } from '../dto/hoster-limits.dto';
 
 export class CreateHosterInput {

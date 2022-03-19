@@ -1,18 +1,17 @@
+import { GLOBAL_DOWNLOADS_CONCURRENCY } from '@/consts/app';
+import { DOWNLOADS_QUEUE } from '@/consts/queues';
+import { DownloadJobDto } from '@/dto/download.job.dto';
+import { DownloadsOrquestrator } from '@/orchestrators/downloads.orchestrator';
+import { DownloadsRequestsAttemptsRepository } from '@/repositories/downloads-requests-attempts.repository';
+import { DownloadsService } from '@/services/downloads.service';
 import {
   OnQueueCompleted,
   OnQueueFailed,
   Process,
   Processor,
 } from '@nestjs/bull';
-import { Job } from 'bull';
 import { DownloadStatus } from '@prisma/client';
-
-import { DOWNLOADS_QUEUE } from '@/consts/queues';
-import { DownloadsService } from '@/services/downloads.service';
-import { GLOBAL_DOWNLOADS_CONCURRENCY } from '@/consts/app';
-import { DownloadJobDto } from '@/dto/download.job.dto';
-import { DownloadsRequestsAttemptsRepository } from '@/repositories/downloads-requests-attempts.repository';
-import { DownloadsOrquestrator } from '@/orchestrators/downloads.orchestrator';
+import { Job } from 'bull';
 
 @Processor(DOWNLOADS_QUEUE)
 export class DownloadsConsumer {
