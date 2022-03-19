@@ -4,7 +4,7 @@
 {
 	"name": "NDownloader²",
 	"dockerComposeFile": "docker-compose.yml",
-	"service": "app",
+	"service": "downloader",
 	"workspaceFolder": "/workspace",
 	// Set *default* container specific settings.json values on container create.
 	"settings": {
@@ -29,10 +29,8 @@
 	"forwardPorts": [
 		3000,
 		5001,
-		5432,
 		5555,
 		6001,
-		8080
 	],
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": "yarn install",

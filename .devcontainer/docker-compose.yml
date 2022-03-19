@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  app:
+  downloader:
     build: 
       context: .
       dockerfile: Dockerfile
@@ -20,7 +20,7 @@ services:
     command: sleep infinity
 
     # Runs app on the same network as the database container, allows "forwardPorts" in devcontainer.json function.
-    network_mode: service:db
+    # network_mode: service:db
 
     # Uncomment the next line to use a non-root user for all processes.
     user: node
@@ -42,11 +42,6 @@ services:
     # Add "forwardPorts": ["5432"] to **devcontainer.json** to forward PostgreSQL locally.
     # (Adding the "ports" property to this file will not forward from a Codespace.)
 
-  adminer:
-    image: adminer
-    ports:
-    - 8080:8080
-
   redis:
     image: redis:alpine
 
@@ -65,3 +60,7 @@ services:
 volumes:
   postgres-data:
   downloaded-files:
+
+networks:
+  default:
+    name: fntwork
