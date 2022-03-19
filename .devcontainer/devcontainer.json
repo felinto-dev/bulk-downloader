@@ -7,13 +7,7 @@
 	"service": "downloader",
 	"workspaceFolder": "/workspace",
 	// Set *default* container specific settings.json values on container create.
-	"settings": {
-		"[typescript]": {
-			"editor.codeActionsOnSave": {
-				"source.organizeImports": true
-			}
-		},
-	},
+	"settings": {},
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
 		"dbaeumer.vscode-eslint",
