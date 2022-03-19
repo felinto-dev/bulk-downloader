@@ -1,14 +1,13 @@
-import {
-  Body,
-  Controller,
-  HttpCode,
-  HttpStatus,
-  ParseArrayPipe,
-  Post,
-} from '@nestjs/common';
-
-import { DownloadsService } from '@/services/downloads.service';
 import { AddDownloadRequestInput } from '@/inputs/add-download-request.input';
+import { DownloadsService } from '@/services/downloads.service';
+import {
+	Body,
+	Controller,
+	HttpCode,
+	HttpStatus,
+	ParseArrayPipe,
+	Post
+} from '@nestjs/common';
 
 @Controller('downloads')
 export class DownloadsController {

@@ -1,9 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { DownloadStatus, HosterAuthenticationMethod } from '@prisma/client';
-
-import { PrismaService } from '@/prisma.service';
 import { PendingDownload } from '@/database/interfaces/pending-download';
 import { AddDownloadRequestInput } from '@/inputs/add-download-request.input';
+import { PrismaService } from '@/prisma.service';
+import { Injectable } from '@nestjs/common';
+import { DownloadStatus, HosterAuthenticationMethod } from '@prisma/client';
 
 @Injectable()
 export class DownloadsRepository {
@@ -34,6 +33,7 @@ export class DownloadsRepository {
         data: {
           status: DownloadStatus.PENDING,
           fingerprint: downloadRequest.fingerprint,
+          priority: downloadRequest.priority,
         },
       });
     }
@@ -45,6 +45,7 @@ export class DownloadsRepository {
         url: downloadRequest.url,
         downloadId: downloadRequest.downloadId,
         fingerprint: downloadRequest.fingerprint,
+        priority: downloadRequest.priority,
         Hoster: {
           connectOrCreate: {
             where: { id: downloadRequest.hosterId },
