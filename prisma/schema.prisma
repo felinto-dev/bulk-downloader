@@ -14,7 +14,7 @@ model Hoster {
   id                   String                     @id
   name                 String
   authenticationMethod HosterAuthenticationMethod
-  concurrency          Int                        @default(1)
+  concurrency          Int                        @default(0)
   downloads            Download[]
   limits               HosterLimits?
   downloadsAttempts    DownloadRequestAttempt[]
