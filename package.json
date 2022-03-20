@@ -1,10 +1,10 @@
 {
-  "name": "Downloader-N2",
+  "name": "bulk-downloader",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "A simple tool to download files in bulk, being possible to configure scheduling, apply rate limit, use proxy, among other functions.",
+  "author": "Felinto",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
