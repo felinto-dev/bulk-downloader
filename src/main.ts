@@ -18,9 +18,9 @@ async function bootstrap() {
     options: {
       urls: [process.env.RMQ_URI],
       queue: 'bulk-downloader',
+      noAck: false,
       queueOptions: {
         durable: true,
-        noAck: true,
       },
     },
   });

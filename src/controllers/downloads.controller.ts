@@ -8,6 +8,12 @@ import {
   ParseArrayPipe,
   Post,
 } from '@nestjs/common';
+import {
+  Ctx,
+  MessagePattern,
+  Payload,
+  RmqContext,
+} from '@nestjs/microservices';
 
 @Controller('downloads')
 export class DownloadsController {
@@ -27,5 +33,17 @@ export class DownloadsController {
     downloadRequests: AddDownloadRequestInput[],
   ) {
     await this.downloadsService.upsertBulkDownloadRequest(downloadRequests);
+  }
+
+  @MessagePattern('downloads')
+  async addBulkDownloadRequestByRMQ(
+    @Payload() downloadRequests: AddDownloadRequestInput[],
+    @Ctx() context: RmqContext,
+  ) {
+    await this.downloadsService.upsertBulkDownloadRequest(downloadRequests);
+
+    const channel = context.getChannelRef();
+    const originalMsg = context.getMessage();
+    channel.ack(originalMsg);
   }
 }
