@@ -11,6 +11,7 @@ import {
   Processor,
 } from '@nestjs/bull';
 import { Inject } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { DownloadStatus } from '@prisma/client';
 import { Job } from 'bull';
 
@@ -21,6 +22,7 @@ export class DownloadsConsumer {
     private readonly downloadsOrquestrator: DownloadsOrquestrator,
     @Inject('DOWNLOAD_CLIENT')
     private readonly downloadClient: DownloadClientInterface,
+    private readonly configService: ConfigService,
   ) {}
 
   @Process({ concurrency: GLOBAL_DOWNLOADS_CONCURRENCY })
@@ -32,7 +34,7 @@ export class DownloadsConsumer {
     );
     await this.downloadClient.download({
       downloadUrl: url,
-      saveLocation: '/files',
+      saveLocation: await this.configService.get('app.downloads_directory'),
       onDownloadProgress: (updatedDownloadProgress: number) =>
         job.progress(updatedDownloadProgress),
     });
@@ -47,7 +49,7 @@ export class DownloadsConsumer {
   }
 
   @OnQueueCompleted()
-  async onDownloadCompleted(job: Job<DownloadJobDto>) {
+  async onDownloadFinished(job: Job<DownloadJobDto>) {
     await this.downloadsOrquestrator.categorizeDownloadAndPullNextDownload(
       job,
       DownloadStatus.SUCCESS,
