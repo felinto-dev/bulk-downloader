@@ -14,14 +14,15 @@ jobs:
 
       - name: Get NodeJS package info
         id: get_package_info
-        run: echo "::set-output name=version::$(jq -r .version package.json)"
+        run: |
+          echo "::set-output name=name::$(jq -r .name package.json)"
+          echo "::set-output name=version::$(jq -r .version package.json)"
 
       - uses: mr-smithers-excellent/docker-build-push@v3
         name: Build & push Docker image
         with:
-          image: bulk-downloader
+          image: "${{ steps.get_package_info.outputs.name }}"
           tag: "${{ steps.get_package_info.outputs.version }}"
           registry: ${{ secrets.REGISTRY_URI }}
-          dockerfile: Dockerfile
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
