@@ -10,7 +10,7 @@
     "target": "es2017",
     "sourceMap": true,
     "outDir": "./dist",
-		"rootDir": "src",
+		"rootDir": "./",
     "baseUrl": "src",
     "incremental": true,
     "skipLibCheck": true,
@@ -23,6 +23,7 @@
 		"paths": {
       "@/*": ["*"]
     },
+		"resolveJsonModule": true
   },
 	"exclude": ["node_modules", "dist", "test", "prisma"]
 }

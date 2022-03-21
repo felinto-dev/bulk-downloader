@@ -4,6 +4,7 @@ import {
   FastifyAdapter,
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
+import { name } from '../package.json';
 import { AppModule } from './app.module';
 import { configureApp } from './configure-app';
 
@@ -17,11 +18,9 @@ async function bootstrap() {
     transport: Transport.RMQ,
     options: {
       urls: [process.env.RMQ_URI],
-      queue: 'bulk-downloader',
+      queue: name,
       noAck: false,
-      queueOptions: {
-        durable: true,
-      },
+      queueOptions: { durable: true },
     },
   });
   await app.startAllMicroservices();
