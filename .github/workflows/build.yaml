@@ -17,5 +17,7 @@ jobs:
         with:
           image: bulk-downloader
           tags: latest
-          registry: rg.fnt.work:5000
+          registry: rg.fr-par.scw.cloud/fntwork
           dockerfile: Dockerfile
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
