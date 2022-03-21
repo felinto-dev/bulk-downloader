@@ -22,7 +22,7 @@ jobs:
         name: Build & push Docker image
         with:
           image: "${{ steps.get_package_info.outputs.name }}"
-          tag: "${{ steps.get_package_info.outputs.version }}"
+          tag: "${{ steps.get_package_info.outputs.version }},develop"
           registry: ${{ secrets.REGISTRY_URI }}
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
