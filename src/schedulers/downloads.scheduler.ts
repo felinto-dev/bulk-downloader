@@ -7,7 +7,7 @@ export class DownloadsScheduler {
   constructor(private readonly downloadsOrquestrator: DownloadsOrquestrator) {}
 
   @Cron(CronExpression.EVERY_30_MINUTES)
-  async pullDownloadOnHourlyReset() {
+  async pullDownloads() {
     await this.downloadsOrquestrator.pullDownloads();
   }
 }
