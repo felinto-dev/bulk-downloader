@@ -35,13 +35,13 @@ export class DownloadsController {
     await this.downloadsService.upsertBulkDownloadRequest(downloadRequests);
   }
 
-  @MessagePattern('downloads')
+  @MessagePattern({ cmd: 'schedule-downloads-requests' })
   async addBulkDownloadRequestByRMQ(
     @Payload(new ParseArrayPipe({ items: AddDownloadRequestInput }))
-    downloadRequests: AddDownloadRequestInput[],
+    downloadsRequests: AddDownloadRequestInput[],
     @Ctx() context: RmqContext,
   ) {
-    await this.downloadsService.upsertBulkDownloadRequest(downloadRequests);
+    await this.downloadsService.upsertBulkDownloadRequest(downloadsRequests);
 
     const channel = context.getChannelRef();
     const originalMsg = context.getMessage();
