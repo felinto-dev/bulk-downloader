@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import {
   FastifyAdapter,
   NestFastifyApplication,
@@ -12,6 +13,18 @@ async function bootstrap() {
     new FastifyAdapter({ bodyLimit: 1048576 * 50 }), // 50 MB
   );
   configureApp(app);
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.RMQ,
+    options: {
+      urls: [process.env.RMQ_URI],
+      queue: 'bulk-downloader',
+      noAck: false,
+      queueOptions: {
+        durable: true,
+      },
+    },
+  });
+  await app.startAllMicroservices();
   await app.listen(3000, '0.0.0.0');
 }
 bootstrap();
