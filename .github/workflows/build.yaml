@@ -16,7 +16,7 @@ jobs:
         name: Build & push Docker image
         with:
           image: bulk-downloader
-          tag: latest
+          tag: ${{ jq -r .version package.jso }}
           registry: rg.fr-par.scw.cloud/fntwork
           dockerfile: Dockerfile
           username: ${{ secrets.REGISTRY_USERNAME }}
