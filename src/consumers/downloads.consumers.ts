@@ -1,24 +1,26 @@
 import { GLOBAL_DOWNLOADS_CONCURRENCY } from '@/consts/app';
 import { DOWNLOADS_QUEUE } from '@/consts/queues';
 import { DownloadJobDto } from '@/dto/download.job.dto';
+import { DownloadClientInterface } from '@/interfaces/download-client.interface';
 import { DownloadsOrquestrator } from '@/orchestrators/downloads.orchestrator';
 import { DownloadsRequestsAttemptsRepository } from '@/repositories/downloads-requests-attempts.repository';
-import { DownloadsService } from '@/services/downloads.service';
 import {
   OnQueueCompleted,
   OnQueueFailed,
   Process,
   Processor,
 } from '@nestjs/bull';
+import { Inject } from '@nestjs/common';
 import { DownloadStatus } from '@prisma/client';
 import { Job } from 'bull';
 
 @Processor(DOWNLOADS_QUEUE)
 export class DownloadsConsumer {
   constructor(
-    private readonly downloadsService: DownloadsService,
     private readonly downloadsRequestsAttemptsRepository: DownloadsRequestsAttemptsRepository,
     private readonly downloadsOrquestrator: DownloadsOrquestrator,
+    @Inject('DOWNLOAD_CLIENT')
+    private readonly downloadClient: DownloadClientInterface,
   ) {}
 
   @Process({ concurrency: GLOBAL_DOWNLOADS_CONCURRENCY })
@@ -28,8 +30,9 @@ export class DownloadsConsumer {
       downloadId,
       hosterId,
     );
-    await this.downloadsService.downloadFile({
-      url,
+    await this.downloadClient.download({
+      downloadUrl: url,
+      saveLocation: '/files',
       onDownloadProgress: (updatedDownloadProgress: number) =>
         job.progress(updatedDownloadProgress),
     });
