@@ -12,11 +12,14 @@ jobs:
       - uses: actions/checkout@v2
         name: Check out code
 
+      - id: package_version
+        run: echo $(jq -r .version package.json)
+
       - uses: mr-smithers-excellent/docker-build-push@v3
         name: Build & push Docker image
         with:
           image: bulk-downloader
-          tag: ${{ jq -r .version package.jso }}
+          tag: ${{ steps.package_version.outputs }}
           registry: rg.fr-par.scw.cloud/fntwork
           dockerfile: Dockerfile
           username: ${{ secrets.REGISTRY_USERNAME }}
