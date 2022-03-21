@@ -13,7 +13,7 @@ jobs:
         name: Check out code
 
       - id: package_version
-        run: echo "::set-output name=version::$(jq -r .version package.json)
+        run: echo "::set-output name=version::$(jq -r .version package.json)"
 
       - uses: mr-smithers-excellent/docker-build-push@v3
         name: Build & push Docker image
