@@ -37,7 +37,8 @@ export class DownloadsController {
 
   @MessagePattern('downloads')
   async addBulkDownloadRequestByRMQ(
-    @Payload() downloadRequests: AddDownloadRequestInput[],
+    @Payload(new ParseArrayPipe({ items: AddDownloadRequestInput }))
+    downloadRequests: AddDownloadRequestInput[],
     @Ctx() context: RmqContext,
   ) {
     await this.downloadsService.upsertBulkDownloadRequest(downloadRequests);
