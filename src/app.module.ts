@@ -9,7 +9,7 @@ import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
-import { NodeJsFileDownloader } from './adapters/download-client/nodejs-file-downloader.service';
+import { ADAPTERS } from './adapters';
 import { ORCHESTRATORS } from './orchestrators';
 import { SCHEDULES } from './schedulers';
 import { VALIDATORS } from './validators';
@@ -24,10 +24,7 @@ import { VALIDATORS } from './validators';
   controllers: [...CONTROLLERS],
   providers: [
     PrismaService,
-    {
-      provide: 'DOWNLOAD_CLIENT',
-      useClass: NodeJsFileDownloader,
-    },
+    ...ADAPTERS,
     ...CONSUMERS,
     ...SERVICES,
     ...REPOSITORIES,

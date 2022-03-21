@@ -1,3 +1,4 @@
+import { DOWNLOAD_CLIENT } from '@/adapters/tokens';
 import { GLOBAL_DOWNLOADS_CONCURRENCY } from '@/consts/app';
 import { DOWNLOADS_QUEUE } from '@/consts/queues';
 import { DownloadJobDto } from '@/dto/download.job.dto';
@@ -20,7 +21,7 @@ export class DownloadsConsumer {
   constructor(
     private readonly downloadsRequestsAttemptsRepository: DownloadsRequestsAttemptsRepository,
     private readonly downloadsOrquestrator: DownloadsOrquestrator,
-    @Inject('DOWNLOAD_CLIENT')
+    @Inject(DOWNLOAD_CLIENT)
     private readonly downloadClient: DownloadClientInterface,
     private readonly configService: ConfigService,
   ) {}
