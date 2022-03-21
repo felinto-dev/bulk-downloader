@@ -36,6 +36,7 @@ export class DownloadsConsumer {
     await this.downloadClient.download({
       downloadUrl: url,
       saveLocation: await this.configService.get('app.downloads_directory'),
+      maxAttempts: 3,
       onDownloadProgress: (updatedDownloadProgress: number) =>
         job.progress(updatedDownloadProgress),
     });
