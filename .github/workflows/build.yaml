@@ -2,8 +2,7 @@ name: ci
 
 on:
   push:
-    branches:
-      - 'develop'
+    branches: [main, develop]
 
 jobs:
   docker:
