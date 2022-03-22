@@ -1,6 +1,6 @@
 {
   "name": "bulk-downloader",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "A simple tool to download files in bulk, being possible to configure scheduling, apply rate limit, use proxy, among other functions.",
   "author": "Felinto",
   "private": true,
