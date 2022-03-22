@@ -26,7 +26,7 @@ jobs:
         id: semver
         with:
           version: "${{ steps.get_package_info.outputs.version }}"
-        run: |
+      - run: |
           echo "::set-output name=major::${{ steps.semver.outputs.major }}"
 
       - uses: mr-smithers-excellent/docker-build-push@v5
