@@ -32,8 +32,7 @@ jobs:
         name: Build & push Docker image
         with:
           image: "${{ steps.get_package_info.outputs.name }}"
-          tags: |
-            "${{ steps.extract_branch.outputs.branch }},${{ steps.get_package_info.outputs.version }},${{ steps.semver.outputs.major }},${{ steps.semver.outputs.major }}.${{ steps.semver.outputs.minor }}"
+          tags: "${{ steps.extract_branch.outputs.branch }},${{ steps.get_package_info.outputs.version }},${{ steps.semver.outputs.major }},${{ steps.semver.outputs.major }}.${{ steps.semver.outputs.minor }}"
           registry: ${{ secrets.REGISTRY_URI }}
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
