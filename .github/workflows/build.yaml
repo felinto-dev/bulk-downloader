@@ -22,18 +22,16 @@ jobs:
           echo "::set-output name=name::$(jq -r .name package.json)"
           echo "::set-output name=version::$(jq -r .version package.json)"
 
-      - uses: madhead/semver-utils@latest
+      - name: Parse package version to semver
         id: semver
-        with:
-          version: "${{ steps.get_package_info.outputs.version }}"
-      - run: |
-          echo "::set-output name=major::${{ steps.semver.outputs.major }}"
+        run: |
+          echo "::set-output name=major::$(echo ${{ steps.get_package_info.outputs.version }} | awk -F '.' '{print $1}')"
 
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: Build & push Docker image
         with:
           image: "${{ steps.get_package_info.outputs.name }}"
-          tags: "${{ steps.extract_branch.outputs.branch }},${{ steps.get_package_info.outputs.version }}",${{ steps.semver.outputs.major }}"
+          tags: "${{ steps.extract_branch.outputs.branch }},${{ steps.get_package_info.outputs.version }},${{ steps.semver.outputs.major }}"
           registry: ${{ secrets.REGISTRY_URI }}
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
