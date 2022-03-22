@@ -25,10 +25,9 @@ jobs:
       - uses: madhead/semver-utils@latest
         id: semver
         with:
-          # A version to work with
           version: "${{ steps.get_package_info.outputs.version }}"
-          - run: |
-              echo "::set-output name=major::${{ steps.semver.outputs.major }}"
+        run: |
+          echo "::set-output name=major::${{ steps.semver.outputs.major }}"
 
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: Build & push Docker image
