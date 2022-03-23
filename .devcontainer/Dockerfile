@@ -12,8 +12,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 
 ARG DOWNLOADS_DIRECTORY
 ENV DOWNLOADS_DIRECTORY ${DOWNLOADS_DIRECTORY}
-RUN mkdir ${DOWNLOADS_DIRECTORY}
-RUN chown node:node ${DOWNLOADS_DIRECTORY}
+RUN mkdir -p ${DOWNLOADS_DIRECTORY} && chown -R node:node ${DOWNLOADS_DIRECTORY}
 
 # [Optional] Uncomment if you want to install more global node modules
 RUN su node -c "npm install -g npm"
