@@ -1,17 +1,44 @@
-FROM node:16-alpine as DEV
-ENV NODE_ENV=development
-WORKDIR /opt/node_app
-COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile
-COPY . .
-RUN npm run build
+FROM node:16-alpine AS builder
 
-FROM node:16-alpine as PROD
+ENV NODE_ENV=development
+
+# install node-prune (https://github.com/tj/node-prune)
+RUN apk add curl bash --no-cache
+RUN curl -sfL https://install.goreleaser.com/github.com/tj/node-prune.sh | bash -s -- -b /usr/local/bin
+
+WORKDIR /usr/src/app
+
+COPY package.json yarn.lock .yarnclean ./
+
+# install dependencies
+RUN yarn --frozen-lockfile --ignore-optional && yarn autoclean --force
+
+# Copy application
+COPY . .
+
+# build application
+RUN yarn build
+
+# remove development dependencies
+RUN npm prune --production
+
+# run node prune
+RUN /usr/local/bin/node-prune
+
+## Start a new stage
+FROM node:16-alpine
+
 ENV NODE_ENV=production
-RUN mkdir /opt/node_app && chown node:node /opt/node_app
-WORKDIR /opt/node_app
-USER node
-COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile --ignore-optional --production && yarn cache clean
-COPY --chown=node:node --from=DEV /opt/node_app/dist ./
-CMD [ "node", "./src/main.js" ]
+
+RUN apk add dumb-init --no-cache
+
+RUN mkdir -p /usr/src/app && chown node:node /usr/src/app
+WORKDIR /usr/src/app
+
+# copy from build image
+COPY --chown=node:node --from=builder /usr/src/app/dist ./
+COPY --chown=node:node --from=builder /usr/src/app/node_modules ./node_modules
+
+EXPOSE 3000
+
+CMD [ "dumb-init", "node", "./src/main.js" ]
