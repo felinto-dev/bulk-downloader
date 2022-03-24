@@ -46,3 +46,5 @@ tmp
 .github
 .vscode
 Dockerfile
+
+*.md

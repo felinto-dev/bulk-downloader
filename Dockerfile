@@ -10,7 +10,7 @@ WORKDIR /usr/src/app
 
 COPY package.json yarn.lock .yarnclean ./
 
-# install dependencies
+# install ALL dependencies
 RUN yarn --frozen-lockfile --ignore-optional && yarn autoclean --force
 
 # Copy application
@@ -25,8 +25,14 @@ RUN npm prune --production
 # run node prune
 RUN /usr/local/bin/node-prune
 
-## Start a new stage
-FROM node:16-alpine
+# Build development purposes image
+FROM builder AS dev
+
+# Start application in development mode
+CMD [ "npm", "run", "start:dev" ]
+
+## Build production-ready image
+FROM node:16-alpine AS prod
 
 ENV NODE_ENV=production
 
@@ -35,10 +41,12 @@ RUN apk add dumb-init --no-cache
 RUN mkdir -p /usr/src/app && chown node:node /usr/src/app
 WORKDIR /usr/src/app
 
-# copy from build image
-COPY --chown=node:node --from=builder /usr/src/app/dist ./
+# copy artifacts
+COPY --chown=node:node . ./
+COPY --chown=node:node --from=builder /usr/src/app/dist ./dist/
 COPY --chown=node:node --from=builder /usr/src/app/node_modules ./node_modules
 
 EXPOSE 3000
 
-CMD [ "dumb-init", "node", "./src/main.js" ]
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+CMD [ "npm", "run", "start:prod" ]
