@@ -11,7 +11,7 @@ export class NodeJsFileDownloader implements DownloadClientInterface {
     const downloader = new Downloader({
       url: params.downloadUrl,
       directory: params.saveLocation,
-      maxAttempts: params.maxAttempts,
+      maxAttempts: params.retry,
       onProgress: (percentage) => params.onDownloadProgress(+percentage),
     });
     await downloader.download();

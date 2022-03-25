@@ -1,7 +1,7 @@
 export interface DownloadParams {
   downloadUrl: string;
   saveLocation: string;
-  maxAttempts?: number;
+  retry?: number;
   onDownloadProgress?: { (downloadPercentage: number): Promise<void> };
 }
 
