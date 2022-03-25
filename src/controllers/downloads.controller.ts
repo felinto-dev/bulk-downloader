@@ -20,15 +20,16 @@ export class DownloadsController {
   constructor(private readonly downloadsService: DownloadsService) {}
 
   @Post()
-  async upsertDownloadRequest(
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async scheduleDownloadRequest(
     @Body() downloadRequest: AddDownloadRequestInput,
   ) {
-    return this.downloadsService.upsertDownloadRequest(downloadRequest);
+    await this.downloadsService.upsertDownloadRequest(downloadRequest);
   }
 
   @Post('bulk')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async addBulkDownloadRequest(
+  async scheduleBulkDownloadRequestByRestApi(
     @Body(new ParseArrayPipe({ items: AddDownloadRequestInput }))
     downloadRequests: AddDownloadRequestInput[],
   ) {
@@ -36,7 +37,7 @@ export class DownloadsController {
   }
 
   @MessagePattern({ cmd: 'schedule-bulk-downloads' })
-  async addBulkDownloadRequestByRMQ(
+  async scheduleBulkDownloadRequestByRMQ(
     @Payload(new ParseArrayPipe({ items: AddDownloadRequestInput }))
     downloadsRequests: AddDownloadRequestInput[],
     @Ctx() context: RmqContext,
