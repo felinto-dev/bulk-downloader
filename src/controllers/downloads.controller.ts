@@ -1,4 +1,4 @@
-import { AddDownloadRequestInput } from '@/inputs/add-download-request.input';
+import { ScheduleDownloadInput } from '@/inputs/schedule-download.input';
 import { DownloadsService } from '@/services/downloads.service';
 import {
   Body,
@@ -22,7 +22,7 @@ export class DownloadsController {
   @Post()
   @HttpCode(HttpStatus.NO_CONTENT)
   async scheduleDownloadRequest(
-    @Body() downloadRequest: AddDownloadRequestInput,
+    @Body() downloadRequest: ScheduleDownloadInput,
   ) {
     await this.downloadsService.upsertDownloadRequest(downloadRequest);
   }
@@ -30,16 +30,16 @@ export class DownloadsController {
   @Post('bulk')
   @HttpCode(HttpStatus.NO_CONTENT)
   async scheduleBulkDownloadRequestByRestApi(
-    @Body(new ParseArrayPipe({ items: AddDownloadRequestInput }))
-    downloadRequests: AddDownloadRequestInput[],
+    @Body(new ParseArrayPipe({ items: ScheduleDownloadInput }))
+    downloadRequests: ScheduleDownloadInput[],
   ) {
     await this.downloadsService.upsertBulkDownloadRequest(downloadRequests);
   }
 
   @MessagePattern({ cmd: 'schedule-bulk-downloads' })
   async scheduleBulkDownloadRequestByRMQ(
-    @Payload(new ParseArrayPipe({ items: AddDownloadRequestInput }))
-    downloadsRequests: AddDownloadRequestInput[],
+    @Payload(new ParseArrayPipe({ items: ScheduleDownloadInput }))
+    downloadsRequests: ScheduleDownloadInput[],
     @Ctx() context: RmqContext,
   ) {
     await this.downloadsService.upsertBulkDownloadRequest(downloadsRequests);

@@ -1,8 +1,8 @@
 import { IsNumber, IsOptional, IsUrl, Matches } from 'class-validator';
 
-export class AddDownloadRequestInput {
+export class ScheduleDownloadInput {
   @IsUrl()
-  url: string;
+  downloadUrl: string;
 
   @Matches(/^([a-z0-9-_]+)$/)
   hosterId: string;

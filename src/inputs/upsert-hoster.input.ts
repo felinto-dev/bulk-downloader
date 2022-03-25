@@ -13,7 +13,7 @@ import {
 } from 'class-validator';
 import { HosterLimits } from '../dto/hoster-limits.dto';
 
-export class CreateHosterInput {
+export class UpsertHosterInput {
   @Matches(/^([a-z0-9-_]+)$/)
   id: string;
 

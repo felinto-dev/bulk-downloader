@@ -1,5 +1,5 @@
 import { PendingDownload } from '@/database/interfaces/pending-download';
-import { AddDownloadRequestInput } from '@/inputs/add-download-request.input';
+import { ScheduleDownloadInput } from '@/inputs/schedule-download.input';
 import { PrismaService } from '@/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { DownloadStatus, HosterAuthenticationMethod } from '@prisma/client';
@@ -8,7 +8,7 @@ import { DownloadStatus, HosterAuthenticationMethod } from '@prisma/client';
 export class DownloadsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async upsertDownloadRequest(downloadRequest: AddDownloadRequestInput) {
+  async upsertDownloadRequest(downloadRequest: ScheduleDownloadInput) {
     const foundDownload = await this.prisma.download.findUnique({
       where: {
         downloadIdByHoster: {
@@ -39,10 +39,10 @@ export class DownloadsRepository {
     }
   }
 
-  private async addDownloadRequest(downloadRequest: AddDownloadRequestInput) {
+  private async addDownloadRequest(downloadRequest: ScheduleDownloadInput) {
     return this.prisma.download.create({
       data: {
-        url: downloadRequest.url,
+        url: downloadRequest.downloadUrl,
         downloadId: downloadRequest.downloadId,
         fingerprint: downloadRequest.fingerprint,
         priority: downloadRequest.priority,

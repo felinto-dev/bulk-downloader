@@ -1,5 +1,5 @@
 import { DOWNLOADS_SORTING_QUEUE } from '@/consts/queues';
-import { AddDownloadRequestInput } from '@/inputs/add-download-request.input';
+import { ScheduleDownloadInput } from '@/inputs/schedule-download.input';
 import { DownloadsService } from '@/services/downloads.service';
 import { Process, Processor } from '@nestjs/bull';
 import { Job } from 'bull';
@@ -9,7 +9,7 @@ export class DownloadsSortingConsumer {
   constructor(private readonly downloadsService: DownloadsService) {}
 
   @Process()
-  async onDownloadRequest(job: Job<AddDownloadRequestInput>) {
+  async onDownloadRequest(job: Job<ScheduleDownloadInput>) {
     await this.downloadsService.upsertDownloadRequest(job.data);
   }
 }

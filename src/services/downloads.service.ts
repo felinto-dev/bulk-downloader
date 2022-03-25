@@ -1,5 +1,5 @@
 import { DOWNLOADS_SORTING_QUEUE } from '@/consts/queues';
-import { AddDownloadRequestInput } from '@/inputs/add-download-request.input';
+import { ScheduleDownloadInput } from '@/inputs/schedule-download.input';
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Logger } from '@nestjs/common';
 import { Queue } from 'bull';
@@ -8,19 +8,19 @@ import { Queue } from 'bull';
 export class DownloadsService {
   constructor(
     @InjectQueue(DOWNLOADS_SORTING_QUEUE)
-    private readonly queue: Queue<AddDownloadRequestInput>,
+    private readonly queue: Queue<ScheduleDownloadInput>,
   ) {}
 
   private readonly logger: Logger = new Logger(DownloadsService.name);
 
-  async upsertDownloadRequest(download: AddDownloadRequestInput) {
+  async upsertDownloadRequest(download: ScheduleDownloadInput) {
     this.logger.verbose(
       `New add download request was received:\n${JSON.stringify(download)}`,
     );
     await this.queue.add(download);
   }
 
-  async upsertBulkDownloadRequest(downloadRequests: AddDownloadRequestInput[]) {
+  async upsertBulkDownloadRequest(downloadRequests: ScheduleDownloadInput[]) {
     this.logger.verbose(
       `A bulk add download request with ${downloadRequests.length} valid items was received!`,
     );

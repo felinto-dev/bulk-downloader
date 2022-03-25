@@ -1,5 +1,5 @@
 import { DOWNLOADS_SORTING_QUEUE } from '@/consts/queues';
-import { AddDownloadRequestInput } from '@/inputs/add-download-request.input';
+import { ScheduleDownloadInput } from '@/inputs/schedule-download.input';
 import { createMock } from '@golevelup/ts-jest';
 import { getQueueToken } from '@nestjs/bull';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -8,7 +8,7 @@ import { DownloadsService } from '../downloads.service';
 
 describe(DownloadsService.name, () => {
   let service: DownloadsService;
-  let queue: Queue<AddDownloadRequestInput>;
+  let queue: Queue<ScheduleDownloadInput>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -16,13 +16,13 @@ describe(DownloadsService.name, () => {
         DownloadsService,
         {
           provide: getQueueToken(DOWNLOADS_SORTING_QUEUE),
-          useValue: createMock<Queue<AddDownloadRequestInput>>(),
+          useValue: createMock<Queue<ScheduleDownloadInput>>(),
         },
       ],
     }).compile();
 
     service = module.get<DownloadsService>(DownloadsService);
-    queue = module.get<Queue<AddDownloadRequestInput>>(
+    queue = module.get<Queue<ScheduleDownloadInput>>(
       getQueueToken(DOWNLOADS_SORTING_QUEUE),
     );
   });
@@ -31,10 +31,10 @@ describe(DownloadsService.name, () => {
     expect(service).toBeDefined();
   });
 
-  const mockedDownloadRequest: AddDownloadRequestInput = {
+  const mockedDownloadRequest: ScheduleDownloadInput = {
     hosterId: '123',
     downloadId: '123',
-    url: 'https://example.com',
+    downloadUrl: 'https://example.com',
     fingerprint: '123',
     priority: 1,
   };

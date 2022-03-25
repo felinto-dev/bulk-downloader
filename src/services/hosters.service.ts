@@ -1,7 +1,7 @@
 import { releaseAtDateFrame } from '@/consts/release-at-date-frame';
 import { HosterReadyToPull } from '@/database/interfaces/hoster-ready-to-pull.interface';
 import { HosterLimits } from '@/dto/hoster-limits.dto';
-import { CreateHosterInput } from '@/inputs/create-hoster.input';
+import { UpsertHosterInput } from '@/inputs/upsert-hoster.input';
 import { HostersRepository } from '@/repositories/hosters.repository';
 import { checkIfNumberExistsInObjectValues } from '@/utils/objects';
 import { Injectable, Logger } from '@nestjs/common';
@@ -16,7 +16,7 @@ export class HostersService {
 
   private readonly logger: Logger = new Logger(HostersService.name);
 
-  async upsertHoster(hoster: CreateHosterInput) {
+  async upsertHoster(hoster: UpsertHosterInput) {
     return this.hostersRepository.upsertHoster(hoster);
   }
 

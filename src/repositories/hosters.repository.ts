@@ -1,5 +1,5 @@
 import { HosterReadyToPull } from '@/database/interfaces/hoster-ready-to-pull.interface';
-import { CreateHosterInput } from '@/inputs/create-hoster.input';
+import { UpsertHosterInput } from '@/inputs/upsert-hoster.input';
 import { PrismaService } from '@/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { DownloadStatus } from '@prisma/client';
@@ -9,7 +9,7 @@ import { DateTime } from 'luxon';
 export class HostersRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  upsertHoster(hoster: CreateHosterInput) {
+  upsertHoster(hoster: UpsertHosterInput) {
     return this.prisma.hoster.upsert({
       where: { id: hoster.id },
       create: {
