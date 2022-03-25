@@ -45,10 +45,10 @@ describe(HosterQuotaService.name, () => {
 
   describe(HosterQuotaService.prototype.countHosterQuotaLeft.name, () => {
     it('should get the min value from differents periods', async () => {
-      mockedHosterLimitsRepository.getHosterLimits.mockResolvedValue(
+      mockedHosterLimitsRepository.getHosterLimits.mockResolvedValueOnce(
         hosterLimits,
       );
-      mockedHosterLimitsRepository.countHosterDownloadsAttempts.mockResolvedValue(
+      mockedHosterLimitsRepository.countHosterDownloadsAttempts.mockResolvedValueOnce(
         downloadsAttempts,
       );
 
@@ -60,10 +60,10 @@ describe(HosterQuotaService.name, () => {
 
   describe(HosterQuotaService.prototype.listHosterQuotas.name, () => {
     it('should get hoster limits and downloads attempts and substract objects to get quota left', async () => {
-      mockedHosterLimitsRepository.getHosterLimits.mockResolvedValue(
+      mockedHosterLimitsRepository.getHosterLimits.mockResolvedValueOnce(
         hosterLimits,
       );
-      mockedHosterLimitsRepository.countHosterDownloadsAttempts.mockResolvedValue(
+      mockedHosterLimitsRepository.countHosterDownloadsAttempts.mockResolvedValueOnce(
         downloadsAttempts,
       );
 
@@ -73,9 +73,9 @@ describe(HosterQuotaService.name, () => {
     });
 
     it('should return null when hoster there is no hoster limits defined', async () => {
-      mockedHosterLimitsRepository.getHosterLimits.mockResolvedValue(null);
+      mockedHosterLimitsRepository.getHosterLimits.mockResolvedValueOnce(null);
 
-      mockedHosterLimitsRepository.countHosterDownloadsAttempts.mockResolvedValue(
+      mockedHosterLimitsRepository.countHosterDownloadsAttempts.mockResolvedValueOnce(
         downloadsAttempts,
       );
 
