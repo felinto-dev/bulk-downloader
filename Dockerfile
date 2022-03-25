@@ -19,6 +19,9 @@ COPY . .
 # build application
 RUN yarn build
 
+# tests MUST pass
+RUN yarn test
+
 # remove development dependencies
 RUN npm prune --production
 
