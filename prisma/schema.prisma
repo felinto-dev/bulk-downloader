@@ -17,7 +17,6 @@ model Hoster {
   concurrency          Int                        @default(0)
   downloads            Download[]
   limits               HosterLimit?
-  downloadsAttempts    DownloadRequestAttempt[]
   releaseAt            DateTime                   @default(now())
 }
 
@@ -42,20 +41,9 @@ model Download {
   fingerprint String?
   Hoster      Hoster                   @relation(fields: [hosterId], references: [id])
   hosterId    String
-  attemps     DownloadRequestAttempt[]
   updatedAt   DateTime                 @updatedAt
 
   @@id(name: "downloadIdByHoster", fields: [downloadId, hosterId])
-}
-
-model DownloadRequestAttempt {
-  id         String   @id @default(uuid())
-  Download   Download @relation(fields: [downloadId, hosterId], references: [downloadId, hosterId])
-  downloadId String
-  logs       String?
-  createdAt  DateTime @default(now())
-  Hoster     Hoster   @relation(fields: [hosterId], references: [id])
-  hosterId   String
 }
 
 enum DownloadStatus {

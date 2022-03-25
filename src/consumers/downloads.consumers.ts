@@ -4,7 +4,6 @@ import { DOWNLOADS_PROCESSING_QUEUE } from '@/consts/queues';
 import { DownloadJobDto } from '@/dto/download.job.dto';
 import { DownloadClientInterface } from '@/interfaces/download-client.interface';
 import { DownloadsOrquestrator } from '@/orchestrators/downloads.orchestrator';
-import { DownloadsRequestsAttemptsRepository } from '@/repositories/downloads-requests-attempts.repository';
 import { DownloadsRepository } from '@/repositories/downloads.repository';
 import {
   OnQueueCompleted,
@@ -20,7 +19,6 @@ import { Job } from 'bull';
 @Processor(DOWNLOADS_PROCESSING_QUEUE)
 export class DownloadsConsumer {
   constructor(
-    private readonly downloadsRequestsAttemptsRepository: DownloadsRequestsAttemptsRepository,
     private readonly downloadsOrquestrator: DownloadsOrquestrator,
     @Inject(DOWNLOAD_CLIENT)
     private readonly downloadClient: DownloadClientInterface,
@@ -31,10 +29,6 @@ export class DownloadsConsumer {
   @Process({ concurrency: GLOBAL_DOWNLOADS_CONCURRENCY })
   async onDownload(job: Job<DownloadJobDto>) {
     const { url, downloadId, hosterId } = job.data;
-    await this.downloadsRequestsAttemptsRepository.registerDownloadAttempt(
-      downloadId,
-      hosterId,
-    );
     await this.downloadsRepository.changeDownloadStatus(
       downloadId,
       hosterId,
