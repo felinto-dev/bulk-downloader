@@ -9,7 +9,6 @@ import { DownloadsRequestsService } from '../downloads-requests.service';
 
 describe(DownloadsRequestsService.name, () => {
   let service: DownloadsRequestsService;
-  let repository: DownloadsRepository;
   let queue: Queue<AddDownloadRequestInput>;
 
   beforeEach(async () => {
@@ -28,7 +27,6 @@ describe(DownloadsRequestsService.name, () => {
     }).compile();
 
     service = module.get<DownloadsRequestsService>(DownloadsRequestsService);
-    repository = module.get<DownloadsRepository>(DownloadsRepository);
     queue = module.get<Queue<AddDownloadRequestInput>>(
       getQueueToken(DOWNLOADS_REQUESTS_QUEUE),
     );
@@ -51,7 +49,7 @@ describe(DownloadsRequestsService.name, () => {
       mockedDownloadRequest,
     );
 
-    expect(repository.upsertDownloadRequest).toHaveBeenCalled();
+    expect(queue.add).toHaveBeenCalled();
     expect(voidFunction).toBeUndefined();
   });
 

@@ -1,6 +1,5 @@
 import { DOWNLOADS_REQUESTS_QUEUE } from '@/consts/queues';
 import { AddDownloadRequestInput } from '@/inputs/add-download-request.input';
-import { DownloadsRepository } from '@/repositories/downloads.repository';
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Logger } from '@nestjs/common';
 import { Queue } from 'bull';
@@ -10,7 +9,6 @@ export class DownloadsRequestsService {
   constructor(
     @InjectQueue(DOWNLOADS_REQUESTS_QUEUE)
     private readonly queue: Queue<AddDownloadRequestInput>,
-    private readonly downloadsRepository: DownloadsRepository,
   ) {}
 
   private readonly logger: Logger = new Logger(DownloadsRequestsService.name);
@@ -19,7 +17,7 @@ export class DownloadsRequestsService {
     this.logger.verbose(
       `New add download request was received:\n${JSON.stringify(download)}`,
     );
-    await this.downloadsRepository.upsertDownloadRequest(download);
+    await this.queue.add(download);
   }
 
   async upsertBulkDownloadRequest(downloadRequests: AddDownloadRequestInput[]) {
