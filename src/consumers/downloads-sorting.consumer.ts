@@ -5,7 +5,7 @@ import { Process, Processor } from '@nestjs/bull';
 import { Job } from 'bull';
 
 @Processor(DOWNLOADS_SORTING_QUEUE)
-export class DownloadsRequestsConsumer {
+export class DownloadsSortingConsumer {
   constructor(private readonly downloadsService: DownloadsService) {}
 
   @Process()

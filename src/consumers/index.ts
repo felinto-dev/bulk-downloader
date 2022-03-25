@@ -1,4 +1,7 @@
-import { DownloadsRequestsConsumer } from './downloads-requests.consumer';
-import { DownloadsConsumer } from './downloads.consumers';
+import { DownloadsProcessingConsumer } from './downloads-processing.consumers';
+import { DownloadsSortingConsumer } from './downloads-sorting.consumer';
 
-export const CONSUMERS = [DownloadsConsumer, DownloadsRequestsConsumer];
+export const CONSUMERS = [
+  DownloadsProcessingConsumer,
+  DownloadsSortingConsumer,
+];

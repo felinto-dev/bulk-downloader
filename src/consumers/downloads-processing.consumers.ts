@@ -17,7 +17,7 @@ import { DownloadStatus } from '@prisma/client';
 import { Job } from 'bull';
 
 @Processor(DOWNLOADS_PROCESSING_QUEUE)
-export class DownloadsConsumer {
+export class DownloadsProcessingConsumer {
   constructor(
     private readonly downloadsOrquestrator: DownloadsOrquestrator,
     @Inject(DOWNLOAD_CLIENT)
