@@ -5,6 +5,7 @@ import { DownloadJobDto } from '@/dto/download.job.dto';
 import { DownloadClientInterface } from '@/interfaces/download-client.interface';
 import { DownloadsOrquestrator } from '@/orchestrators/downloads.orchestrator';
 import { DownloadsRequestsAttemptsRepository } from '@/repositories/downloads-requests-attempts.repository';
+import { DownloadsRepository } from '@/repositories/downloads.repository';
 import {
   OnQueueCompleted,
   OnQueueFailed,
@@ -24,6 +25,7 @@ export class DownloadsConsumer {
     @Inject(DOWNLOAD_CLIENT)
     private readonly downloadClient: DownloadClientInterface,
     private readonly configService: ConfigService,
+    private readonly downloadsRepository: DownloadsRepository,
   ) {}
 
   @Process({ concurrency: GLOBAL_DOWNLOADS_CONCURRENCY })
@@ -32,6 +34,11 @@ export class DownloadsConsumer {
     await this.downloadsRequestsAttemptsRepository.registerDownloadAttempt(
       downloadId,
       hosterId,
+    );
+    await this.downloadsRepository.changeDownloadStatus(
+      downloadId,
+      hosterId,
+      'DOWNLOADING',
     );
     await this.downloadClient.download({
       downloadUrl: url,
