@@ -1,4 +1,4 @@
-export const removeNullObjectValues = (obj: object): object =>
+const removeNullObjectValues = (obj: object): object =>
   Object.entries(obj || {}).reduce(
     (a, [k, v]) => (v === null ? a : ((a[k] = v), a)),
     {},
@@ -20,8 +20,3 @@ export const checkIfNumberExistsInObjectValues = (
   obj: object,
   value: number,
 ): boolean => Object.values(obj || {}).some((element) => element === value);
-
-export const isObjectEmpty = (obj: Record<string, unknown>) =>
-  obj &&
-  Object.keys(obj).length === 0 &&
-  Object.getPrototypeOf(obj) === Object.prototype;
