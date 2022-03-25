@@ -8,10 +8,10 @@ RUN curl -sfL https://install.goreleaser.com/github.com/tj/node-prune.sh | bash 
 
 WORKDIR /usr/src/app
 
-COPY package.json yarn.lock .yarnclean ./
+COPY package.json yarn.lock ./
 
 # install ALL dependencies
-RUN yarn --frozen-lockfile --ignore-optional && yarn autoclean --force
+RUN yarn --frozen-lockfile --ignore-optional
 
 # Copy application
 COPY . .
