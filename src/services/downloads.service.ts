@@ -5,13 +5,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Queue } from 'bull';
 
 @Injectable()
-export class DownloadsRequestsService {
+export class DownloadsService {
   constructor(
     @InjectQueue(DOWNLOADS_SORTING_QUEUE)
     private readonly queue: Queue<AddDownloadRequestInput>,
   ) {}
 
-  private readonly logger: Logger = new Logger(DownloadsRequestsService.name);
+  private readonly logger: Logger = new Logger(DownloadsService.name);
 
   async upsertDownloadRequest(download: AddDownloadRequestInput) {
     this.logger.verbose(

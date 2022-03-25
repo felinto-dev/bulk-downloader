@@ -1,32 +1,27 @@
 import { DOWNLOADS_SORTING_QUEUE } from '@/consts/queues';
 import { AddDownloadRequestInput } from '@/inputs/add-download-request.input';
-import { DownloadsRepository } from '@/repositories/downloads.repository';
 import { createMock } from '@golevelup/ts-jest';
 import { getQueueToken } from '@nestjs/bull';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Queue } from 'bull';
-import { DownloadsRequestsService } from '../downloads-requests.service';
+import { DownloadsService } from '../downloads.service';
 
-describe(DownloadsRequestsService.name, () => {
-  let service: DownloadsRequestsService;
+describe(DownloadsService.name, () => {
+  let service: DownloadsService;
   let queue: Queue<AddDownloadRequestInput>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        DownloadsRequestsService,
+        DownloadsService,
         {
           provide: getQueueToken(DOWNLOADS_SORTING_QUEUE),
           useValue: createMock<Queue<AddDownloadRequestInput>>(),
         },
-        {
-          provide: DownloadsRepository,
-          useValue: createMock<DownloadsRepository>(),
-        },
       ],
     }).compile();
 
-    service = module.get<DownloadsRequestsService>(DownloadsRequestsService);
+    service = module.get<DownloadsService>(DownloadsService);
     queue = module.get<Queue<AddDownloadRequestInput>>(
       getQueueToken(DOWNLOADS_SORTING_QUEUE),
     );

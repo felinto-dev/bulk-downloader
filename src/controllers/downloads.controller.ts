@@ -1,5 +1,5 @@
 import { AddDownloadRequestInput } from '@/inputs/add-download-request.input';
-import { DownloadsRequestsService } from '@/services/downloads-requests.service';
+import { DownloadsService } from '@/services/downloads.service';
 import {
   Body,
   Controller,
@@ -17,15 +17,13 @@ import {
 
 @Controller('downloads')
 export class DownloadsController {
-  constructor(
-    private readonly downloadsRequestsService: DownloadsRequestsService,
-  ) {}
+  constructor(private readonly downloadsService: DownloadsService) {}
 
   @Post()
   async upsertDownloadRequest(
     @Body() downloadRequest: AddDownloadRequestInput,
   ) {
-    return this.downloadsRequestsService.upsertDownloadRequest(downloadRequest);
+    return this.downloadsService.upsertDownloadRequest(downloadRequest);
   }
 
   @Post('bulk')
@@ -34,9 +32,7 @@ export class DownloadsController {
     @Body(new ParseArrayPipe({ items: AddDownloadRequestInput }))
     downloadRequests: AddDownloadRequestInput[],
   ) {
-    await this.downloadsRequestsService.upsertBulkDownloadRequest(
-      downloadRequests,
-    );
+    await this.downloadsService.upsertBulkDownloadRequest(downloadRequests);
   }
 
   @MessagePattern({ cmd: 'schedule-downloads-requests' })
@@ -45,9 +41,7 @@ export class DownloadsController {
     downloadsRequests: AddDownloadRequestInput[],
     @Ctx() context: RmqContext,
   ) {
-    await this.downloadsRequestsService.upsertBulkDownloadRequest(
-      downloadsRequests,
-    );
+    await this.downloadsService.upsertBulkDownloadRequest(downloadsRequests);
 
     const channel = context.getChannelRef();
     const originalMsg = context.getMessage();
