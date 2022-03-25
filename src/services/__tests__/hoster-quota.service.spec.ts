@@ -1,5 +1,5 @@
 import { HosterLimits } from '@/dto/hoster-limits.dto';
-import { HostersLimitsRepository } from '@/repositories/hosters-limit.repository';
+import { HosterQuotaRepository } from '@/repositories/hoster-quota.repository';
 import { createMock } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { HosterQuotasService } from '../hoster-quotas.service';
@@ -7,14 +7,14 @@ import { HosterQuotasService } from '../hoster-quotas.service';
 describe(HosterQuotasService.name, () => {
   let service: HosterQuotasService;
 
-  const mockedHosterLimitsRepository = createMock<HostersLimitsRepository>();
+  const mockedHosterLimitsRepository = createMock<HosterQuotaRepository>();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         HosterQuotasService,
         {
-          provide: HostersLimitsRepository,
+          provide: HosterQuotaRepository,
           useValue: mockedHosterLimitsRepository,
         },
       ],

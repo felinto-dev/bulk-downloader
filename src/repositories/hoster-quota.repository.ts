@@ -5,11 +5,11 @@ import { Injectable } from '@nestjs/common';
 import { PrismaPromise } from '@prisma/client';
 
 @Injectable()
-export class HostersLimitsRepository {
+export class HosterQuotaRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async getQuotasByHosterId(hosterId: string) {
-    return this.prisma.hosterLimit.findUnique({
+    return this.prisma.hosterQuota.findUnique({
       where: { hosterId },
       select: { hourly: true, daily: true, monthly: true },
     });
@@ -29,11 +29,12 @@ export class HostersLimitsRepository {
   }
 
   async countUsedDownloadsQuota(hosterId: string): Promise<HosterLimits> {
-    const [monthly, daily, hourly] = await this.prisma.$transaction([
+    const [monthly, daily, hourly] = await Promise.all([
       this.countUsedDownloadsQuotaByPeriod(hosterId, startOfMonth()),
       this.countUsedDownloadsQuotaByPeriod(hosterId, startOfDay()),
       this.countUsedDownloadsQuotaByPeriod(hosterId, startOfHour()),
     ]);
+
     return { monthly, daily, hourly };
   }
 }

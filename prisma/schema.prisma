@@ -16,7 +16,7 @@ model Hoster {
   authenticationMethod HosterAuthenticationMethod
   concurrency          Int                        @default(0)
   downloads            Download[]
-  limits               HosterLimit?
+  limits               HosterQuota?
   releaseAt            DateTime                   @default(now())
 }
 
@@ -24,7 +24,7 @@ enum HosterAuthenticationMethod {
   FREE
 }
 
-model HosterLimit {
+model HosterQuota {
   hourly    Int?
   daily     Int?
   monthly   Int?

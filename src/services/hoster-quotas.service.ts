@@ -1,13 +1,11 @@
 import { HosterLimits } from '@/dto/hoster-limits.dto';
-import { HostersLimitsRepository } from '@/repositories/hosters-limit.repository';
+import { HosterQuotaRepository } from '@/repositories/hoster-quota.repository';
 import { getMinValueFromObjectValues, subtractObjects } from '@/utils/objects';
 import { Injectable, Logger } from '@nestjs/common';
 
 @Injectable()
 export class HosterQuotasService {
-  constructor(
-    private readonly hosterQuotasRepository: HostersLimitsRepository,
-  ) {}
+  constructor(private readonly hosterQuotasRepository: HosterQuotaRepository) {}
 
   private readonly logger: Logger = new Logger(HosterQuotasService.name);
 
