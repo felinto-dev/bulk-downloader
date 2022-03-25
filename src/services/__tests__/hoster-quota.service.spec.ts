@@ -2,17 +2,17 @@ import { HosterLimits } from '@/dto/hoster-limits.dto';
 import { HostersLimitsRepository } from '@/repositories/hosters-limit.repository';
 import { createMock } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
-import { HosterQuotaService } from '../hoster-quota.service';
+import { HosterQuotasService } from '../hoster-quotas.service';
 
-describe(HosterQuotaService.name, () => {
-  let service: HosterQuotaService;
+describe(HosterQuotasService.name, () => {
+  let service: HosterQuotasService;
 
   const mockedHosterLimitsRepository = createMock<HostersLimitsRepository>();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        HosterQuotaService,
+        HosterQuotasService,
         {
           provide: HostersLimitsRepository,
           useValue: mockedHosterLimitsRepository,
@@ -20,7 +20,7 @@ describe(HosterQuotaService.name, () => {
       ],
     }).compile();
 
-    service = module.get<HosterQuotaService>(HosterQuotaService);
+    service = module.get<HosterQuotasService>(HosterQuotasService);
   });
 
   it('should be defined', () => {
@@ -43,12 +43,12 @@ describe(HosterQuotaService.name, () => {
     hourly: 70,
   };
 
-  describe(HosterQuotaService.prototype.countHosterQuotaLeft.name, () => {
+  describe(HosterQuotasService.prototype.countHosterQuotaLeft.name, () => {
     it('should get the min value from differents periods', async () => {
-      mockedHosterLimitsRepository.getHosterLimits.mockResolvedValueOnce(
+      mockedHosterLimitsRepository.getQuotasByHosterId.mockResolvedValueOnce(
         hosterLimits,
       );
-      mockedHosterLimitsRepository.countHosterDownloadsAttempts.mockResolvedValueOnce(
+      mockedHosterLimitsRepository.countUsedDownloadsQuota.mockResolvedValueOnce(
         downloadsAttempts,
       );
 
@@ -58,28 +58,30 @@ describe(HosterQuotaService.name, () => {
     });
   });
 
-  describe(HosterQuotaService.prototype.listHosterQuotas.name, () => {
+  describe(HosterQuotasService.prototype.listHosterQuotasLeft.name, () => {
     it('should get hoster limits and downloads attempts and substract objects to get quota left', async () => {
-      mockedHosterLimitsRepository.getHosterLimits.mockResolvedValueOnce(
+      mockedHosterLimitsRepository.getQuotasByHosterId.mockResolvedValueOnce(
         hosterLimits,
       );
-      mockedHosterLimitsRepository.countHosterDownloadsAttempts.mockResolvedValueOnce(
+      mockedHosterLimitsRepository.countUsedDownloadsQuota.mockResolvedValueOnce(
         downloadsAttempts,
       );
 
-      const outcome = await service.listHosterQuotas('123');
+      const outcome = await service.listHosterQuotasLeft('123');
 
       expect(outcome).toEqual(expectedOutcome);
     });
 
     it('should return null when hoster there is no hoster limits defined', async () => {
-      mockedHosterLimitsRepository.getHosterLimits.mockResolvedValueOnce(null);
+      mockedHosterLimitsRepository.getQuotasByHosterId.mockResolvedValueOnce(
+        null,
+      );
 
-      mockedHosterLimitsRepository.countHosterDownloadsAttempts.mockResolvedValueOnce(
+      mockedHosterLimitsRepository.countUsedDownloadsQuota.mockResolvedValueOnce(
         downloadsAttempts,
       );
 
-      const outcome = await service.listHosterQuotas('123');
+      const outcome = await service.listHosterQuotasLeft('123');
 
       expect(outcome).toBeNull();
     });

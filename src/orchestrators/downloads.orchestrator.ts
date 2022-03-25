@@ -3,7 +3,7 @@ import { DOWNLOADS_PROCESSING_QUEUE } from '@/consts/queues';
 import { PendingDownload } from '@/database/interfaces/pending-download';
 import { DownloadJobDto } from '@/dto/download.job.dto';
 import { DownloadsRepository } from '@/repositories/downloads.repository';
-import { HosterQuotaService } from '@/services/hoster-quota.service';
+import { HosterQuotasService } from '@/services/hoster-quotas.service';
 import { HostersService } from '@/services/hosters.service';
 import { replaceNegativeValueWithZero } from '@/utils/math';
 import { InjectQueue } from '@nestjs/bull';
@@ -18,7 +18,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
     private readonly queue: Queue<DownloadJobDto>,
     private readonly downloadsRepository: DownloadsRepository,
     private readonly hostersService: HostersService,
-    private readonly hosterQuotaService: HosterQuotaService,
+    private readonly hosterQuotaService: HosterQuotasService,
   ) {}
 
   onModuleInit() {

@@ -8,14 +8,14 @@ import { PrismaPromise } from '@prisma/client';
 export class HostersLimitsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getHosterLimits(hosterId: string) {
+  async getQuotasByHosterId(hosterId: string) {
     return this.prisma.hosterLimit.findUnique({
       where: { hosterId },
       select: { hourly: true, daily: true, monthly: true },
     });
   }
 
-  countHosterDownloadsAttemptsByPeriod(
+  countUsedDownloadsQuotaByPeriod(
     hosterId: string,
     date: string,
   ): PrismaPromise<number> {
@@ -28,11 +28,11 @@ export class HostersLimitsRepository {
     });
   }
 
-  async countHosterDownloadsAttempts(hosterId: string): Promise<HosterLimits> {
+  async countUsedDownloadsQuota(hosterId: string): Promise<HosterLimits> {
     const [monthly, daily, hourly] = await this.prisma.$transaction([
-      this.countHosterDownloadsAttemptsByPeriod(hosterId, startOfMonth()),
-      this.countHosterDownloadsAttemptsByPeriod(hosterId, startOfDay()),
-      this.countHosterDownloadsAttemptsByPeriod(hosterId, startOfHour()),
+      this.countUsedDownloadsQuotaByPeriod(hosterId, startOfMonth()),
+      this.countUsedDownloadsQuotaByPeriod(hosterId, startOfDay()),
+      this.countUsedDownloadsQuotaByPeriod(hosterId, startOfHour()),
     ]);
     return { monthly, daily, hourly };
   }
