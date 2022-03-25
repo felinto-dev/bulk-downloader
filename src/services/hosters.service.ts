@@ -5,13 +5,13 @@ import { UpsertHosterInput } from '@/inputs/upsert-hoster.input';
 import { HostersRepository } from '@/repositories/hosters.repository';
 import { checkIfNumberExistsInObjectValues } from '@/utils/objects';
 import { Injectable, Logger } from '@nestjs/common';
-import { HostersLimitsService } from './hosters-limits.service';
+import { HosterQuotaService } from './hoster-quota.service';
 
 @Injectable()
 export class HostersService {
   constructor(
     private readonly hostersRepository: HostersRepository,
-    private readonly hosterLimitsService: HostersLimitsService,
+    private readonly hosterQuotaService: HosterQuotaService,
   ) {}
 
   private readonly logger: Logger = new Logger(HostersService.name);
@@ -31,8 +31,9 @@ export class HostersService {
       return null;
     }
 
-    const hosterLimits =
-      await this.hosterLimitsService.listHosterLimitsQuotaLeft(hoster.id);
+    const hosterLimits = await this.hosterQuotaService.listHosterQuotas(
+      hoster.id,
+    );
 
     const releaseAt = this.calculateReleaseAtDateFrame(hosterLimits);
     await this.hostersRepository.updateReleaseAt(hoster.id, releaseAt);

@@ -4,21 +4,21 @@ import { getMinValueFromObjectValues, subtractObjects } from '@/utils/objects';
 import { Injectable, Logger } from '@nestjs/common';
 
 @Injectable()
-export class HostersLimitsService {
+export class HosterQuotaService {
   constructor(
     private readonly hostersLimitsRepository: HostersLimitsRepository,
   ) {}
 
-  private readonly logger: Logger = new Logger(HostersLimitsService.name);
+  private readonly logger: Logger = new Logger(HosterQuotaService.name);
 
-  async countHosterLimitsQuotaLeft(hosterId: string) {
-    const hosterLimits = await this.listHosterLimitsQuotaLeft(hosterId);
+  async countHosterQuotaLeft(hosterId: string) {
+    const hosterLimits = await this.listHosterQuotas(hosterId);
     this.logger.verbose(`Listing hoster limits for ${hosterId}`);
     this.logger.verbose(hosterLimits);
     return getMinValueFromObjectValues(hosterLimits);
   }
 
-  async listHosterLimitsQuotaLeft(hosterId: string): Promise<HosterLimits> {
+  async listHosterQuotas(hosterId: string): Promise<HosterLimits> {
     const hosterLimits = await this.hostersLimitsRepository.getHosterLimits(
       hosterId,
     );

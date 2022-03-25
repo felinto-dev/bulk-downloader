@@ -1,9 +1,5 @@
 import { DownloadsService } from './downloads.service';
-import { HostersLimitsService } from './hosters-limits.service';
+import { HosterQuotaService } from './hoster-quota.service';
 import { HostersService } from './hosters.service';
 
-export const SERVICES = [
-  HostersService,
-  HostersLimitsService,
-  DownloadsService,
-];
+export const SERVICES = [HostersService, HosterQuotaService, DownloadsService];

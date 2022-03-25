@@ -3,7 +3,7 @@ import { DOWNLOADS_PROCESSING_QUEUE } from '@/consts/queues';
 import { PendingDownload } from '@/database/interfaces/pending-download';
 import { DownloadJobDto } from '@/dto/download.job.dto';
 import { DownloadsRepository } from '@/repositories/downloads.repository';
-import { HostersLimitsService } from '@/services/hosters-limits.service';
+import { HosterQuotaService } from '@/services/hoster-quota.service';
 import { HostersService } from '@/services/hosters.service';
 import { replaceNegativeValueWithZero } from '@/utils/math';
 import { InjectQueue } from '@nestjs/bull';
@@ -18,7 +18,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
     private readonly queue: Queue<DownloadJobDto>,
     private readonly downloadsRepository: DownloadsRepository,
     private readonly hostersService: HostersService,
-    private readonly hostersLimitsService: HostersLimitsService,
+    private readonly hosterQuotaService: HosterQuotaService,
   ) {}
 
   onModuleInit() {
@@ -50,7 +50,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
   async pullDownloadsByHosterId(hosterId: string, concurrency = 1) {
     const downloadsConcurrencyLimit = replaceNegativeValueWithZero(
       Math.min(
-        await this.hostersLimitsService.countHosterLimitsQuotaLeft(hosterId),
+        await this.hosterQuotaService.countHosterQuotaLeft(hosterId),
         concurrency,
       ),
     );
