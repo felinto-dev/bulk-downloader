@@ -9,7 +9,7 @@ export class HostersLimitsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async getHosterLimits(hosterId: string) {
-    return this.prisma.hosterLimits.findUnique({
+    return this.prisma.hosterLimit.findUnique({
       where: { hosterId },
       select: { hourly: true, daily: true, monthly: true },
     });
