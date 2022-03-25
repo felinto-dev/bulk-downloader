@@ -1,4 +1,4 @@
-import { DOWNLOADS_REQUESTS_QUEUE } from '@/consts/queues';
+import { DOWNLOADS_SORTING_QUEUE } from '@/consts/queues';
 import { AddDownloadRequestInput } from '@/inputs/add-download-request.input';
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Logger } from '@nestjs/common';
@@ -7,7 +7,7 @@ import { Queue } from 'bull';
 @Injectable()
 export class DownloadsRequestsService {
   constructor(
-    @InjectQueue(DOWNLOADS_REQUESTS_QUEUE)
+    @InjectQueue(DOWNLOADS_SORTING_QUEUE)
     private readonly queue: Queue<AddDownloadRequestInput>,
   ) {}
 

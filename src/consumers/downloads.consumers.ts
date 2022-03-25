@@ -1,6 +1,6 @@
 import { DOWNLOAD_CLIENT } from '@/adapters/tokens';
 import { GLOBAL_DOWNLOADS_CONCURRENCY } from '@/consts/app';
-import { DOWNLOADS_QUEUE } from '@/consts/queues';
+import { DOWNLOADS_PROCESSING_QUEUE } from '@/consts/queues';
 import { DownloadJobDto } from '@/dto/download.job.dto';
 import { DownloadClientInterface } from '@/interfaces/download-client.interface';
 import { DownloadsOrquestrator } from '@/orchestrators/downloads.orchestrator';
@@ -16,7 +16,7 @@ import { ConfigService } from '@nestjs/config';
 import { DownloadStatus } from '@prisma/client';
 import { Job } from 'bull';
 
-@Processor(DOWNLOADS_QUEUE)
+@Processor(DOWNLOADS_PROCESSING_QUEUE)
 export class DownloadsConsumer {
   constructor(
     private readonly downloadsRequestsAttemptsRepository: DownloadsRequestsAttemptsRepository,

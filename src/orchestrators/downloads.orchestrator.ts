@@ -1,5 +1,5 @@
 import { GLOBAL_DOWNLOADS_CONCURRENCY } from '@/consts/app';
-import { DOWNLOADS_QUEUE } from '@/consts/queues';
+import { DOWNLOADS_PROCESSING_QUEUE } from '@/consts/queues';
 import { PendingDownload } from '@/database/interfaces/pending-download';
 import { DownloadJobDto } from '@/dto/download.job.dto';
 import { DownloadsRepository } from '@/repositories/downloads.repository';
@@ -14,7 +14,8 @@ import { Job, Queue } from 'bull';
 @Injectable()
 export class DownloadsOrquestrator implements OnModuleInit {
   constructor(
-    @InjectQueue(DOWNLOADS_QUEUE) private readonly queue: Queue<DownloadJobDto>,
+    @InjectQueue(DOWNLOADS_PROCESSING_QUEUE)
+    private readonly queue: Queue<DownloadJobDto>,
     private readonly downloadsRepository: DownloadsRepository,
     private readonly hostersService: HostersService,
     private readonly hostersLimitsService: HostersLimitsService,

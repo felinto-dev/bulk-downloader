@@ -1,4 +1,4 @@
-import { DOWNLOADS_REQUESTS_QUEUE } from '@/consts/queues';
+import { DOWNLOADS_SORTING_QUEUE } from '@/consts/queues';
 import { AddDownloadRequestInput } from '@/inputs/add-download-request.input';
 import { DownloadsRepository } from '@/repositories/downloads.repository';
 import { createMock } from '@golevelup/ts-jest';
@@ -16,7 +16,7 @@ describe(DownloadsRequestsService.name, () => {
       providers: [
         DownloadsRequestsService,
         {
-          provide: getQueueToken(DOWNLOADS_REQUESTS_QUEUE),
+          provide: getQueueToken(DOWNLOADS_SORTING_QUEUE),
           useValue: createMock<Queue<AddDownloadRequestInput>>(),
         },
         {
@@ -28,7 +28,7 @@ describe(DownloadsRequestsService.name, () => {
 
     service = module.get<DownloadsRequestsService>(DownloadsRequestsService);
     queue = module.get<Queue<AddDownloadRequestInput>>(
-      getQueueToken(DOWNLOADS_REQUESTS_QUEUE),
+      getQueueToken(DOWNLOADS_SORTING_QUEUE),
     );
   });
 

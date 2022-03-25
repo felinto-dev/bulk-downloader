@@ -1,10 +1,10 @@
-import { DOWNLOADS_REQUESTS_QUEUE } from '@/consts/queues';
+import { DOWNLOADS_SORTING_QUEUE } from '@/consts/queues';
 import { AddDownloadRequestInput } from '@/inputs/add-download-request.input';
 import { DownloadsRequestsService } from '@/services/downloads-requests.service';
 import { Process, Processor } from '@nestjs/bull';
 import { Job } from 'bull';
 
-@Processor(DOWNLOADS_REQUESTS_QUEUE)
+@Processor(DOWNLOADS_SORTING_QUEUE)
 export class DownloadsRequestsConsumer {
   constructor(
     private readonly downloadsRequestsService: DownloadsRequestsService,

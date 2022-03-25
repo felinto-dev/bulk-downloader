@@ -1,2 +1,2 @@
-export const DOWNLOADS_QUEUE = 'downloads';
-export const DOWNLOADS_REQUESTS_QUEUE = 'downloads_requests';
+export const DOWNLOADS_PROCESSING_QUEUE = 'downloads/processing';
+export const DOWNLOADS_SORTING_QUEUE = 'downloads/sorting';
