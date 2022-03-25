@@ -12,7 +12,6 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { ADAPTERS } from './adapters';
 import { ORCHESTRATORS } from './orchestrators';
 import { SCHEDULES } from './schedulers';
-import { VALIDATORS } from './validators';
 
 @Module({
   imports: [
@@ -28,7 +27,6 @@ import { VALIDATORS } from './validators';
     ...CONSUMERS,
     ...SERVICES,
     ...REPOSITORIES,
-    ...VALIDATORS,
     ...ORCHESTRATORS,
     ...SCHEDULES,
   ],
