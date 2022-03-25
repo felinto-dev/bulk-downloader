@@ -35,7 +35,7 @@ export class DownloadsController {
     await this.downloadsService.upsertBulkDownloadRequest(downloadRequests);
   }
 
-  @MessagePattern({ cmd: 'schedule-downloads-requests' })
+  @MessagePattern({ cmd: 'schedule-bulk-downloads' })
   async addBulkDownloadRequestByRMQ(
     @Payload(new ParseArrayPipe({ items: AddDownloadRequestInput }))
     downloadsRequests: AddDownloadRequestInput[],
