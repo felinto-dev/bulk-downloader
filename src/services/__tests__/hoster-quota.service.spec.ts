@@ -27,18 +27,24 @@ describe(HosterQuotaService.name, () => {
     expect(service).toBeDefined();
   });
 
+  const hosterLimits: HosterLimits = {
+    monthly: 100,
+    daily: 100,
+    hourly: 100,
+  };
+  const downloadsAttempts: HosterLimits = {
+    monthly: 10,
+    daily: 20,
+    hourly: 30,
+  };
+  const expectedOutcome: HosterLimits = {
+    monthly: 90,
+    daily: 80,
+    hourly: 70,
+  };
+
   describe(HosterQuotaService.prototype.countHosterQuotaLeft.name, () => {
     it('should get the min value from differents periods', async () => {
-      const hosterLimits: HosterLimits = {
-        monthly: 100,
-        daily: 100,
-        hourly: 100,
-      };
-      const downloadsAttempts: HosterLimits = {
-        monthly: 10,
-        daily: 20,
-        hourly: 30,
-      };
       mockedHosterLimitsRepository.getHosterLimits.mockResolvedValue(
         hosterLimits,
       );
@@ -54,21 +60,6 @@ describe(HosterQuotaService.name, () => {
 
   describe(HosterQuotaService.prototype.listHosterQuotas.name, () => {
     it('should get hoster limits and downloads attempts and substract objects to get quota left', async () => {
-      const hosterLimits: HosterLimits = {
-        monthly: 100,
-        daily: 100,
-        hourly: 100,
-      };
-      const downloadsAttempts: HosterLimits = {
-        monthly: 10,
-        daily: 10,
-        hourly: 10,
-      };
-      const expectedOutcome: HosterLimits = {
-        monthly: 90,
-        daily: 90,
-        hourly: 90,
-      };
       mockedHosterLimitsRepository.getHosterLimits.mockResolvedValue(
         hosterLimits,
       );
@@ -82,11 +73,6 @@ describe(HosterQuotaService.name, () => {
     });
 
     it('should return null when hoster there is no hoster limits defined', async () => {
-      const downloadsAttempts: HosterLimits = {
-        monthly: 10,
-        daily: 10,
-        hourly: 10,
-      };
       mockedHosterLimitsRepository.getHosterLimits.mockResolvedValue(null);
 
       mockedHosterLimitsRepository.countHosterDownloadsAttempts.mockResolvedValue(
