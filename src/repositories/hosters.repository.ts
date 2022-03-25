@@ -1,4 +1,3 @@
-import { GLOBAL_DOWNLOADS_CONCURRENCY } from '@/consts/app';
 import { HosterReadyToPull } from '@/database/interfaces/hoster-ready-to-pull.interface';
 import { CreateHosterInput } from '@/inputs/create-hoster.input';
 import { PrismaService } from '@/prisma.service';
@@ -41,41 +40,6 @@ export class HostersRepository {
       where: { id: hosterId },
       select: { concurrency: true },
       rejectOnNotFound: true,
-    });
-  }
-
-  findProblematicHosters() {
-    return this.prisma.hoster.findMany({
-      where: {
-        downloads: {
-          some: { status: 'FAILED' },
-        },
-      },
-      select: {
-        id: true,
-        name: true,
-        concurrency: true,
-        _count: true,
-        downloads: {
-          where: {
-            status: { in: ['PENDING', 'FAILED'] },
-          },
-          take: GLOBAL_DOWNLOADS_CONCURRENCY,
-        },
-        downloadsAttempts: {
-          where: {
-            logs: { not: null },
-          },
-        },
-        limits: {
-          select: {
-            hourly: true,
-            daily: true,
-            monthly: true,
-          },
-        },
-      },
-      orderBy: [{ downloadsAttempts: { _count: 'desc' } }],
     });
   }
 
