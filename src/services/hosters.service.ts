@@ -27,23 +27,24 @@ export class HostersService {
   async findHosterReadyToPull(): Promise<HosterReadyToPull> {
     const hoster = await this.hostersRepository.findHosterToPull();
 
-    if (!hoster) {
-      return null;
+    if (hoster) {
+      const hosterLimits = await this.hosterQuotaService.listHosterQuotasLeft(
+        hoster.id,
+      );
+
+      const shouldReleaseAt = this.calculateReleaseAtDateFrame(hosterLimits);
+      await this.hostersRepository.updateReleaseAt(hoster.id, shouldReleaseAt);
+      this.logger.verbose(
+        `Hoster ${hoster.id} will be released at ${shouldReleaseAt}`,
+      );
+
+      return this.isTheHosterLimitQuotaEmpty(hosterLimits)
+        ? this.findHosterReadyToPull()
+        : hoster;
     }
 
-    const hosterLimits = await this.hosterQuotaService.listHosterQuotasLeft(
-      hoster.id,
-    );
-
-    const releaseAt = this.calculateReleaseAtDateFrame(hosterLimits);
-    await this.hostersRepository.updateReleaseAt(hoster.id, releaseAt);
-    this.logger.verbose(
-      `${hoster.id} will be released at ${releaseAt.toISOString()} for pull`,
-    );
-
-    return this.isTheHosterLimitQuotaEmpty(hosterLimits)
-      ? this.findHosterReadyToPull()
-      : hoster;
+    this.logger.verbose('No hoster ready to pull found');
+    return null;
   }
 
   private calculateReleaseAtDateFrame(hosterLimits: HosterLimits): Date {
