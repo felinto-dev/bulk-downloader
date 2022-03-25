@@ -43,6 +43,7 @@ model Download {
   Hoster      Hoster                   @relation(fields: [hosterId], references: [id])
   hosterId    String
   attemps     DownloadRequestAttempt[]
+  updatedAt   DateTime                 @updatedAt
 
   @@id(name: "downloadIdByHoster", fields: [downloadId, hosterId])
 }

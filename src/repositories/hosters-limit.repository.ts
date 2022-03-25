@@ -19,12 +19,11 @@ export class HostersLimitsRepository {
     hosterId: string,
     date: string,
   ): PrismaPromise<number> {
-    return this.prisma.downloadRequestAttempt.count({
+    return this.prisma.download.count({
       where: {
-        hosterId,
-        createdAt: {
-          gte: date,
-        },
+        status: { in: ['DOWNLOADING', 'FAILED', 'SUCCESS'] },
+        Hoster: { id: hosterId },
+        updatedAt: { gte: date },
       },
     });
   }

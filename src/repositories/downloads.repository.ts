@@ -76,7 +76,7 @@ export class DownloadsRepository {
   ): Promise<PendingDownload[]> {
     return this.prisma.download.findMany({
       where: { hosterId: id, status: 'PENDING' },
-      orderBy: [{ priority: 'desc' }, { attemps: { _count: 'asc' } }],
+      orderBy: [{ priority: 'desc' }],
       take: limit,
       select: { url: true, downloadId: true, hosterId: true },
     });
