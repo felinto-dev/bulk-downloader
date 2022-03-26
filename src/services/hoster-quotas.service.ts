@@ -16,9 +16,12 @@ export class HosterQuotasService {
 
   async countHosterQuotaLeft(hosterId: string) {
     const hosterLimits = await this.listHosterQuotasLeft(hosterId);
-    this.logger.verbose(`Listing hoster limits for ${hosterId}`);
-    this.logger.verbose(hosterLimits);
-    return getMinValueFromObjectValues(hosterLimits);
+    const quotaLeft = getMinValueFromObjectValues(hosterLimits);
+    this.logger.verbose(
+      `Hoster ${hosterId} has ${quotaLeft} downloads quota left`,
+    );
+    // TODO: if the quota left is 0, the hoster should be released at the next date frame
+    return quotaLeft;
   }
 
   async listHosterQuotasUsed(hosterId: string): Promise<HosterLimits> {
