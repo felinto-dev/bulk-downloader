@@ -43,6 +43,8 @@ export class DownloadsOrquestrator implements OnModuleInit {
       await this.pullDownloadsByHosterId(hoster.id, hoster.concurrency);
       return this.pullDownloads();
     }
+
+    this.logger.verbose('No hoster ready to pull found');
   }
 
   async pullDownloadsByHosterId(hosterId: string, concurrency = 1) {
