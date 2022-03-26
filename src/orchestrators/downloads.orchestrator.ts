@@ -32,9 +32,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
   }
 
   async pullDownloads() {
-    this.logger.verbose(
-      `Starting pull downloads at ${new Date().toLocaleTimeString()}`,
-    );
+    this.logger.verbose('Pulling downloads...');
     const hoster = await this.hostersService.findHosterReadyToPull();
 
     if (hoster) {
