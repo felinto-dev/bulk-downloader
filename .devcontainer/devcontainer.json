@@ -17,6 +17,7 @@
 		"kisstkondoros.vscode-codemetrics",
 		"Gruntfuggly.todo-tree",
 		"pflannery.vscode-versionlens",
+		"hediet.vscode-drawio",
 	],
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// This can be used to network with other containers or with the host.
