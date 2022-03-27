@@ -18,6 +18,10 @@ Solution 3: Store in memory the used quota by hoster and based on events trigger
 		1. Copy on bootstrap all the hosters and their limit quota.
 		2. Calculate the used quota by hoster based on made downloads.
 
+	Services:
+		- Find a hoster to pull: Find a hoster that has download quota left and release at date frame is equal or less than the current date.
+		- Measure the used quota by hoster: Calculate the used quota by hoster based on made downloads.
+
 	Listen for events:
 		On download made: Recalculate the used quota by hoster.
 		On hoster has no quota left: Increment the release at date frame by the period whom run out of the quota.
@@ -30,3 +34,5 @@ Solution 3: Store in memory the used quota by hoster and based on events trigger
 		- It is easy for testing.
 	Cons:
 		- Confuse to implement because of the complexity of the data structure and is based on events.
+
+Solution 4: Checks the hoster's quota balance on each request and increment the release at date frame if the hoster has no quota left to avoid processing the same hoster twice.
