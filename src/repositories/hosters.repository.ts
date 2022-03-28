@@ -16,14 +16,14 @@ export class HostersRepository {
         hosterId: hoster.id,
         hosterName: hoster.name,
         authenticationMethod: hoster.credentialsStrategy,
-        concurrency: hoster.concurrencyConnections,
+        maxConcurrentDownloads: hoster.concurrencyConnections,
         limits: {
           create: hoster.limits,
         },
       },
       update: {
         hosterName: hoster.name,
-        concurrency: hoster.concurrencyConnections,
+        maxConcurrentDownloads: hoster.concurrencyConnections,
         limits: {
           upsert: {
             create: hoster.limits,
@@ -57,15 +57,17 @@ export class HostersRepository {
   findHosterReadyToPullDownloads(): Promise<HosterReadyToPull> {
     return this.prisma.hoster.findFirst({
       where: {
-        concurrency: { gte: 1 },
+        maxConcurrentDownloads: { gte: 1 },
         downloads: {
           some: { status: DownloadStatus.PENDING },
           none: { status: DownloadStatus.DOWNLOADING },
         },
         quotaRenewsAt: { lt: DateTime.now().toISO() },
       },
-      orderBy: [{ concurrency: 'asc', downloads: { _count: 'asc' } }],
-      select: { hosterId: true, concurrency: true },
+      orderBy: [
+        { maxConcurrentDownloads: 'asc', downloads: { _count: 'asc' } },
+      ],
+      select: { hosterId: true, maxConcurrentDownloads: true },
     });
   }
 

@@ -5,7 +5,7 @@ export const hosters: Prisma.HosterCreateInput[] = [
     hosterId: 'gplzone',
     hosterName: 'GPLZone',
     authenticationMethod: HosterAuthenticationMethod.FREE,
-    concurrency: 1,
+    maxConcurrentDownloads: 1,
     limits: {
       create: {
         daily: 50,
@@ -16,7 +16,7 @@ export const hosters: Prisma.HosterCreateInput[] = [
     hosterId: 'file-examples.com',
     hosterName: 'File-Examples.com',
     authenticationMethod: HosterAuthenticationMethod.FREE,
-    concurrency: 1,
+    maxConcurrentDownloads: 1,
     limits: {
       create: {
         hourly: 1,
@@ -28,7 +28,7 @@ export const hosters: Prisma.HosterCreateInput[] = [
     hosterId: 'file-samples.com',
     hosterName: 'File Samples',
     authenticationMethod: HosterAuthenticationMethod.FREE,
-    concurrency: 1,
+    maxConcurrentDownloads: 1,
     limits: {
       create: {
         hourly: 10,
@@ -40,6 +40,6 @@ export const hosters: Prisma.HosterCreateInput[] = [
     hosterId: 'thinkbroadband.com',
     hosterName: 'Think broad band',
     authenticationMethod: HosterAuthenticationMethod.FREE,
-    concurrency: 1,
+    maxConcurrentDownloads: 1,
   },
 ];

@@ -36,11 +36,14 @@ export class DownloadsOrquestrator implements OnModuleInit {
     const hoster = await this.hostersService.findHosterReadyToPull();
 
     if (hoster) {
-      hoster.concurrency = Math.min(
-        hoster.concurrency,
+      hoster.maxConcurrentDownloads = Math.min(
+        hoster.maxConcurrentDownloads,
         await this.queueActiveDownloadsQuotaLeft(),
       );
-      await this.pullDownloadsByHosterId(hoster.hosterId, hoster.concurrency);
+      await this.pullDownloadsByHosterId(
+        hoster.hosterId,
+        hoster.maxConcurrentDownloads,
+      );
       return this.pullDownloads();
     }
 
