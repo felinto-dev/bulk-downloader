@@ -50,7 +50,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
   async pullDownloadsByHosterId(hosterId: string, concurrency = 1) {
     const downloadsConcurrencyLimit = replaceNegativeValueWithZero(
       Math.min(
-        await this.hosterQuotaService.countHosterQuotaLeft(hosterId),
+        await this.hosterQuotaService.getQuotaLeft(hosterId),
         concurrency,
       ),
     );

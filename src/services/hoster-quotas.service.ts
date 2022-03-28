@@ -9,19 +9,19 @@ export class HosterQuotasService {
 
   private readonly logger: Logger = new Logger(HosterQuotasService.name);
 
-  async listQuotasByHosterId(hosterId: string): Promise<HosterLimits> {
-    this.logger.log(`Getting quotas for hoster ${hosterId}`);
-    return this.hosterQuotasRepository.getQuotasByHosterId(hosterId);
-  }
-
-  async countHosterQuotaLeft(hosterId: string) {
-    const hosterLimits = await this.listHosterQuotasLeft(hosterId);
-    const quotaLeft = getMinValueFromObjectValues(hosterLimits);
+  async getQuotaLeft(hosterId: string): Promise<number> {
+    const quotaLeft = getMinValueFromObjectValues(
+      await this.listHosterQuotasLeft(hosterId),
+    );
     this.logger.verbose(
       `Hoster ${hosterId} has ${quotaLeft} downloads quota left`,
     );
-    // TODO: if the quota left is 0, the hoster should be released at the next date frame
     return quotaLeft;
+  }
+
+  async listQuotasByHosterId(hosterId: string): Promise<HosterLimits> {
+    this.logger.log(`Getting quotas for hoster ${hosterId}`);
+    return this.hosterQuotasRepository.getQuotasByHosterId(hosterId);
   }
 
   async listHosterQuotasUsed(hosterId: string): Promise<HosterLimits> {
