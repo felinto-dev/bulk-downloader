@@ -51,7 +51,7 @@ export class DownloadsRepository {
             where: { hosterId: downloadRequest.hosterId },
             create: {
               hosterId: downloadRequest.hosterId,
-              name: downloadRequest.hosterId,
+              hosterName: downloadRequest.hosterId,
               authenticationMethod: HosterAuthenticationMethod.FREE,
             },
           },

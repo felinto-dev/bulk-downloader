@@ -14,7 +14,7 @@ export class HostersRepository {
       where: { hosterId: hoster.id },
       create: {
         hosterId: hoster.id,
-        name: hoster.name,
+        hosterName: hoster.name,
         authenticationMethod: hoster.credentialsStrategy,
         concurrency: hoster.concurrencyConnections,
         limits: {
@@ -22,7 +22,7 @@ export class HostersRepository {
         },
       },
       update: {
-        name: hoster.name,
+        hosterName: hoster.name,
         concurrency: hoster.concurrencyConnections,
         limits: {
           upsert: {
