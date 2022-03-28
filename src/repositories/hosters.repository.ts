@@ -35,38 +35,37 @@ export class HostersRepository {
     });
   }
 
-  getHosterById(hosterId: string) {
-    return this.prisma.hoster.findUnique({
-      where: { id: hosterId },
-      select: { concurrency: true },
-      rejectOnNotFound: true,
-    });
-  }
+  /*
+		Algorithm name: "Fairly Fair"
+	
+		Finds a hoster ready to pull.
+		A hoster is ready to pull if:
+		- it has releaseAt lower than now
+		- it has no downloads in progress
+		- it has some download pending to be pulled
 
-  findHosterToPull(): Promise<HosterReadyToPull> {
+		Should prioritize:
+		- hosters with lower concurrency
+		- hosters with less downloads pending to be pulled
+
+		This should help improve the performane because:
+		- more downloads can be pulled at the same time by different hosters
+		- less hosters have to wait for other hosters to release their downloads
+
+		If no hoster is ready to pull, returns null.
+	*/
+  findHosterReadyToPullDownloads(): Promise<HosterReadyToPull> {
     return this.prisma.hoster.findFirst({
       where: {
         concurrency: { gte: 1 },
         downloads: {
-          some: {
-            status: DownloadStatus.PENDING,
-          },
-          none: {
-            status: DownloadStatus.DOWNLOADING,
-          },
+          some: { status: DownloadStatus.PENDING },
+          none: { status: DownloadStatus.DOWNLOADING },
         },
-        releaseAt: { lte: DateTime.now().toISO() },
+        releaseAt: { lt: DateTime.now().toISO() },
       },
-      orderBy: [
-        { limits: { monthly: 'asc' } },
-        { limits: { daily: 'asc' } },
-        { limits: { hourly: 'asc' } },
-        { concurrency: 'asc' },
-      ],
-      select: {
-        id: true,
-        concurrency: true,
-      },
+      orderBy: [{ concurrency: 'asc', downloads: { _count: 'asc' } }],
+      select: { id: true, concurrency: true },
     });
   }
 

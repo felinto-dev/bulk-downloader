@@ -25,7 +25,8 @@ export class HostersService {
   }
 
   async findHosterReadyToPull(): Promise<HosterReadyToPull> {
-    const hoster = await this.hostersRepository.findHosterToPull();
+    const hoster =
+      await this.hostersRepository.findHosterReadyToPullDownloads();
 
     if (hoster) {
       const hosterLimits = await this.hosterQuotaService.listHosterQuotasLeft(
