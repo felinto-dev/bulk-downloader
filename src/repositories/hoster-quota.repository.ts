@@ -11,7 +11,11 @@ export class HosterQuotaRepository {
   async getQuotasByHosterId(hosterId: string) {
     return this.prisma.hosterQuota.findUnique({
       where: { hosterId },
-      select: { hourly: true, daily: true, monthly: true },
+      select: {
+        hourlyDownloadLimit: true,
+        dailyDownloadLimit: true,
+        monthlyDownloadLimit: true,
+      },
     });
   }
 
@@ -29,12 +33,13 @@ export class HosterQuotaRepository {
   }
 
   async countUsedDownloadsQuota(hosterId: string): Promise<HosterLimits> {
-    const [monthly, daily, hourly] = await Promise.all([
-      this.countUsedDownloadsQuotaByPeriod(hosterId, startOfMonth()),
-      this.countUsedDownloadsQuotaByPeriod(hosterId, startOfDay()),
-      this.countUsedDownloadsQuotaByPeriod(hosterId, startOfHour()),
-    ]);
+    const [monthlyDownloadLimit, dailyDownloadLimit, hourlyDownloadLimit] =
+      await Promise.all([
+        this.countUsedDownloadsQuotaByPeriod(hosterId, startOfMonth()),
+        this.countUsedDownloadsQuotaByPeriod(hosterId, startOfDay()),
+        this.countUsedDownloadsQuotaByPeriod(hosterId, startOfHour()),
+      ]);
 
-    return { monthly, daily, hourly };
+    return { monthlyDownloadLimit, dailyDownloadLimit, hourlyDownloadLimit };
   }
 }

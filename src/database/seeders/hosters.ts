@@ -8,7 +8,7 @@ export const hosters: Prisma.HosterCreateInput[] = [
     maxConcurrentDownloads: 1,
     limits: {
       create: {
-        daily: 50,
+        dailyDownloadLimit: 50,
       },
     },
   },
@@ -19,8 +19,8 @@ export const hosters: Prisma.HosterCreateInput[] = [
     maxConcurrentDownloads: 1,
     limits: {
       create: {
-        hourly: 1,
-        daily: 10,
+        hourlyDownloadLimit: 1,
+        dailyDownloadLimit: 10,
       },
     },
   },
@@ -31,8 +31,8 @@ export const hosters: Prisma.HosterCreateInput[] = [
     maxConcurrentDownloads: 1,
     limits: {
       create: {
-        hourly: 10,
-        daily: 10,
+        hourlyDownloadLimit: 10,
+        dailyDownloadLimit: 10,
       },
     },
   },

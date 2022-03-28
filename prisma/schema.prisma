@@ -25,12 +25,12 @@ enum HosterAuthenticationMethod {
 }
 
 model HosterQuota {
-  hourly    Int?
-  daily     Int?
-  monthly   Int?
-  updatedAt DateTime @updatedAt
-  hoster    Hoster   @relation(fields: [hosterId], references: [hosterId])
-  hosterId  String   @id
+  hourlyDownloadLimit  Int?
+  dailyDownloadLimit   Int?
+  monthlyDownloadLimit Int?
+  updatedAt            DateTime @updatedAt
+  hoster               Hoster   @relation(fields: [hosterId], references: [hosterId])
+  hosterId             String   @id
 }
 
 model Download {
