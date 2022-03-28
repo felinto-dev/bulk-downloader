@@ -1,4 +1,4 @@
-import { HosterLimits } from '@/dto/hoster-limits.dto';
+import { HosterQuotas } from '@/dto/hoster-quotas.dto';
 import { PrismaService } from '@/prisma.service';
 import { startOfDay, startOfHour, startOfMonth } from '@/utils/date';
 import { Injectable } from '@nestjs/common';
@@ -32,7 +32,7 @@ export class HosterQuotaRepository {
     });
   }
 
-  async countUsedDownloadsQuota(hosterId: string): Promise<HosterLimits> {
+  async countUsedDownloadsQuota(hosterId: string): Promise<HosterQuotas> {
     const [monthlyDownloadLimit, dailyDownloadLimit, hourlyDownloadLimit] =
       await Promise.all([
         this.countUsedDownloadsQuotaByPeriod(hosterId, startOfMonth()),

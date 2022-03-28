@@ -1,4 +1,4 @@
-import { HosterLimits } from '@/dto/hoster-limits.dto';
+import { HosterQuotas } from '@/dto/hoster-quotas.dto';
 import { HosterQuotaRepository } from '@/repositories/hoster-quota.repository';
 import { getMinValueFromObjectValues, subtractObjects } from '@/utils/objects';
 import { Injectable, Logger } from '@nestjs/common';
@@ -19,16 +19,16 @@ export class HosterQuotasService {
     return quotaLeft;
   }
 
-  async listQuotasByHosterId(hosterId: string): Promise<HosterLimits> {
+  async listQuotasByHosterId(hosterId: string): Promise<HosterQuotas> {
     this.logger.log(`Getting quotas for hoster ${hosterId}`);
     return this.hosterQuotasRepository.getQuotasByHosterId(hosterId);
   }
 
-  async listHosterQuotasUsed(hosterId: string): Promise<HosterLimits> {
+  async listHosterQuotasUsed(hosterId: string): Promise<HosterQuotas> {
     return this.hosterQuotasRepository.countUsedDownloadsQuota(hosterId);
   }
 
-  async listHosterQuotasLeft(hosterId: string): Promise<HosterLimits | null> {
+  async listHosterQuotasLeft(hosterId: string): Promise<HosterQuotas | null> {
     const hosterQuotas = await this.listQuotasByHosterId(hosterId);
     const hosterQuotasUsed = await this.listHosterQuotasUsed(hosterId);
     return hosterQuotas && subtractObjects(hosterQuotas, hosterQuotasUsed);

@@ -1,6 +1,6 @@
 import { releaseAtDateFrame } from '@/consts/release-at-date-frame';
 import { HosterReadyToPull } from '@/database/interfaces/hoster-ready-to-pull.interface';
-import { HosterLimits } from '@/dto/hoster-limits.dto';
+import { HosterQuotas } from '@/dto/hoster-quotas.dto';
 import { UpsertHosterInput } from '@/inputs/upsert-hoster.input';
 import { HostersRepository } from '@/repositories/hosters.repository';
 import { checkIfNumberExistsInObjectValues } from '@/utils/objects';
@@ -20,7 +20,7 @@ export class HostersService {
     return this.hostersRepository.upsertHoster(hoster);
   }
 
-  private isTheHosterLimitQuotaEmpty(hosterLimits: HosterLimits): boolean {
+  private isTheHosterLimitQuotaEmpty(hosterLimits: HosterQuotas): boolean {
     return checkIfNumberExistsInObjectValues(hosterLimits, 0);
   }
 
@@ -51,7 +51,7 @@ export class HostersService {
     return null;
   }
 
-  private calculateReleaseAtDateFrame(hosterLimits: HosterLimits): Date {
+  private calculateReleaseAtDateFrame(hosterLimits: HosterQuotas): Date {
     for (const [dateFrame, limit] of Object.entries(hosterLimits || {})) {
       if (limit === 0) {
         return releaseAtDateFrame[dateFrame];

@@ -1,4 +1,4 @@
-import { HosterLimits } from '@/dto/hoster-limits.dto';
+import { HosterQuotas } from '@/dto/hoster-quotas.dto';
 import { HosterQuotaRepository } from '@/repositories/hoster-quota.repository';
 import { createMock } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -27,23 +27,23 @@ describe(HosterQuotasService.name, () => {
     expect(service).toBeDefined();
   });
 
-  const hosterLimits: HosterLimits = {
-    monthly: 100,
-    daily: 100,
-    hourly: 100,
+  const hosterLimits: HosterQuotas = {
+    monthlyDownloadLimit: 100,
+    dailyDownloadLimit: 100,
+    hourlyDownloadLimit: 100,
   };
-  const downloadsAttempts: HosterLimits = {
-    monthly: 10,
-    daily: 20,
-    hourly: 30,
+  const downloadsAttempts: HosterQuotas = {
+    monthlyDownloadLimit: 10,
+    dailyDownloadLimit: 20,
+    hourlyDownloadLimit: 30,
   };
-  const expectedOutcome: HosterLimits = {
-    monthly: 90,
-    daily: 80,
-    hourly: 70,
+  const expectedOutcome: HosterQuotas = {
+    monthlyDownloadLimit: 90,
+    dailyDownloadLimit: 80,
+    hourlyDownloadLimit: 70,
   };
 
-  describe(HosterQuotasService.prototype.countHosterQuotaLeft.name, () => {
+  describe(HosterQuotasService.prototype.getQuotaLeft.name, () => {
     it('should get the min value from differents periods', async () => {
       mockedHosterLimitsRepository.getQuotasByHosterId.mockResolvedValueOnce(
         hosterLimits,
@@ -52,7 +52,7 @@ describe(HosterQuotasService.name, () => {
         downloadsAttempts,
       );
 
-      const result = await service.countHosterQuotaLeft('123');
+      const result = await service.getQuotaLeft('123');
 
       expect(result).toEqual(70);
     });

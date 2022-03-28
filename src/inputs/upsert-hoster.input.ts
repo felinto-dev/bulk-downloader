@@ -11,7 +11,7 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
-import { HosterLimits } from '../dto/hoster-limits.dto';
+import { HosterQuotas } from '../dto/hoster-quotas.dto';
 
 export class UpsertHosterInput {
   /** The unique ID for Hoster (e.g "wp.org") */
@@ -32,8 +32,8 @@ export class UpsertHosterInput {
   /** Limits for the hoster (e.g. max. downloads allowed per day) */
   @IsDefined()
   @ValidateNested()
-  @Type(() => HosterLimits)
-  limits: HosterLimits;
+  @Type(() => HosterQuotas)
+  limits: HosterQuotas;
 
   /** Authentication method for the hoster (e.g. "basic") */
   @IsEnum(HosterAuthenticationMethod)

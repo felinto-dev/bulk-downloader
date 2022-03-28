@@ -1,6 +1,6 @@
 import { IsNumber, IsOptional } from 'class-validator';
 
-export class HosterLimits {
+export class HosterQuotas {
   @IsNumber()
   @IsOptional()
   monthlyDownloadLimit: number;
