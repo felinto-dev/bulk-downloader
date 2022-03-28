@@ -1,0 +1,82 @@
+<mxfile host="65bd71144e">
+    <diagram id="MF8sW6uRz19Nb5RdCe7q" name="Page-1">
+        <mxGraphModel dx="2014" dy="782" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="19" value="Service -&amp;gt; getHosterQuotaLeft(hosterId)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#647687;strokeColor=#314354;fontColor=#ffffff;align=left;verticalAlign=top;spacingTop=5;spacingLeft=5;" parent="1" vertex="1">
+                    <mxGeometry x="1200" y="330" width="770" height="370" as="geometry"/>
+                </mxCell>
+                <mxCell id="6" value="" style="edgeStyle=none;html=1;" parent="1" source="2" target="5" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="2" value="Check if hoster has quota available by month, day and hour" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#008a00;fontColor=#ffffff;strokeColor=#005700;" parent="1" vertex="1">
+                    <mxGeometry x="1240" y="510" width="130" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" value="" style="edgeStyle=none;html=1;" parent="1" source="5" target="7" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="11" value="" style="edgeStyle=none;html=1;" parent="1" source="5" target="7" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="12" value="" style="edgeStyle=none;html=1;" parent="1" source="5" target="7" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="13" value="" style="edgeStyle=none;html=1;" parent="1" source="5" target="7" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="15" value="" style="edgeStyle=none;html=1;" parent="1" source="5" target="14" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" value="Is hoster quota equals 0?" style="rhombus;whiteSpace=wrap;html=1;rounded=0;fillColor=#008a00;fontColor=#ffffff;strokeColor=#005700;" parent="1" vertex="1">
+                    <mxGeometry x="1460" y="500" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="17" value="" style="edgeStyle=none;html=1;" parent="1" source="7" target="16" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="20" value="onHosterQuotaEmpty()" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;align=left;spacingTop=5;spacingLeft=5;" parent="1" vertex="1">
+                    <mxGeometry x="1570" y="350" width="200" height="190" as="geometry"/>
+                </mxCell>
+                <mxCell id="7" value="increase the releaseAt period, according to how long the hoster will be unavailable for downloads" style="whiteSpace=wrap;html=1;rounded=0;fillColor=#008a00;fontColor=#ffffff;strokeColor=#005700;" parent="1" vertex="1">
+                    <mxGeometry x="1610" y="390" width="120" height="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="14" value="Return the hoster quota left" style="whiteSpace=wrap;html=1;rounded=0;fillColor=#008a00;fontColor=#ffffff;strokeColor=#005700;" parent="1" vertex="1">
+                    <mxGeometry x="1610" y="600" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="16" value="Return 0" style="whiteSpace=wrap;html=1;rounded=0;fillColor=#008a00;fontColor=#ffffff;strokeColor=#005700;" parent="1" vertex="1">
+                    <mxGeometry x="1810" y="420" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="24" value="" style="edgeStyle=none;html=1;" parent="1" source="22" target="23" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="22" value="Pull Downloads" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="110" y="450" width="120" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="26" value="" style="edgeStyle=none;html=1;" parent="1" source="23" target="25" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="28" value="" style="edgeStyle=none;html=1;" parent="1" source="23" target="27" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="23" value="Calculate how much concurrent downloads is allowed" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="310" y="460" width="140" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="25" value="GLOBAL_DOWNLOADS_CONCURRENCY_LIMIT - sum(processDownloadsQueue.values)" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="225" y="600" width="310" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="32" value="" style="edgeStyle=none;html=1;" parent="1" source="27" target="31" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="27" value="WHILE (concurrent download allowed) &amp;gt; 0&lt;br&gt;Add hoster concurrency Ticket for the queue" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="580" y="460" width="250" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="30" value="What is a hoster concurrency ticket?&lt;br&gt;&lt;br&gt;Is a ticket that allows the hoster do how much downloads they would while they still has the ticket.&amp;nbsp;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+                    <mxGeometry x="120" y="200" width="250" height="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="31" value="pullDownloadByHosterId(hosterId)" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="597.5" y="600" width="215" height="60" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
