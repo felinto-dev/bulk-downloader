@@ -7,7 +7,7 @@ async function main() {
   const hostersTransactions = [
     ...hosters.map((hoster) => {
       return prisma.hoster.upsert({
-        where: { id: hoster.id },
+        where: { hosterId: hoster.hosterId },
         update: {},
         create: hoster,
       });
@@ -20,7 +20,7 @@ async function main() {
         where: {
           downloadIdByHoster: {
             downloadId: download.downloadId,
-            hosterId: download.Hoster.connect.id,
+            hosterId: download.Hoster.connect.hosterId,
           },
         },
         update: {},

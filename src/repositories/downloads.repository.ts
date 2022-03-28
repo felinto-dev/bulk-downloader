@@ -48,9 +48,9 @@ export class DownloadsRepository {
         priority: downloadRequest.priority,
         Hoster: {
           connectOrCreate: {
-            where: { id: downloadRequest.hosterId },
+            where: { hosterId: downloadRequest.hosterId },
             create: {
-              id: downloadRequest.hosterId,
+              hosterId: downloadRequest.hosterId,
               name: downloadRequest.hosterId,
               authenticationMethod: HosterAuthenticationMethod.FREE,
             },

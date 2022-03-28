@@ -9,7 +9,7 @@ export const downloads: Prisma.DownloadCreateInput[] = [
     priority: 5,
     fingerprint: generateUuid(),
     Hoster: {
-      connect: { id: 'file-examples.com' },
+      connect: { hosterId: 'file-examples.com' },
     },
   },
   {
@@ -18,7 +18,7 @@ export const downloads: Prisma.DownloadCreateInput[] = [
     priority: 4,
     fingerprint: generateUuid(),
     Hoster: {
-      connect: { id: 'file-examples.com' },
+      connect: { hosterId: 'file-examples.com' },
     },
   },
   {
@@ -27,7 +27,7 @@ export const downloads: Prisma.DownloadCreateInput[] = [
     priority: 4,
     fingerprint: generateUuid(),
     Hoster: {
-      connect: { id: 'file-examples.com' },
+      connect: { hosterId: 'file-examples.com' },
     },
   },
   {
@@ -35,7 +35,7 @@ export const downloads: Prisma.DownloadCreateInput[] = [
     url: 'https://file-examples-com.github.io/uploads/2017/11/file_example_MP3_5MG.mp3',
     fingerprint: generateUuid(),
     Hoster: {
-      connect: { id: 'file-examples.com' },
+      connect: { hosterId: 'file-examples.com' },
     },
   },
   {
@@ -43,7 +43,7 @@ export const downloads: Prisma.DownloadCreateInput[] = [
     url: 'http://ipv6.download.thinkbroadband.com/10MB.zip',
     fingerprint: generateUuid(),
     Hoster: {
-      connect: { id: 'thinkbroadband.com' },
+      connect: { hosterId: 'thinkbroadband.com' },
     },
   },
   {
@@ -51,7 +51,7 @@ export const downloads: Prisma.DownloadCreateInput[] = [
     url: 'http://ipv6.download.thinkbroadband.com/1GB.zip',
     fingerprint: generateUuid(),
     Hoster: {
-      connect: { id: 'thinkbroadband.com' },
+      connect: { hosterId: 'thinkbroadband.com' },
     },
   },
   {
@@ -59,7 +59,7 @@ export const downloads: Prisma.DownloadCreateInput[] = [
     url: 'https://filesamples.com/samples/video/mp4/sample_1280x720_surfing_with_audio.mp4',
     fingerprint: generateUuid(),
     Hoster: {
-      connect: { id: 'file-samples.com' },
+      connect: { hosterId: 'file-samples.com' },
     },
   },
   {
@@ -67,7 +67,7 @@ export const downloads: Prisma.DownloadCreateInput[] = [
     url: 'https://filesamples.com/samples/video/mp4/sample_960x400_ocean_with_audio.mp4',
     fingerprint: generateUuid(),
     Hoster: {
-      connect: { id: 'file-samples.com' },
+      connect: { hosterId: 'file-samples.com' },
     },
   },
   {
@@ -75,7 +75,7 @@ export const downloads: Prisma.DownloadCreateInput[] = [
     url: 'https://filesamples.com/samples/video/mp4/sample_640x360.mp4',
     fingerprint: generateUuid(),
     Hoster: {
-      connect: { id: 'file-samples.com' },
+      connect: { hosterId: 'file-samples.com' },
     },
   },
   {
@@ -83,7 +83,7 @@ export const downloads: Prisma.DownloadCreateInput[] = [
     url: 'https://filesamples.com/samples/video/mp4/sample_960x540.mp4',
     fingerprint: generateUuid(),
     Hoster: {
-      connect: { id: 'file-samples.com' },
+      connect: { hosterId: 'file-samples.com' },
     },
   },
   {
@@ -91,7 +91,7 @@ export const downloads: Prisma.DownloadCreateInput[] = [
     url: 'https://filesamples.com/samples/video/mp4/sample_1280x720.mp4',
     fingerprint: generateUuid(),
     Hoster: {
-      connect: { id: 'file-samples.com' },
+      connect: { hosterId: 'file-samples.com' },
     },
   },
   {
@@ -99,7 +99,7 @@ export const downloads: Prisma.DownloadCreateInput[] = [
     url: 'https://filesamples.com/samples/video/mp4/sample_1920x1080.mp4',
     fingerprint: generateUuid(),
     Hoster: {
-      connect: { id: 'file-samples.com' },
+      connect: { hosterId: 'file-samples.com' },
     },
   },
   {
@@ -107,7 +107,7 @@ export const downloads: Prisma.DownloadCreateInput[] = [
     url: 'https://filesamples.com/samples/video/mp4/sample_2560x1440.mp4',
     fingerprint: generateUuid(),
     Hoster: {
-      connect: { id: 'file-samples.com' },
+      connect: { hosterId: 'file-samples.com' },
     },
   },
   {
@@ -115,7 +115,7 @@ export const downloads: Prisma.DownloadCreateInput[] = [
     url: 'https://filesamples.com/samples/video/mp4/sample_3840x2160.mp4',
     fingerprint: generateUuid(),
     Hoster: {
-      connect: { id: 'file-samples.com' },
+      connect: { hosterId: 'file-samples.com' },
     },
   },
 ];

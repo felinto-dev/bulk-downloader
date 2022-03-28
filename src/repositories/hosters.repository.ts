@@ -11,9 +11,9 @@ export class HostersRepository {
 
   upsertHoster(hoster: UpsertHosterInput) {
     return this.prisma.hoster.upsert({
-      where: { id: hoster.id },
+      where: { hosterId: hoster.id },
       create: {
-        id: hoster.id,
+        hosterId: hoster.id,
         name: hoster.name,
         authenticationMethod: hoster.credentialsStrategy,
         concurrency: hoster.concurrencyConnections,
@@ -62,18 +62,18 @@ export class HostersRepository {
           some: { status: DownloadStatus.PENDING },
           none: { status: DownloadStatus.DOWNLOADING },
         },
-        releaseAt: { lt: DateTime.now().toISO() },
+        quotaRenewsAt: { lt: DateTime.now().toISO() },
       },
       orderBy: [{ concurrency: 'asc', downloads: { _count: 'asc' } }],
-      select: { id: true, concurrency: true },
+      select: { hosterId: true, concurrency: true },
     });
   }
 
   async updateReleaseAt(hosterId: string, newReleaseAt: Date) {
     await this.prisma.$transaction([
       this.prisma.hoster.update({
-        where: { id: hosterId },
-        data: { releaseAt: newReleaseAt },
+        where: { hosterId },
+        data: { quotaRenewsAt: newReleaseAt },
       }),
     ]);
   }

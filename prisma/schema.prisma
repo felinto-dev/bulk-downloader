@@ -11,13 +11,13 @@ datasource db {
 }
 
 model Hoster {
-  id                   String                     @id
+  hosterId             String                     @id
   name                 String
   authenticationMethod HosterAuthenticationMethod
   concurrency          Int                        @default(0)
   downloads            Download[]
   limits               HosterQuota?
-  releaseAt            DateTime                   @default(now())
+  quotaRenewsAt        DateTime                   @default(now())
 }
 
 enum HosterAuthenticationMethod {
@@ -29,19 +29,19 @@ model HosterQuota {
   daily     Int?
   monthly   Int?
   updatedAt DateTime @updatedAt
-  hoster    Hoster   @relation(fields: [hosterId], references: [id])
+  hoster    Hoster   @relation(fields: [hosterId], references: [hosterId])
   hosterId  String   @id
 }
 
 model Download {
   downloadId  String
-  status      DownloadStatus           @default(PENDING)
+  status      DownloadStatus @default(PENDING)
   url         String
-  priority    Int                      @default(0)
+  priority    Int            @default(0)
   fingerprint String?
-  Hoster      Hoster                   @relation(fields: [hosterId], references: [id])
+  Hoster      Hoster         @relation(fields: [hosterId], references: [hosterId])
   hosterId    String
-  updatedAt   DateTime                 @updatedAt
+  updatedAt   DateTime       @updatedAt
 
   @@id(name: "downloadIdByHoster", fields: [downloadId, hosterId])
 }

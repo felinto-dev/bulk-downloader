@@ -40,7 +40,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
         hoster.concurrency,
         await this.queueActiveDownloadsQuotaLeft(),
       );
-      await this.pullDownloadsByHosterId(hoster.id, hoster.concurrency);
+      await this.pullDownloadsByHosterId(hoster.hosterId, hoster.concurrency);
       return this.pullDownloads();
     }
 

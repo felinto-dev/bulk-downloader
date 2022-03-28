@@ -22,7 +22,7 @@ export class HosterQuotaRepository {
     return this.prisma.download.count({
       where: {
         status: { in: ['DOWNLOADING', 'FAILED', 'SUCCESS'] },
-        Hoster: { id: hosterId },
+        Hoster: { hosterId },
         updatedAt: { gte: date },
       },
     });

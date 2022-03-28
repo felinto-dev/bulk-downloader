@@ -30,13 +30,16 @@ export class HostersService {
 
     if (hoster) {
       const hosterLimits = await this.hosterQuotaService.listHosterQuotasLeft(
-        hoster.id,
+        hoster.hosterId,
       );
 
       const shouldReleaseAt = this.calculateReleaseAtDateFrame(hosterLimits);
-      await this.hostersRepository.updateReleaseAt(hoster.id, shouldReleaseAt);
+      await this.hostersRepository.updateReleaseAt(
+        hoster.hosterId,
+        shouldReleaseAt,
+      );
       this.logger.verbose(
-        `Hoster ${hoster.id} will be released at ${shouldReleaseAt}`,
+        `Hoster ${hoster.hosterId} will be released at ${shouldReleaseAt}`,
       );
 
       return this.isTheHosterLimitQuotaEmpty(hosterLimits)

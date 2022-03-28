@@ -2,7 +2,7 @@ import { HosterAuthenticationMethod, Prisma } from '@prisma/client';
 
 export const hosters: Prisma.HosterCreateInput[] = [
   {
-    id: 'gplzone',
+    hosterId: 'gplzone',
     name: 'GPLZone',
     authenticationMethod: HosterAuthenticationMethod.FREE,
     concurrency: 1,
@@ -13,7 +13,7 @@ export const hosters: Prisma.HosterCreateInput[] = [
     },
   },
   {
-    id: 'file-examples.com',
+    hosterId: 'file-examples.com',
     name: 'File-Examples.com',
     authenticationMethod: HosterAuthenticationMethod.FREE,
     concurrency: 1,
@@ -25,7 +25,7 @@ export const hosters: Prisma.HosterCreateInput[] = [
     },
   },
   {
-    id: 'file-samples.com',
+    hosterId: 'file-samples.com',
     name: 'File Samples',
     authenticationMethod: HosterAuthenticationMethod.FREE,
     concurrency: 1,
@@ -37,7 +37,7 @@ export const hosters: Prisma.HosterCreateInput[] = [
     },
   },
   {
-    id: 'thinkbroadband.com',
+    hosterId: 'thinkbroadband.com',
     name: 'Think broad band',
     authenticationMethod: HosterAuthenticationMethod.FREE,
     concurrency: 1,
