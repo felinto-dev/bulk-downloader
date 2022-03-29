@@ -63,16 +63,16 @@ export class HosterQuotasService {
     hosterQuotasUsed: HosterQuotas,
   ) {
     const hosterQuotasLeft: HosterQuotas = {};
-    for (const key in hosterQuotas) {
-      if (hosterQuotas.hasOwnProperty(key)) {
-        const element = hosterQuotas[key];
-        if (element !== null) {
-          const used = hosterQuotasUsed[key] || 0;
-          const difference = element - used;
-          if (difference >= 0) {
-            hosterQuotasLeft[key] = difference;
+    for (const timePeriod in hosterQuotas) {
+      if (hosterQuotas.hasOwnProperty(timePeriod)) {
+        const quota = hosterQuotas[timePeriod];
+        if (quota) {
+          const quotaUsed = hosterQuotasUsed[timePeriod] || 0;
+          const quotaLeft = quota - quotaUsed;
+          if (quotaLeft >= 0) {
+            hosterQuotasLeft[timePeriod] = quotaLeft;
           } else {
-            hosterQuotasLeft[key] = 0;
+            hosterQuotasLeft[timePeriod] = 0;
           }
         }
       }
