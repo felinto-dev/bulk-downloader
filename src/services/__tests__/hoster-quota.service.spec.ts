@@ -37,11 +37,6 @@ describe(HosterQuotasService.name, () => {
     dailyDownloadLimit: 20,
     hourlyDownloadLimit: 30,
   };
-  const hosterQuotasLeft: HosterQuotas = {
-    monthlyDownloadLimit: 90,
-    dailyDownloadLimit: 80,
-    hourlyDownloadLimit: 70,
-  };
 
   describe(HosterQuotasService.prototype.getQuotaLeft.name, () => {
     it('should get the min value from differents periods', async () => {
@@ -59,31 +54,90 @@ describe(HosterQuotasService.name, () => {
   });
 
   describe(HosterQuotasService.prototype.listHosterQuotasLeft.name, () => {
-    it('should get hoster limits and downloads attempts and substract objects to get quota left', async () => {
-      mockedHosterLimitsRepository.getQuotasByHosterId.mockResolvedValueOnce(
-        hosterQuotas,
-      );
+    it('should subtract the used quota from the total quota', async () => {
+      mockedHosterLimitsRepository.getQuotasByHosterId.mockResolvedValueOnce({
+        monthlyDownloadLimit: 100,
+        dailyDownloadLimit: 100,
+        hourlyDownloadLimit: 100,
+      });
       mockedHosterLimitsRepository.countUsedDownloadsQuota.mockResolvedValueOnce(
-        hosterQuotasUsed,
+        {
+          monthlyDownloadLimit: 10,
+          dailyDownloadLimit: 20,
+          hourlyDownloadLimit: 30,
+        },
       );
 
       const outcome = await service.listHosterQuotasLeft('123');
 
-      expect(outcome).toEqual(hosterQuotasLeft);
+      expect(outcome).toEqual({
+        monthlyDownloadLimit: 90,
+        dailyDownloadLimit: 80,
+        hourlyDownloadLimit: 70,
+      });
     });
 
-    it('should return null when hoster there is no hoster limits defined', async () => {
+    it('should return an empty object if the hoster has no quota', async () => {
       mockedHosterLimitsRepository.getQuotasByHosterId.mockResolvedValueOnce(
-        null,
+        {},
       );
 
       mockedHosterLimitsRepository.countUsedDownloadsQuota.mockResolvedValueOnce(
-        hosterQuotasUsed,
+        {
+          monthlyDownloadLimit: 10,
+          dailyDownloadLimit: 20,
+          hourlyDownloadLimit: 30,
+        },
       );
 
       const outcome = await service.listHosterQuotasLeft('123');
 
-      expect(outcome).toBeNull();
+      expect(outcome).toStrictEqual({});
+    });
+
+    it('should return 0 as quota left when the hoster quota - used quota is a negative number', async () => {
+      mockedHosterLimitsRepository.getQuotasByHosterId.mockResolvedValueOnce({
+        monthlyDownloadLimit: 100,
+        dailyDownloadLimit: 100,
+        hourlyDownloadLimit: 100,
+      });
+      mockedHosterLimitsRepository.countUsedDownloadsQuota.mockResolvedValueOnce(
+        {
+          monthlyDownloadLimit: 1000,
+          dailyDownloadLimit: 100,
+          hourlyDownloadLimit: 100,
+        },
+      );
+
+      const outcome = await service.listHosterQuotasLeft('123');
+
+      expect(outcome).toStrictEqual({
+        monthlyDownloadLimit: 0,
+        dailyDownloadLimit: 0,
+        hourlyDownloadLimit: 0,
+      });
+    });
+
+    it('should not substract the used quota from the total quota if the hoster has no quota for a specific period', async () => {
+      mockedHosterLimitsRepository.getQuotasByHosterId.mockResolvedValueOnce({
+        monthlyDownloadLimit: 100,
+        dailyDownloadLimit: 100,
+        hourlyDownloadLimit: 100,
+      });
+      mockedHosterLimitsRepository.countUsedDownloadsQuota.mockResolvedValueOnce(
+        {
+          dailyDownloadLimit: 100,
+          hourlyDownloadLimit: 100,
+        },
+      );
+
+      const outcome = await service.listHosterQuotasLeft('123');
+
+      expect(outcome).toStrictEqual({
+        monthlyDownloadLimit: 100,
+        dailyDownloadLimit: 0,
+        hourlyDownloadLimit: 0,
+      });
     });
   });
 });

@@ -1,6 +1,6 @@
 import { HosterQuotas } from '@/dto/hoster-quotas.dto';
 import { HosterQuotaRepository } from '@/repositories/hoster-quota.repository';
-import { getMinValueFromObjectValues, subtractObjects } from '@/utils/objects';
+import { getMinValueFromObjectValues } from '@/utils/objects';
 import { Injectable, Logger } from '@nestjs/common';
 
 @Injectable()
@@ -48,10 +48,35 @@ export class HosterQuotasService {
   async listHosterQuotasLeft(hosterId: string): Promise<HosterQuotas> {
     const hosterQuotas = await this.listQuotasByHosterId(hosterId);
     const hosterQuotasUsed = await this.listHosterQuotasUsed(hosterId);
-    const hosterQuotasLeft = subtractObjects(hosterQuotas, hosterQuotasUsed);
+    const hosterQuotasLeft = this.calculateHosterQuotaLeft(
+      hosterQuotas,
+      hosterQuotasUsed,
+    );
     this.logger.log(
       `listHosterQuotasLeft: ${JSON.stringify(hosterQuotasLeft)}`,
     );
     return hosterQuotas && hosterQuotasLeft;
+  }
+
+  private calculateHosterQuotaLeft(
+    hosterQuotas: HosterQuotas,
+    hosterQuotasUsed: HosterQuotas,
+  ) {
+    const hosterQuotasLeft: HosterQuotas = {};
+    for (const key in hosterQuotas) {
+      if (hosterQuotas.hasOwnProperty(key)) {
+        const element = hosterQuotas[key];
+        if (element !== null) {
+          const used = hosterQuotasUsed[key] || 0;
+          const difference = element - used;
+          if (difference >= 0) {
+            hosterQuotasLeft[key] = difference;
+          } else {
+            hosterQuotasLeft[key] = 0;
+          }
+        }
+      }
+    }
+    return hosterQuotasLeft;
   }
 }
