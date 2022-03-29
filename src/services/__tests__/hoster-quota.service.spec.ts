@@ -27,17 +27,17 @@ describe(HosterQuotasService.name, () => {
     expect(service).toBeDefined();
   });
 
-  const hosterLimits: HosterQuotas = {
+  const hosterQuotas: HosterQuotas = {
     monthlyDownloadLimit: 100,
     dailyDownloadLimit: 100,
     hourlyDownloadLimit: 100,
   };
-  const downloadsAttempts: HosterQuotas = {
+  const hosterQuotasUsed: HosterQuotas = {
     monthlyDownloadLimit: 10,
     dailyDownloadLimit: 20,
     hourlyDownloadLimit: 30,
   };
-  const expectedOutcome: HosterQuotas = {
+  const hosterQuotasLeft: HosterQuotas = {
     monthlyDownloadLimit: 90,
     dailyDownloadLimit: 80,
     hourlyDownloadLimit: 70,
@@ -46,10 +46,10 @@ describe(HosterQuotasService.name, () => {
   describe(HosterQuotasService.prototype.getQuotaLeft.name, () => {
     it('should get the min value from differents periods', async () => {
       mockedHosterLimitsRepository.getQuotasByHosterId.mockResolvedValueOnce(
-        hosterLimits,
+        hosterQuotas,
       );
       mockedHosterLimitsRepository.countUsedDownloadsQuota.mockResolvedValueOnce(
-        downloadsAttempts,
+        hosterQuotasUsed,
       );
 
       const result = await service.getQuotaLeft('123');
@@ -61,15 +61,15 @@ describe(HosterQuotasService.name, () => {
   describe(HosterQuotasService.prototype.listHosterQuotasLeft.name, () => {
     it('should get hoster limits and downloads attempts and substract objects to get quota left', async () => {
       mockedHosterLimitsRepository.getQuotasByHosterId.mockResolvedValueOnce(
-        hosterLimits,
+        hosterQuotas,
       );
       mockedHosterLimitsRepository.countUsedDownloadsQuota.mockResolvedValueOnce(
-        downloadsAttempts,
+        hosterQuotasUsed,
       );
 
       const outcome = await service.listHosterQuotasLeft('123');
 
-      expect(outcome).toEqual(expectedOutcome);
+      expect(outcome).toEqual(hosterQuotasLeft);
     });
 
     it('should return null when hoster there is no hoster limits defined', async () => {
@@ -78,7 +78,7 @@ describe(HosterQuotasService.name, () => {
       );
 
       mockedHosterLimitsRepository.countUsedDownloadsQuota.mockResolvedValueOnce(
-        downloadsAttempts,
+        hosterQuotasUsed,
       );
 
       const outcome = await service.listHosterQuotasLeft('123');
