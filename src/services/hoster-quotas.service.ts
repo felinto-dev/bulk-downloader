@@ -9,28 +9,49 @@ export class HosterQuotasService {
 
   private readonly logger: Logger = new Logger(HosterQuotasService.name);
 
-  async getQuotaLeft(hosterId: string): Promise<number> {
-    const quotaLeft = getMinValueFromObjectValues(
-      await this.listHosterQuotasLeft(hosterId),
-    );
-    this.logger.verbose(
-      `Hoster ${hosterId} has ${quotaLeft} downloads quota left`,
-    );
-    return quotaLeft;
+  /*
+		create a function to get the quota left for a hoster
+		should consider the quota for each period (monthly, daily, hourly) and get the min value as the quota left for the hoster
+		if a hoster has no quota, return null
+	*/
+  async getQuotaLeft(hosterId: string): Promise<number | null> {
+    const hosterQuotas = await this.listHosterQuotasLeft(hosterId);
+    return hosterQuotas ? getMinValueFromObjectValues(hosterQuotas) : null;
   }
 
+  /*
+		list the quota for a hoster by period (monthly, daily, hourly)
+	*/
   async listQuotasByHosterId(hosterId: string): Promise<HosterQuotas> {
-    this.logger.log(`Getting quotas for hoster ${hosterId}`);
-    return this.hosterQuotasRepository.getQuotasByHosterId(hosterId);
+    const hosterQuotas = await this.hosterQuotasRepository.getQuotasByHosterId(
+      hosterId,
+    );
+    this.logger.log(`listQuotasByHosterId: ${JSON.stringify(hosterQuotas)}`);
+    return hosterQuotas;
   }
 
+  /*
+		list the quota used for a hoster by period (monthly, daily, hourly)
+	*/
   async listHosterQuotasUsed(hosterId: string): Promise<HosterQuotas> {
-    return this.hosterQuotasRepository.countUsedDownloadsQuota(hosterId);
+    const hosterQuotasUsed =
+      await this.hosterQuotasRepository.countUsedDownloadsQuota(hosterId);
+    this.logger.log(
+      `listHosterQuotasUsed: ${JSON.stringify(hosterQuotasUsed)}`,
+    );
+    return hosterQuotasUsed;
   }
 
-  async listHosterQuotasLeft(hosterId: string): Promise<HosterQuotas | null> {
+  /*
+		list the quota left for a hoster by period (monthly, daily, hourly)
+	*/
+  async listHosterQuotasLeft(hosterId: string): Promise<HosterQuotas> {
     const hosterQuotas = await this.listQuotasByHosterId(hosterId);
     const hosterQuotasUsed = await this.listHosterQuotasUsed(hosterId);
-    return hosterQuotas && subtractObjects(hosterQuotas, hosterQuotasUsed);
+    const hosterQuotasLeft = subtractObjects(hosterQuotas, hosterQuotasUsed);
+    this.logger.log(
+      `listHosterQuotasLeft: ${JSON.stringify(hosterQuotasLeft)}`,
+    );
+    return hosterQuotas && hosterQuotasLeft;
   }
 }
