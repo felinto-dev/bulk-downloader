@@ -39,7 +39,8 @@ describe(HosterQuotasService.name, () => {
   };
 
   describe(HosterQuotasService.prototype.getQuotaLeft.name, () => {
-    it('should get the min value from differents periods', async () => {
+    // suggest a better test name
+    it('should return the quota left for a hoster considering the quota for each period e.g. (monthly, daily, hourly) and get the min value as the quota left for the hoster', async () => {
       mockedHosterLimitsRepository.getQuotasByHosterId.mockResolvedValueOnce(
         hosterQuotas,
       );
@@ -50,6 +51,19 @@ describe(HosterQuotasService.name, () => {
       const result = await service.getQuotaLeft('123');
 
       expect(result).toEqual(70);
+    });
+
+    it('should return -1 to means "unlimited" quota', async () => {
+      mockedHosterLimitsRepository.getQuotasByHosterId.mockResolvedValueOnce(
+        {},
+      );
+      mockedHosterLimitsRepository.countUsedDownloadsQuota.mockResolvedValueOnce(
+        hosterQuotasUsed,
+      );
+
+      const result = await service.getQuotaLeft('123');
+
+      expect(result).toEqual(-1);
     });
   });
 

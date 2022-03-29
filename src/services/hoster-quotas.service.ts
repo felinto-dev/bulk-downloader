@@ -1,3 +1,4 @@
+import { UNLIMITED_QUOTA } from '@/consts/quotas';
 import { HosterQuotas } from '@/dto/hoster-quotas.dto';
 import { HosterQuotaRepository } from '@/repositories/hoster-quota.repository';
 import { getMinValueFromObjectValues } from '@/utils/objects';
@@ -14,9 +15,11 @@ export class HosterQuotasService {
 		should consider the quota for each period (monthly, daily, hourly) and get the min value as the quota left for the hoster
 		if a hoster has no quota, return null
 	*/
-  async getQuotaLeft(hosterId: string): Promise<number | null> {
+  async getQuotaLeft(hosterId: string): Promise<number> {
     const hosterQuotas = await this.listHosterQuotasLeft(hosterId);
-    return hosterQuotas ? getMinValueFromObjectValues(hosterQuotas) : null;
+    const quotaLeft = getMinValueFromObjectValues(hosterQuotas);
+    this.logger.log(`The quota left for hosterId: ${hosterId} is ${quotaLeft}`);
+    return Object.keys(hosterQuotas).length === 0 ? UNLIMITED_QUOTA : quotaLeft;
   }
 
   /*
@@ -53,9 +56,11 @@ export class HosterQuotasService {
       hosterQuotasUsed,
     );
     this.logger.log(
-      `listHosterQuotasLeft: ${JSON.stringify(hosterQuotasLeft)}`,
+      `listing hosterQuotasLeft for hosterId: ${hosterId}\n${JSON.stringify(
+        hosterQuotasLeft,
+      )}`,
     );
-    return hosterQuotas && hosterQuotasLeft;
+    return hosterQuotasLeft;
   }
 
   private calculateHosterQuotaLeft(
