@@ -8,7 +8,7 @@ import { PrismaPromise } from '@prisma/client';
 export class HosterQuotaRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getQuotasByHosterId(hosterId: string) {
+  async getQuotasByHosterId(hosterId: string): Promise<HosterQuotas> {
     return this.prisma.hosterQuota.findUnique({
       where: { hosterId },
       select: {
