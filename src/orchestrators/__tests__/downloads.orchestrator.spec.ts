@@ -60,5 +60,19 @@ describe(DownloadsOrquestrator.name, () => {
       await service.pullDownloads();
       expect(mockedQueue.add).not.toHaveBeenCalled();
     });
+
+    it('should do not add download to the queue when hosterQuotaService.hasReachedQuota returns true', async () => {
+      service.queueActiveDownloadsQuotaLeft = jest
+        .fn()
+        .mockResolvedValueOnce(10);
+      repository.findNextDownload = jest.fn().mockResolvedValueOnce({
+        hoster: 'hoster',
+      });
+      mockedHosterQuotasService.hasReachedQuota = jest
+        .fn()
+        .mockResolvedValueOnce(true);
+      await service.pullDownloads();
+      expect(mockedQueue.add).not.toHaveBeenCalled();
+    });
   });
 });

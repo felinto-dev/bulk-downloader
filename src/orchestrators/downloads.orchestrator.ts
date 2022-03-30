@@ -41,6 +41,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
 
 		1. Should check if the quota left for the queue is 0. If it is, do not look for downloads in database.
 		2. When do not find any downloads in database, abort the function.
+		3. Check if the download hoster has reached its quota. If it has, abort the function.
 
 	 * @returns {Promise<void>}
    */
@@ -58,6 +59,16 @@ export class DownloadsOrquestrator implements OnModuleInit {
       this.logger.verbose('No downloads in database for pulling');
       return;
     }
+
+    const { hosterId } = nextDownload;
+    const hosterQuotaLeft = await this.hosterQuotaService.getHosterQuotaLeft(
+      hosterId,
+    );
+    if (hosterQuotaLeft === 0) {
+      this.logger.verbose('Hoster quota reached');
+      return;
+    }
+    this.logger.verbose('Hoster quota left:', hosterQuotaLeft);
   }
 
   async categorizeDownloadAndPullNextDownload(

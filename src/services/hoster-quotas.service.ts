@@ -28,6 +28,11 @@ export class HosterQuotasService {
       : quotaLeft;
   }
 
+  async hasReachedQuota(hosterId: string): Promise<boolean> {
+    const quotaLeft = await this.getHosterQuotaLeft(hosterId);
+    return quotaLeft === 0;
+  }
+
   private calculateNextQuotaRenews(hosterQuotasLeft: HosterQuotas): Date {
     let nextQuotaRenews: Date;
     if (hosterQuotasLeft.monthlyDownloadLimit === 0) {
