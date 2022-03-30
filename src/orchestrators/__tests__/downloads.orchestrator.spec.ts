@@ -61,7 +61,7 @@ describe(DownloadsOrquestrator.name, () => {
       expect(mockedQueue.add).not.toHaveBeenCalled();
     });
 
-    it('should do not add download to the queue when hosterQuotaService.hasReachedQuota returns true', async () => {
+    it('should do not add download to the queue when hoster has reached quota', async () => {
       service.queueActiveDownloadsQuotaLeft = jest
         .fn()
         .mockResolvedValueOnce(10);
