@@ -38,7 +38,7 @@ describe(HosterQuotasService.name, () => {
     hourlyDownloadLimit: 30,
   };
 
-  describe(HosterQuotasService.prototype.getQuotaLeft.name, () => {
+  describe(HosterQuotasService.prototype.getHosterQuotaLeft.name, () => {
     // suggest a better test name
     it('should return the quota left for a hoster considering the quota for each period e.g. (monthly, daily, hourly) and get the min value as the quota left for the hoster', async () => {
       mockedHosterLimitsRepository.getQuotasByHosterId.mockResolvedValueOnce(
@@ -48,7 +48,7 @@ describe(HosterQuotasService.name, () => {
         hosterQuotasUsed,
       );
 
-      const result = await service.getQuotaLeft('123');
+      const result = await service.getHosterQuotaLeft('123');
 
       expect(result).toEqual(70);
     });
@@ -61,7 +61,7 @@ describe(HosterQuotasService.name, () => {
         hosterQuotasUsed,
       );
 
-      const result = await service.getQuotaLeft('123');
+      const result = await service.getHosterQuotaLeft('123');
 
       expect(result).toEqual(-1);
     });

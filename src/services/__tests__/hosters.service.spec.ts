@@ -1,7 +1,6 @@
 import { HostersRepository } from '@/repositories/hosters.repository';
 import { createMock } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
-import { HosterQuotasService } from '../hoster-quotas.service';
 import { HostersService } from '../hosters.service';
 
 describe(HostersService.name, () => {
@@ -16,10 +15,6 @@ describe(HostersService.name, () => {
         {
           provide: HostersRepository,
           useValue: mockedHostersRepository,
-        },
-        {
-          provide: HosterQuotasService,
-          useValue: createMock<HosterQuotasService>(),
         },
       ],
     }).compile();
