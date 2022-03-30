@@ -3,6 +3,7 @@ import { DOWNLOADS_PROCESSING_QUEUE } from '@/consts/queues';
 import { DownloadJobDto } from '@/dto/download.job.dto';
 import { DownloadsRepository } from '@/repositories/downloads.repository';
 import { HosterQuotasService } from '@/services/hoster-quotas.service';
+import { sumMapValues } from '@/utils/objects';
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { DownloadStatus } from '@prisma/client';
@@ -23,8 +24,14 @@ export class DownloadsOrquestrator implements OnModuleInit {
 
   private readonly logger: Logger = new Logger(DownloadsOrquestrator.name);
 
+  public readonly hosterConcurrentDownloadsCounter: Map<string, number> =
+    new Map();
+
   async queueActiveDownloadsQuotaLeft() {
-    return GLOBAL_DOWNLOADS_CONCURRENCY - (await this.queue.getActiveCount());
+    const hosterConcurrentDownloadsQuotaLeft = sumMapValues(
+      this.hosterConcurrentDownloadsCounter,
+    );
+    return GLOBAL_DOWNLOADS_CONCURRENCY - hosterConcurrentDownloadsQuotaLeft;
   }
 
   async pullDownloads() {
@@ -51,6 +58,21 @@ export class DownloadsOrquestrator implements OnModuleInit {
         nextDownload = await this.downloadsRepository.findNextDownload();
         continue;
       }
+
+      // if hoster quota left is not 0, then we can process to add this download to the queue
+      this.hosterConcurrentDownloadsCounter.set(
+        nextDownload.hosterId,
+        this.hosterConcurrentDownloadsCounter.get(nextDownload.hosterId) + 1 ||
+          1,
+      );
+      this.logger.verbose(
+        `Hoster ${
+          nextDownload.hosterId
+        } has ${this.hosterConcurrentDownloadsCounter.get(
+          nextDownload.hosterId,
+        )} active downloads`,
+      );
+      this.queue.add(nextDownload);
     }
 
     if (!nextDownload) {

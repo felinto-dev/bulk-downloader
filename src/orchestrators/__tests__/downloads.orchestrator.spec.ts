@@ -13,6 +13,8 @@ describe(DownloadsOrquestrator.name, () => {
   let repository: DownloadsRepository;
 
   const mockedQueue = createMock<Queue<DownloadJobDto>>();
+  const mockedHosterQuotasService = createMock<HosterQuotasService>();
+  const mockedDownloadsRepository = createMock<DownloadsRepository>();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -24,11 +26,11 @@ describe(DownloadsOrquestrator.name, () => {
         },
         {
           provide: DownloadsRepository,
-          useValue: createMock<DownloadsRepository>(),
+          useValue: mockedDownloadsRepository,
         },
         {
           provide: HosterQuotasService,
-          useValue: createMock<HosterQuotasService>(),
+          useValue: mockedHosterQuotasService,
         },
       ],
     }).compile();
@@ -48,14 +50,6 @@ describe(DownloadsOrquestrator.name, () => {
         .mockResolvedValueOnce(0);
       await service.pullDownloads();
       expect(repository.findNextDownload).not.toHaveBeenCalled();
-    });
-    it('should look for downloads in database when the quota left for queue is not 0', async () => {
-      service.queueActiveDownloadsQuotaLeft = jest
-        .fn()
-        .mockResolvedValueOnce(1);
-      repository.findNextDownload = jest.fn().mockResolvedValueOnce(null);
-      await service.pullDownloads();
-      expect(repository.findNextDownload).toHaveBeenCalled();
     });
   });
 });
