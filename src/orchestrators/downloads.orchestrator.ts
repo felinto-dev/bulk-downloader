@@ -36,49 +36,19 @@ export class DownloadsOrquestrator implements OnModuleInit {
     );
   }
 
+  /*
+   * Pulls the next download from the database and queues it for processing.
+
+		1. Should check if the quota left for the queue is 0. If it is, do not look for downloads in database.
+
+	 * @returns {Promise<void>}
+   */
   async pullDownloads() {
     this.logger.verbose('Pulling downloads...');
 
     const activeDownloadsQuotaLeft = await this.queueActiveDownloadsQuotaLeft();
     if (activeDownloadsQuotaLeft === 0) {
       this.logger.verbose('No active downloads quota left');
-      return;
-    }
-
-    let nextDownload = await this.downloadsRepository.findNextDownload();
-
-    while (activeDownloadsQuotaLeft > 0 && nextDownload) {
-      const hosterQuotaLeft = await this.hosterQuotaService.getQuotaLeft(
-        nextDownload.hosterId,
-      );
-
-      if (hosterQuotaLeft === 0) {
-        this.logger.verbose(
-          'No quota left for hosterId: ' + nextDownload.hosterId,
-        );
-        // should find another download to process and skip this one
-        nextDownload = await this.downloadsRepository.findNextDownload();
-        continue;
-      }
-
-      // if hoster quota left is not 0, then we can process to add this download to the queue
-      this.hosterConcurrentDownloadsCounter.set(
-        nextDownload.hosterId,
-        this.hosterConcurrentDownloadsCounter.get(nextDownload.hosterId) + 1 ||
-          1,
-      );
-      this.logger.verbose(
-        `Hoster ${
-          nextDownload.hosterId
-        } has ${this.hosterConcurrentDownloadsCounter.get(
-          nextDownload.hosterId,
-        )} active downloads`,
-      );
-      this.queue.add(nextDownload);
-    }
-
-    if (!nextDownload) {
-      this.logger.verbose('No downloads to process');
       return;
     }
   }
