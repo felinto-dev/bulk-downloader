@@ -1,4 +1,4 @@
-import { GLOBAL_DOWNLOADS_CONCURRENCY } from '@/consts/app';
+import { MAX_CONCURRENT_DOWNLOADS_ALLOWED } from '@/consts/app';
 import { DOWNLOADS_PROCESSING_QUEUE } from '@/consts/queues';
 import { DownloadJobDto } from '@/dto/download.job.dto';
 import { DownloadsRepository } from '@/repositories/downloads.repository';
@@ -31,7 +31,9 @@ export class DownloadsOrquestrator implements OnModuleInit {
     const hosterConcurrentDownloadsQuotaLeft = sumMapValues(
       this.hosterConcurrentDownloadsCounter,
     );
-    return GLOBAL_DOWNLOADS_CONCURRENCY - hosterConcurrentDownloadsQuotaLeft;
+    return (
+      MAX_CONCURRENT_DOWNLOADS_ALLOWED - hosterConcurrentDownloadsQuotaLeft
+    );
   }
 
   async pullDownloads() {

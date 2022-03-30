@@ -1,5 +1,5 @@
 import { DOWNLOAD_CLIENT } from '@/adapters/tokens';
-import { GLOBAL_DOWNLOADS_CONCURRENCY } from '@/consts/app';
+import { MAX_CONCURRENT_DOWNLOADS_ALLOWED } from '@/consts/app';
 import { DOWNLOADS_PROCESSING_QUEUE } from '@/consts/queues';
 import { DownloadJobDto } from '@/dto/download.job.dto';
 import { DownloadClientInterface } from '@/interfaces/download-client.interface';
@@ -26,7 +26,7 @@ export class DownloadsProcessingConsumer {
     private readonly downloadsRepository: DownloadsRepository,
   ) {}
 
-  @Process({ concurrency: GLOBAL_DOWNLOADS_CONCURRENCY })
+  @Process({ concurrency: MAX_CONCURRENT_DOWNLOADS_ALLOWED })
   async onDownload(job: Job<DownloadJobDto>) {
     const { url, downloadId, hosterId } = job.data;
     await this.downloadsRepository.changeDownloadStatus(
