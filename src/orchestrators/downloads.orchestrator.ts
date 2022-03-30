@@ -1,11 +1,8 @@
 import { GLOBAL_DOWNLOADS_CONCURRENCY } from '@/consts/app';
 import { DOWNLOADS_PROCESSING_QUEUE } from '@/consts/queues';
-import { PendingDownload } from '@/database/interfaces/pending-download';
 import { DownloadJobDto } from '@/dto/download.job.dto';
 import { DownloadsRepository } from '@/repositories/downloads.repository';
 import { HosterQuotasService } from '@/services/hoster-quotas.service';
-import { HostersService } from '@/services/hosters.service';
-import { replaceNegativeValueWithZero } from '@/utils/math';
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { DownloadStatus } from '@prisma/client';
@@ -17,7 +14,6 @@ export class DownloadsOrquestrator implements OnModuleInit {
     @InjectQueue(DOWNLOADS_PROCESSING_QUEUE)
     private readonly queue: Queue<DownloadJobDto>,
     private readonly downloadsRepository: DownloadsRepository,
-    private readonly hostersService: HostersService,
     private readonly hosterQuotaService: HosterQuotasService,
   ) {}
 
@@ -33,63 +29,33 @@ export class DownloadsOrquestrator implements OnModuleInit {
 
   async pullDownloads() {
     this.logger.verbose('Pulling downloads...');
-    const hoster = await this.hostersService.findHosterReadyToPull();
 
-    if (hoster) {
-      hoster.maxConcurrentDownloads = Math.min(
-        hoster.maxConcurrentDownloads,
-        await this.queueActiveDownloadsQuotaLeft(),
-      );
-      await this.pullDownloadsByHosterId(
-        hoster.hosterId,
-        hoster.maxConcurrentDownloads,
-      );
-      return this.pullDownloads();
+    const activeDownloadsQuotaLeft = await this.queueActiveDownloadsQuotaLeft();
+    if (activeDownloadsQuotaLeft === 0) {
+      this.logger.verbose('No active downloads quota left');
+      return;
     }
 
-    this.logger.verbose('No hoster ready to pull found');
-  }
+    let nextDownload = await this.downloadsRepository.findNextDownload();
 
-  async pullDownloadsByHosterId(hosterId: string, concurrency = 1) {
-    const downloadsConcurrencyLimit = replaceNegativeValueWithZero(
-      Math.min(
-        await this.hosterQuotaService.getQuotaLeft(hosterId),
-        concurrency,
-      ),
-    );
-
-    const pendingDownloads =
-      await this.downloadsRepository.getPendingDownloadsByHosterId(
-        hosterId,
-        downloadsConcurrencyLimit,
+    while (activeDownloadsQuotaLeft > 0 && nextDownload) {
+      const hosterQuotaLeft = await this.hosterQuotaService.getQuotaLeft(
+        nextDownload.hosterId,
       );
 
-    this.logger.verbose(
-      `Adding ${downloadsConcurrencyLimit} pending download(s) for hoster id "${hosterId}":`,
-    );
-    await this.addBulkDownloadsToQueue(pendingDownloads);
-
-    if (pendingDownloads.length === 0) {
-      this.logger.verbose(
-        `There are no more downloads available for hoster id "${hosterId}", so the spot will be offered to another hoster.`,
-      );
-      await this.pullDownloads();
+      if (hosterQuotaLeft === 0) {
+        this.logger.verbose(
+          'No quota left for hosterId: ' + nextDownload.hosterId,
+        );
+        // should find another download to process and skip this one
+        nextDownload = await this.downloadsRepository.findNextDownload();
+        continue;
+      }
     }
-  }
 
-  private async addBulkDownloadsToQueue(downloads: PendingDownload[]) {
-    if ((await this.queueActiveDownloadsQuotaLeft()) >= downloads.length) {
-      this.logger.verbose(JSON.stringify(downloads));
-      await this.queue.addBulk(
-        downloads.map((download) => ({
-          data: {
-            url: download.url,
-            hosterId: download.hosterId,
-            downloadId: download.downloadId,
-          },
-          opts: { jobId: `${download.hosterId}/${download.downloadId}` },
-        })),
-      );
+    if (!nextDownload) {
+      this.logger.verbose('No downloads to process');
+      return;
     }
   }
 
@@ -103,6 +69,6 @@ export class DownloadsOrquestrator implements OnModuleInit {
       hosterId,
       downloadStatus,
     );
-    await this.pullDownloadsByHosterId(hosterId);
+    await this.pullDownloads();
   }
 }

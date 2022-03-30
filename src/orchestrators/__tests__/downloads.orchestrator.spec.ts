@@ -2,7 +2,6 @@ import { DOWNLOADS_PROCESSING_QUEUE } from '@/consts/queues';
 import { DownloadJobDto } from '@/dto/download.job.dto';
 import { DownloadsRepository } from '@/repositories/downloads.repository';
 import { HosterQuotasService } from '@/services/hoster-quotas.service';
-import { HostersService } from '@/services/hosters.service';
 import { createMock } from '@golevelup/ts-jest';
 import { getQueueToken } from '@nestjs/bull';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -11,6 +10,9 @@ import { DownloadsOrquestrator } from '../downloads.orchestrator';
 
 describe(DownloadsOrquestrator.name, () => {
   let service: DownloadsOrquestrator;
+  let repository: DownloadsRepository;
+
+  const mockedQueue = createMock<Queue<DownloadJobDto>>();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -18,15 +20,11 @@ describe(DownloadsOrquestrator.name, () => {
         DownloadsOrquestrator,
         {
           provide: getQueueToken(DOWNLOADS_PROCESSING_QUEUE),
-          useValue: createMock<Queue<DownloadJobDto>>(),
+          useValue: mockedQueue,
         },
         {
           provide: DownloadsRepository,
           useValue: createMock<DownloadsRepository>(),
-        },
-        {
-          provide: HostersService,
-          useValue: createMock<HostersService>(),
         },
         {
           provide: HosterQuotasService,
@@ -36,9 +34,28 @@ describe(DownloadsOrquestrator.name, () => {
     }).compile();
 
     service = module.get<DownloadsOrquestrator>(DownloadsOrquestrator);
+    repository = module.get<DownloadsRepository>(DownloadsRepository);
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  describe(DownloadsOrquestrator.prototype.pullDownloads.name, () => {
+    it('should do not look for downloads in database when the quota left for queue is 0', async () => {
+      service.queueActiveDownloadsQuotaLeft = jest
+        .fn()
+        .mockResolvedValueOnce(0);
+      await service.pullDownloads();
+      expect(repository.findNextDownload).not.toHaveBeenCalled();
+    });
+    it('should look for downloads in database when the quota left for queue is not 0', async () => {
+      service.queueActiveDownloadsQuotaLeft = jest
+        .fn()
+        .mockResolvedValueOnce(1);
+      repository.findNextDownload = jest.fn().mockResolvedValueOnce(null);
+      await service.pullDownloads();
+      expect(repository.findNextDownload).toHaveBeenCalled();
+    });
   });
 });
