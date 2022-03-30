@@ -11,7 +11,7 @@ export class HosterQuotasService {
 
   private readonly logger: Logger = new Logger(HosterQuotasService.name);
 
-  async getQuotaLeft(hosterId: string): Promise<number> {
+  async getHosterQuotaLeft(hosterId: string): Promise<number> {
     const hosterQuotasLeft = await this.listHosterQuotasLeft(hosterId);
     const quotaLeft = getMinValueFromObjectValues(hosterQuotasLeft);
     this.logger.log(`The quota left for hosterId: ${hosterId} is ${quotaLeft}`);

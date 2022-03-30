@@ -51,5 +51,14 @@ describe(DownloadsOrquestrator.name, () => {
       await service.pullDownloads();
       expect(repository.findNextDownload).not.toHaveBeenCalled();
     });
+
+    it('should do not add any download to the queue when repository.findNextDownload returns null', async () => {
+      service.queueActiveDownloadsQuotaLeft = jest
+        .fn()
+        .mockResolvedValueOnce(10);
+      repository.findNextDownload = jest.fn().mockResolvedValueOnce({});
+      await service.pullDownloads();
+      expect(mockedQueue.add).not.toHaveBeenCalled();
+    });
   });
 });

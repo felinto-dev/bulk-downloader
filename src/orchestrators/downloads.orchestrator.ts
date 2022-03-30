@@ -40,6 +40,9 @@ export class DownloadsOrquestrator implements OnModuleInit {
    * Pulls the next download from the database and queues it for processing.
 
 		1. Should check if the quota left for the queue is 0. If it is, do not look for downloads in database.
+		2. While the quota left for the queue is not 0, look for the next download in database.
+		2.1. If there is no download in database, do not look for downloads in database.
+		2.2. When found a download in database, check if the hoster quota left for download is 0. If it is, do not queue the download and look for the next download in database.
 
 	 * @returns {Promise<void>}
    */
@@ -49,6 +52,12 @@ export class DownloadsOrquestrator implements OnModuleInit {
     const activeDownloadsQuotaLeft = await this.queueActiveDownloadsQuotaLeft();
     if (activeDownloadsQuotaLeft === 0) {
       this.logger.verbose('No active downloads quota left');
+      return;
+    }
+
+    const nextDownload = await this.downloadsRepository.findNextDownload();
+    if (!nextDownload) {
+      this.logger.verbose('No next download');
       return;
     }
   }
