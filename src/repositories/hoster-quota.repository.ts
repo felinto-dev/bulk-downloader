@@ -42,4 +42,11 @@ export class HosterQuotaRepository {
 
     return { monthlyDownloadLimit, dailyDownloadLimit, hourlyDownloadLimit };
   }
+
+  async updateQuotaRenewsAt(hosterId: string, date: Date): Promise<void> {
+    await this.prisma.hosterQuota.update({
+      where: { hosterId },
+      data: { quotaRenewsAt: date },
+    });
+  }
 }

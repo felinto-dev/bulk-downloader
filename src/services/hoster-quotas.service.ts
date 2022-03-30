@@ -1,3 +1,4 @@
+import { nextQuotaRenewsByPeriod } from '@/consts/next-quota-renews-by-period';
 import { UNLIMITED_QUOTA } from '@/consts/quotas';
 import { HosterQuotas } from '@/dto/hoster-quotas.dto';
 import { HosterQuotaRepository } from '@/repositories/hoster-quota.repository';
@@ -10,21 +11,38 @@ export class HosterQuotasService {
 
   private readonly logger: Logger = new Logger(HosterQuotasService.name);
 
-  /*
-		create a function to get the quota left for a hoster
-		should consider the quota for each period (monthly, daily, hourly) and get the min value as the quota left for the hoster
-		if a hoster has no quota, return null
-	*/
   async getQuotaLeft(hosterId: string): Promise<number> {
-    const hosterQuotas = await this.listHosterQuotasLeft(hosterId);
-    const quotaLeft = getMinValueFromObjectValues(hosterQuotas);
+    const hosterQuotasLeft = await this.listHosterQuotasLeft(hosterId);
+    const quotaLeft = getMinValueFromObjectValues(hosterQuotasLeft);
     this.logger.log(`The quota left for hosterId: ${hosterId} is ${quotaLeft}`);
-    return Object.keys(hosterQuotas).length === 0 ? UNLIMITED_QUOTA : quotaLeft;
+
+    if (quotaLeft === 0) {
+      await this.hosterQuotasRepository.updateQuotaRenewsAt(
+        hosterId,
+        this.calculateNextQuotaRenews(hosterQuotasLeft),
+      );
+    }
+
+    return Object.keys(hosterQuotasLeft).length === 0
+      ? UNLIMITED_QUOTA
+      : quotaLeft;
   }
 
-  /*
-		list the quota for a hoster by period (monthly, daily, hourly)
-	*/
+  private calculateNextQuotaRenews(hosterQuotasLeft: HosterQuotas): Date {
+    let nextQuotaRenews: Date;
+    if (hosterQuotasLeft.monthlyDownloadLimit === 0) {
+      nextQuotaRenews = nextQuotaRenewsByPeriod.monthly;
+    }
+    if (hosterQuotasLeft.dailyDownloadLimit === 0) {
+      nextQuotaRenews = nextQuotaRenewsByPeriod.daily;
+    }
+    if (hosterQuotasLeft.hourlyDownloadLimit === 0) {
+      nextQuotaRenews = nextQuotaRenewsByPeriod.hourly;
+    }
+
+    return nextQuotaRenews;
+  }
+
   async listQuotasByHosterId(hosterId: string): Promise<HosterQuotas> {
     const hosterQuotas = await this.hosterQuotasRepository.getQuotasByHosterId(
       hosterId,
@@ -33,9 +51,6 @@ export class HosterQuotasService {
     return hosterQuotas;
   }
 
-  /*
-		list the quota used for a hoster by period (monthly, daily, hourly)
-	*/
   async listHosterQuotasUsed(hosterId: string): Promise<HosterQuotas> {
     const hosterQuotasUsed =
       await this.hosterQuotasRepository.countUsedDownloadsQuota(hosterId);
@@ -45,9 +60,6 @@ export class HosterQuotasService {
     return hosterQuotasUsed;
   }
 
-  /*
-		list the quota left for a hoster by period (monthly, daily, hourly)
-	*/
   async listHosterQuotasLeft(hosterId: string): Promise<HosterQuotas> {
     const hosterQuotas = await this.listQuotasByHosterId(hosterId);
     const hosterQuotasUsed = await this.listHosterQuotasUsed(hosterId);

@@ -1,4 +1,4 @@
-import { releaseAtDateFrame } from '@/consts/release-at-date-frame';
+import { nextQuotaRenewsByPeriod } from '@/consts/next-quota-renews-by-period';
 import { HosterReadyToPull } from '@/database/interfaces/hoster-ready-to-pull.interface';
 import { HosterQuotas } from '@/dto/hoster-quotas.dto';
 import { UpsertHosterInput } from '@/inputs/upsert-hoster.input';
@@ -54,12 +54,12 @@ export class HostersService {
   private calculateReleaseAtDateFrame(hosterLimits: HosterQuotas): Date {
     for (const [dateFrame, limit] of Object.entries(hosterLimits || {})) {
       if (limit === 0) {
-        return releaseAtDateFrame[dateFrame];
+        return nextQuotaRenewsByPeriod[dateFrame];
       }
     }
 
     // TODO: Avoid magic string
     // ⚠️ The goal is to prevent hoster from getting twice if this function is called concurrently.
-    return releaseAtDateFrame['hourly'];
+    return nextQuotaRenewsByPeriod['hourly'];
   }
 }

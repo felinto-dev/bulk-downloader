@@ -17,7 +17,6 @@ model Hoster {
   maxConcurrentDownloads Int                        @default(0)
   downloads              Download[]
   limits                 HosterQuota?
-  quotaRenewsAt          DateTime                   @default(now())
 }
 
 enum HosterAuthenticationMethod {
@@ -28,6 +27,7 @@ model HosterQuota {
   hourlyDownloadLimit  Int?
   dailyDownloadLimit   Int?
   monthlyDownloadLimit Int?
+  quotaRenewsAt        DateTime @default(now())
   updatedAt            DateTime @updatedAt
   hoster               Hoster   @relation(fields: [hosterId], references: [hosterId])
   hosterId             String   @id
