@@ -54,10 +54,10 @@ describe(DownloadsOrquestrator.name, () => {
     expect(service).toBeDefined();
   });
 
-  describe(DownloadsOrquestrator.prototype.pullDownloads.name, () => {
+  describe(DownloadsOrquestrator.prototype.getDownloads.name, () => {
     it('should abort if the active concurrent downloads quota left is 0', async () => {
-      service.canPullDownloads = jest.fn().mockReturnValueOnce(false);
-      await service.pullDownloads();
+      service.shouldPullDownloads = jest.fn().mockReturnValueOnce(false);
+      await service.getDownloads();
       expect(mockedQueue.add).not.toHaveBeenCalled();
     });
     it('should abort if there are no downloads in database for pulling', async () => {
@@ -65,11 +65,11 @@ describe(DownloadsOrquestrator.name, () => {
         1,
       );
       mockedDownloadsRepository.findNextDownload.mockResolvedValueOnce(null);
-      await service.pullDownloads();
+      await service.getDownloads();
       expect(mockedQueue.add).not.toHaveBeenCalled();
     });
     it('should look for another download in database if the hoster quota has been reached', async () => {
-      service.canPullDownloads = jest
+      service.shouldPullDownloads = jest
         .fn()
         .mockReturnValueOnce(true)
         .mockReturnValueOnce(true);
@@ -84,14 +84,14 @@ describe(DownloadsOrquestrator.name, () => {
         })
         .mockResolvedValueOnce(null);
       mockedHosterQuotasService.hasReachedQuota.mockResolvedValueOnce(true);
-      await service.pullDownloads();
+      await service.getDownloads();
       expect(mockedQueue.add).not.toHaveBeenCalled();
       expect(mockedDownloadsRepository.findNextDownload).toHaveBeenCalledTimes(
         2,
       );
     });
     it('should look for another download when the current hoster concurrent downloads is greater than or equal max concurrent downloads for hoster allowed', async () => {
-      service.canPullDownloads = jest
+      service.shouldPullDownloads = jest
         .fn()
         .mockReturnValueOnce(true)
         .mockReturnValueOnce(true);
@@ -109,14 +109,14 @@ describe(DownloadsOrquestrator.name, () => {
       mockedConcurrentHosterDownloadsOrchestrator.getHosterConcurrentDownloads.mockResolvedValueOnce(
         1,
       );
-      await service.pullDownloads();
+      await service.getDownloads();
       expect(mockedQueue.add).not.toHaveBeenCalled();
       expect(mockedDownloadsRepository.findNextDownload).toHaveBeenCalledTimes(
         2,
       );
     });
     it('should add the download to the queue', async () => {
-      service.canPullDownloads = jest
+      service.shouldPullDownloads = jest
         .fn()
         .mockReturnValueOnce(true)
         .mockReturnValueOnce(true);
@@ -132,7 +132,7 @@ describe(DownloadsOrquestrator.name, () => {
       mockedConcurrentHosterDownloadsOrchestrator.getHosterConcurrentDownloads.mockResolvedValueOnce(
         0,
       );
-      await service.pullDownloads();
+      await service.getDownloads();
       expect(queue.add).toHaveBeenCalledTimes(1);
     });
   });

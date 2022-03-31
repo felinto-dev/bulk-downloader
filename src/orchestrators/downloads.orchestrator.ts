@@ -20,18 +20,18 @@ export class DownloadsOrquestrator implements OnModuleInit {
   ) {}
 
   onModuleInit() {
-    this.pullDownloads();
+    this.getDownloads();
   }
 
   private readonly logger: Logger = new Logger(DownloadsOrquestrator.name);
 
-  canPullDownloads(): boolean {
+  shouldPullDownloads(): boolean {
     const concurrentDownloadsQuotaLeft =
       this.concurrentHosterDownloadsOrchestrator.getQuotaLeft();
     return concurrentDownloadsQuotaLeft > 0;
   }
 
-  async canDownload(download: PendingDownload): Promise<boolean> {
+  async shouldDownload(download: PendingDownload): Promise<boolean> {
     const { hosterId } = download;
 
     if (await this.hosterQuotaService.hasReachedQuota(hosterId)) {
@@ -65,10 +65,10 @@ export class DownloadsOrquestrator implements OnModuleInit {
 		2. When do not find any downloads in database, abort the function.
 		3. Check if the download hoster has reached its quota. If it has, abort the function.
    */
-  async pullDownloads() {
+  async getDownloads() {
     this.logger.verbose('Pulling downloads...');
 
-    if (!this.canPullDownloads()) {
+    if (!this.shouldPullDownloads()) {
       return;
     }
 
@@ -79,7 +79,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
     }
 
     while (nextDownload) {
-      if (await this.canDownload(nextDownload)) {
+      if (await this.shouldDownload(nextDownload)) {
         await this.queue.add(nextDownload);
         this.logger.verbose(`Queued download ${nextDownload.downloadId}`);
       }
@@ -87,7 +87,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
     }
   }
 
-  async categorizeDownloadAndPullNextDownload(
+  async processDownload(
     job: Job<DownloadJobDto>,
     downloadStatus: DownloadStatus,
   ) {
@@ -97,6 +97,6 @@ export class DownloadsOrquestrator implements OnModuleInit {
       hosterId,
       downloadStatus,
     );
-    await this.pullDownloads();
+    await this.getDownloads();
   }
 }

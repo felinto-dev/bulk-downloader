@@ -45,7 +45,7 @@ export class DownloadsProcessingConsumer {
 
   @OnQueueFailed()
   async onDownloadFail(job: Job<DownloadJobDto>) {
-    await this.downloadsOrquestrator.categorizeDownloadAndPullNextDownload(
+    await this.downloadsOrquestrator.processDownload(
       job,
       DownloadStatus.FAILED,
     );
@@ -53,7 +53,7 @@ export class DownloadsProcessingConsumer {
 
   @OnQueueCompleted()
   async onDownloadFinished(job: Job<DownloadJobDto>) {
-    await this.downloadsOrquestrator.categorizeDownloadAndPullNextDownload(
+    await this.downloadsOrquestrator.processDownload(
       job,
       DownloadStatus.SUCCESS,
     );

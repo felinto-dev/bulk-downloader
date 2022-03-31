@@ -8,6 +8,6 @@ export class DownloadsScheduler {
 
   @Cron(CronExpression.EVERY_30_MINUTES)
   async pullDownloads() {
-    await this.downloadsOrquestrator.pullDownloads();
+    await this.downloadsOrquestrator.getDownloads();
   }
 }
