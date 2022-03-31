@@ -67,5 +67,22 @@ describe(DownloadsOrquestrator.name, () => {
       await service.pullDownloads();
       expect(mockedQueue.add).not.toHaveBeenCalled();
     });
+    it('should look for another download in database if the hoster quota has been reached', async () => {
+      mockedConcurrentHosterDownloadsOrchestrator.getQuotaLeft = jest
+        .fn()
+        .mockReturnValueOnce(1);
+      mockedDownloadsRepository.findNextDownload = jest
+        .fn()
+        .mockResolvedValueOnce({ hosterId: 'hosterId' })
+        .mockResolvedValueOnce(null);
+      mockedHosterQuotasService.hasReachedQuota = jest
+        .fn()
+        .mockReturnValueOnce(true);
+      await service.pullDownloads();
+      expect(mockedQueue.add).not.toHaveBeenCalled();
+      expect(mockedDownloadsRepository.findNextDownload).toHaveBeenCalledTimes(
+        2,
+      );
+    });
   });
 });
