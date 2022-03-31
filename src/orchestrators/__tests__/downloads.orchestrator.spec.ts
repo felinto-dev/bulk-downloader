@@ -44,33 +44,16 @@ describe(DownloadsOrquestrator.name, () => {
   });
 
   describe(DownloadsOrquestrator.prototype.pullDownloads.name, () => {
-    it('should do not look for downloads in database when the quota left for queue is 0', async () => {
-      service.queueActiveDownloadsQuotaLeft = jest
-        .fn()
-        .mockResolvedValueOnce(0);
-      await service.pullDownloads();
-      expect(repository.findNextDownload).not.toHaveBeenCalled();
-    });
-
-    it('should do not add any download to the queue when repository.findNextDownload returns null', async () => {
-      service.queueActiveDownloadsQuotaLeft = jest
-        .fn()
-        .mockResolvedValueOnce(10);
-      repository.findNextDownload = jest.fn().mockResolvedValueOnce({});
+    it('should abort if the active concurrent downloads quota left is 0', async () => {
+      service.queueActiveDownloadsQuotaLeft = jest.fn().mockResolvedValue(0);
       await service.pullDownloads();
       expect(mockedQueue.add).not.toHaveBeenCalled();
     });
-
-    it('should do not add download to the queue when hoster has reached quota', async () => {
-      service.queueActiveDownloadsQuotaLeft = jest
+    it('should abort if there are no downloads in database for pulling', async () => {
+      service.queueActiveDownloadsQuotaLeft = jest.fn().mockResolvedValue(1);
+      mockedDownloadsRepository.findNextDownload = jest
         .fn()
-        .mockResolvedValueOnce(10);
-      repository.findNextDownload = jest.fn().mockResolvedValueOnce({
-        hoster: 'hoster',
-      });
-      mockedHosterQuotasService.hasReachedQuota = jest
-        .fn()
-        .mockResolvedValueOnce(true);
+        .mockResolvedValueOnce(null);
       await service.pullDownloads();
       expect(mockedQueue.add).not.toHaveBeenCalled();
     });

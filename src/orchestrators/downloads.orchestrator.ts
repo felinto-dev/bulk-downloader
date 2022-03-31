@@ -42,33 +42,39 @@ export class DownloadsOrquestrator implements OnModuleInit {
 		1. Should check if the quota left for the queue is 0. If it is, do not look for downloads in database.
 		2. When do not find any downloads in database, abort the function.
 		3. Check if the download hoster has reached its quota. If it has, abort the function.
-
-	 * @returns {Promise<void>}
    */
   async pullDownloads() {
     this.logger.verbose('Pulling downloads...');
 
     const activeDownloadsQuotaLeft = await this.queueActiveDownloadsQuotaLeft();
-    if (activeDownloadsQuotaLeft === 0) {
+    if (activeDownloadsQuotaLeft < 1) {
       this.logger.verbose('No active downloads quota left');
       return;
     }
 
-    const nextDownload = await this.downloadsRepository.findNextDownload();
+    let nextDownload = await this.downloadsRepository.findNextDownload();
     if (!nextDownload) {
       this.logger.verbose('No downloads in database for pulling');
       return;
     }
 
-    const { hosterId } = nextDownload;
-    const hosterQuotaLeft = await this.hosterQuotaService.getHosterQuotaLeft(
-      hosterId,
-    );
-    if (hosterQuotaLeft === 0) {
-      this.logger.verbose('Hoster quota reached');
-      return;
+    while (activeDownloadsQuotaLeft > 0 && nextDownload) {
+      const hosterQuotaLeft = await this.hosterQuotaService.getHosterQuotaLeft(
+        nextDownload.hosterId,
+      );
+      if (hosterQuotaLeft === 0) {
+        this.logger.verbose('Hoster quota reached');
+        return;
+      }
+      this.hosterConcurrentDownloadsCounter.set(
+        nextDownload.hosterId,
+        (this.hosterConcurrentDownloadsCounter.get(nextDownload.hosterId) ||
+          0) + 1,
+      );
+      this.queue.add(nextDownload);
+      this.logger.verbose(`Queued download ${nextDownload.downloadId}`);
+      nextDownload = await this.downloadsRepository.findNextDownload();
     }
-    this.logger.verbose('Hoster quota left:', hosterQuotaLeft);
   }
 
   async categorizeDownloadAndPullNextDownload(
