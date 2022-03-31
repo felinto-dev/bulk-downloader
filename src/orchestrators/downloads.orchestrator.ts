@@ -41,6 +41,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
       return;
     }
 
+    // TODO: Find next download should be a function in concurrent hoster downloads orchestrator.
     let nextDownload = await this.downloadsRepository.findNextDownload();
     if (!nextDownload) {
       this.logger.verbose('No downloads in database for pulling');
