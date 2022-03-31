@@ -34,9 +34,9 @@ export class DownloadsOrquestrator implements OnModuleInit {
   async pullDownloads() {
     this.logger.verbose('Pulling downloads...');
 
-    const activeDownloadsQuotaLeft =
+    const concurrentDownloadsQuotaLeft =
       this.concurrentHosterDownloadsOrchestrator.getQuotaLeft();
-    if (activeDownloadsQuotaLeft < 1) {
+    if (concurrentDownloadsQuotaLeft < 1) {
       this.logger.verbose('No active downloads quota left');
       return;
     }
@@ -47,11 +47,12 @@ export class DownloadsOrquestrator implements OnModuleInit {
       return;
     }
 
-    while (activeDownloadsQuotaLeft > 0 && nextDownload) {
+    while (concurrentDownloadsQuotaLeft > 0 && nextDownload) {
       const { hosterId, downloadId } = nextDownload;
       if (await this.hosterQuotaService.hasReachedQuota(hosterId)) {
         this.logger.verbose('Hoster quota reached');
-        return;
+        nextDownload = await this.downloadsRepository.findNextDownload();
+        continue;
       }
       await this.concurrentHosterDownloadsOrchestrator.increaseHosterConcurrentDownloads(
         hosterId,
