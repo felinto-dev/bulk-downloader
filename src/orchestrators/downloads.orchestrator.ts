@@ -54,10 +54,22 @@ export class DownloadsOrquestrator implements OnModuleInit {
         nextDownload = await this.downloadsRepository.findNextDownload();
         continue;
       }
-      await this.concurrentHosterDownloadsOrchestrator.increaseHosterConcurrentDownloads(
+      const currentHosterConcurrentDownloads =
+        await this.concurrentHosterDownloadsOrchestrator.getHosterConcurrentDownloads(
+          hosterId,
+        );
+      if (
+        currentHosterConcurrentDownloads >=
+        nextDownload.Hoster.maxConcurrentDownloads
+      ) {
+        this.logger.verbose('No concurrent downloads quota left');
+        nextDownload = await this.downloadsRepository.findNextDownload();
+        continue;
+      }
+      await this.concurrentHosterDownloadsOrchestrator.decrementQuotaLeft(
         hosterId,
       );
-      this.queue.add(nextDownload);
+      await this.queue.add(nextDownload);
       this.logger.verbose(`Queued download ${downloadId}`);
       nextDownload = await this.downloadsRepository.findNextDownload();
     }

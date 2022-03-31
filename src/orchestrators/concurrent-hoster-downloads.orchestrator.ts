@@ -16,12 +16,11 @@ export class ConcurrentHosterDownloadsOrchestrator {
       sumMapValues(this.hosterConcurrentDownloadsCounter)
     );
   }
-
   async getHosterConcurrentDownloads(hosterId: string): Promise<number> {
     return this.hosterConcurrentDownloadsCounter.get(hosterId) || 0;
   }
 
-  async increaseHosterConcurrentDownloads(hosterId: string): Promise<void> {
+  async decrementQuotaLeft(hosterId: string): Promise<void> {
     const hosterConcurrentDownloads =
       this.hosterConcurrentDownloadsCounter.get(hosterId) || 0;
     this.hosterConcurrentDownloadsCounter.set(

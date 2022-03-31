@@ -11,6 +11,7 @@ import { DownloadsOrquestrator } from '../downloads.orchestrator';
 
 describe(DownloadsOrquestrator.name, () => {
   let service: DownloadsOrquestrator;
+  let queue: Queue<DownloadJobDto>;
 
   const mockedQueue = createMock<Queue<DownloadJobDto>>();
   const mockedHosterQuotasService = createMock<HosterQuotasService>();
@@ -42,6 +43,7 @@ describe(DownloadsOrquestrator.name, () => {
     }).compile();
 
     service = module.get<DownloadsOrquestrator>(DownloadsOrquestrator);
+    queue = module.get(getQueueToken(DOWNLOADS_PROCESSING_QUEUE));
   });
 
   it('should be defined', () => {
@@ -83,6 +85,49 @@ describe(DownloadsOrquestrator.name, () => {
       expect(mockedDownloadsRepository.findNextDownload).toHaveBeenCalledTimes(
         2,
       );
+    });
+    it('should look for another download when the current hoster concurrent downloads is greater than max concurrent downloads for hoster allowed', async () => {
+      mockedConcurrentHosterDownloadsOrchestrator.getQuotaLeft = jest
+        .fn()
+        .mockReturnValueOnce(1);
+      mockedDownloadsRepository.findNextDownload = jest
+        .fn()
+        .mockResolvedValueOnce({
+          hosterId: 'hosterId',
+          maxConcurrentDownloads: 1,
+        })
+        .mockReturnValueOnce(null);
+      mockedHosterQuotasService.hasReachedQuota = jest
+        .fn()
+        .mockReturnValueOnce(false);
+      mockedConcurrentHosterDownloadsOrchestrator.getHosterConcurrentDownloads =
+        jest.fn().mockReturnValueOnce(1);
+      await service.pullDownloads();
+      expect(mockedQueue.add).not.toHaveBeenCalled();
+      expect(mockedDownloadsRepository.findNextDownload).toHaveBeenCalledTimes(
+        3,
+      );
+    });
+    it('should add the download to the queue', async () => {
+      mockedConcurrentHosterDownloadsOrchestrator.getQuotaLeft = jest
+        .fn()
+        .mockReturnValueOnce(1);
+      mockedDownloadsRepository.findNextDownload = jest
+        .fn()
+        .mockResolvedValueOnce({
+          hosterId: 'hosterId',
+          downloadId: 'downloadId',
+          url: 'url',
+          Hoster: { maxConcurrentDownloads: 1 },
+        })
+        .mockReturnValueOnce(null);
+      mockedHosterQuotasService.hasReachedQuota = jest
+        .fn()
+        .mockReturnValueOnce(false);
+      mockedConcurrentHosterDownloadsOrchestrator.getHosterConcurrentDownloads =
+        jest.fn().mockReturnValueOnce(0);
+      await service.pullDownloads();
+      expect(queue.add).toHaveBeenCalledTimes(1);
     });
   });
 });

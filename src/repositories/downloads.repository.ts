@@ -18,6 +18,14 @@ export class DownloadsRepository {
         status: DownloadStatus.PENDING,
         Hoster: { limits: { quotaRenewsAt: { lt: new Date() } } },
       },
+      select: {
+        url: true,
+        downloadId: true,
+        hosterId: true,
+        Hoster: {
+          select: { maxConcurrentDownloads: true },
+        },
+      },
     });
   }
 
@@ -80,18 +88,6 @@ export class DownloadsRepository {
           not: 'PENDING',
         },
       },
-    });
-  }
-
-  async getPendingDownloadsByHosterId(
-    id: string,
-    limit?: number,
-  ): Promise<PendingDownload[]> {
-    return this.prisma.download.findMany({
-      where: { hosterId: id, status: 'PENDING' },
-      orderBy: [{ priority: 'desc' }],
-      take: limit,
-      select: { url: true, downloadId: true, hosterId: true },
     });
   }
 
