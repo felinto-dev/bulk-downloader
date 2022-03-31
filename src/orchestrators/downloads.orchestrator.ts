@@ -51,10 +51,6 @@ export class DownloadsOrquestrator implements OnModuleInit {
       return false;
     }
 
-    await this.concurrentHosterDownloadsOrchestrator.decrementQuotaLeft(
-      hosterId,
-    );
-
     return true;
   }
 
@@ -74,6 +70,9 @@ export class DownloadsOrquestrator implements OnModuleInit {
     while (nextDownload) {
       if (await this.shouldDownload(nextDownload)) {
         await this.downloadsProcessingQueue.add(nextDownload);
+        await this.concurrentHosterDownloadsOrchestrator.decrementQuotaLeft(
+          nextDownload.hosterId,
+        );
         this.logger.verbose(`Queued download ${nextDownload.downloadId}`);
       }
       nextDownload = await this.downloadsRepository.findNextDownload();
