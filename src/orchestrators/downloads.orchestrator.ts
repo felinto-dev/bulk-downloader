@@ -24,6 +24,13 @@ export class DownloadsOrquestrator implements OnModuleInit {
 
   private readonly logger: Logger = new Logger(DownloadsOrquestrator.name);
 
+  canPullDownloads() {
+    const concurrentDownloadsQuotaLeft =
+      this.concurrentHosterDownloadsOrchestrator.getQuotaLeft();
+    console.log(concurrentDownloadsQuotaLeft);
+    return concurrentDownloadsQuotaLeft > 0;
+  }
+
   /*
    * Pulls the next download from the database and queues it for processing.
 
@@ -34,9 +41,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
   async pullDownloads() {
     this.logger.verbose('Pulling downloads...');
 
-    const concurrentDownloadsQuotaLeft =
-      this.concurrentHosterDownloadsOrchestrator.getQuotaLeft();
-    if (concurrentDownloadsQuotaLeft < 1) {
+    if (!this.canPullDownloads()) {
       this.logger.verbose('No active downloads quota left');
       return;
     }
@@ -47,7 +52,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
       return;
     }
 
-    while (concurrentDownloadsQuotaLeft > 0 && nextDownload) {
+    while (this.canPullDownloads() && nextDownload) {
       const { hosterId, downloadId } = nextDownload;
       if (await this.hosterQuotaService.hasReachedQuota(hosterId)) {
         this.logger.verbose('Hoster quota reached');

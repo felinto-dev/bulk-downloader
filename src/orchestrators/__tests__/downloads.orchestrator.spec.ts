@@ -56,9 +56,7 @@ describe(DownloadsOrquestrator.name, () => {
 
   describe(DownloadsOrquestrator.prototype.pullDownloads.name, () => {
     it('should abort if the active concurrent downloads quota left is 0', async () => {
-      mockedConcurrentHosterDownloadsOrchestrator.getQuotaLeft.mockReturnValueOnce(
-        0,
-      );
+      service.canPullDownloads = jest.fn().mockReturnValueOnce(false);
       await service.pullDownloads();
       expect(mockedQueue.add).not.toHaveBeenCalled();
     });
@@ -71,9 +69,10 @@ describe(DownloadsOrquestrator.name, () => {
       expect(mockedQueue.add).not.toHaveBeenCalled();
     });
     it('should look for another download in database if the hoster quota has been reached', async () => {
-      mockedConcurrentHosterDownloadsOrchestrator.getQuotaLeft.mockReturnValueOnce(
-        1,
-      );
+      service.canPullDownloads = jest
+        .fn()
+        .mockReturnValueOnce(true)
+        .mockReturnValueOnce(true);
       mockedDownloadsRepository.findNextDownload
         .mockResolvedValueOnce({
           hosterId: 'hosterId',
@@ -92,9 +91,10 @@ describe(DownloadsOrquestrator.name, () => {
       );
     });
     it('should look for another download when the current hoster concurrent downloads is greater than or equal max concurrent downloads for hoster allowed', async () => {
-      mockedConcurrentHosterDownloadsOrchestrator.getQuotaLeft.mockReturnValueOnce(
-        1,
-      );
+      service.canPullDownloads = jest
+        .fn()
+        .mockReturnValueOnce(true)
+        .mockReturnValueOnce(true);
       mockedDownloadsRepository.findNextDownload
         .mockResolvedValueOnce({
           hosterId: 'hosterId',
@@ -116,9 +116,10 @@ describe(DownloadsOrquestrator.name, () => {
       );
     });
     it('should add the download to the queue', async () => {
-      mockedConcurrentHosterDownloadsOrchestrator.getQuotaLeft.mockReturnValueOnce(
-        1,
-      );
+      service.canPullDownloads = jest
+        .fn()
+        .mockReturnValueOnce(true)
+        .mockReturnValueOnce(true);
       mockedDownloadsRepository.findNextDownload
         .mockResolvedValueOnce({
           hosterId: 'hosterId',
