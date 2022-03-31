@@ -1,4 +1,5 @@
 import { DOWNLOADS_PROCESSING_QUEUE } from '@/consts/queues';
+import { PendingDownload } from '@/database/interfaces/pending-download';
 import { DownloadJobDto } from '@/dto/download.job.dto';
 import { DownloadsRepository } from '@/repositories/downloads.repository';
 import { HosterQuotasService } from '@/services/hoster-quotas.service';
@@ -24,11 +25,37 @@ export class DownloadsOrquestrator implements OnModuleInit {
 
   private readonly logger: Logger = new Logger(DownloadsOrquestrator.name);
 
-  canPullDownloads() {
+  canPullDownloads(): boolean {
     const concurrentDownloadsQuotaLeft =
       this.concurrentHosterDownloadsOrchestrator.getQuotaLeft();
-    console.log(concurrentDownloadsQuotaLeft);
     return concurrentDownloadsQuotaLeft > 0;
+  }
+
+  async canDownload(download: PendingDownload): Promise<boolean> {
+    const { hosterId } = download;
+
+    if (await this.hosterQuotaService.hasReachedQuota(hosterId)) {
+      this.logger.verbose('Hoster quota reached');
+      return false;
+    }
+
+    const currentHosterConcurrentDownloads =
+      await this.concurrentHosterDownloadsOrchestrator.getHosterConcurrentDownloads(
+        hosterId,
+      );
+
+    if (
+      currentHosterConcurrentDownloads >= download.Hoster.maxConcurrentDownloads
+    ) {
+      this.logger.verbose('No concurrent downloads quota left');
+      return false;
+    }
+
+    await this.concurrentHosterDownloadsOrchestrator.decrementQuotaLeft(
+      hosterId,
+    );
+
+    return true;
   }
 
   /*
@@ -42,7 +69,6 @@ export class DownloadsOrquestrator implements OnModuleInit {
     this.logger.verbose('Pulling downloads...');
 
     if (!this.canPullDownloads()) {
-      this.logger.verbose('No active downloads quota left');
       return;
     }
 
@@ -52,30 +78,11 @@ export class DownloadsOrquestrator implements OnModuleInit {
       return;
     }
 
-    while (this.canPullDownloads() && nextDownload) {
-      const { hosterId, downloadId } = nextDownload;
-      if (await this.hosterQuotaService.hasReachedQuota(hosterId)) {
-        this.logger.verbose('Hoster quota reached');
-        nextDownload = await this.downloadsRepository.findNextDownload();
-        continue;
+    while (nextDownload) {
+      if (await this.canDownload(nextDownload)) {
+        await this.queue.add(nextDownload);
+        this.logger.verbose(`Queued download ${nextDownload.downloadId}`);
       }
-      const currentHosterConcurrentDownloads =
-        await this.concurrentHosterDownloadsOrchestrator.getHosterConcurrentDownloads(
-          hosterId,
-        );
-      if (
-        currentHosterConcurrentDownloads >=
-        nextDownload.Hoster.maxConcurrentDownloads
-      ) {
-        this.logger.verbose('No concurrent downloads quota left');
-        nextDownload = await this.downloadsRepository.findNextDownload();
-        continue;
-      }
-      await this.concurrentHosterDownloadsOrchestrator.decrementQuotaLeft(
-        hosterId,
-      );
-      await this.queue.add(nextDownload);
-      this.logger.verbose(`Queued download ${downloadId}`);
       nextDownload = await this.downloadsRepository.findNextDownload();
     }
   }
