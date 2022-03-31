@@ -10,7 +10,6 @@ import { DownloadsOrquestrator } from '../downloads.orchestrator';
 
 describe(DownloadsOrquestrator.name, () => {
   let service: DownloadsOrquestrator;
-  let repository: DownloadsRepository;
 
   const mockedQueue = createMock<Queue<DownloadJobDto>>();
   const mockedHosterQuotasService = createMock<HosterQuotasService>();
@@ -36,7 +35,6 @@ describe(DownloadsOrquestrator.name, () => {
     }).compile();
 
     service = module.get<DownloadsOrquestrator>(DownloadsOrquestrator);
-    repository = module.get<DownloadsRepository>(DownloadsRepository);
   });
 
   it('should be defined', () => {
