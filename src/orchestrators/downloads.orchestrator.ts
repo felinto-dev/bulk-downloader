@@ -19,8 +19,10 @@ export class DownloadsOrquestrator implements OnModuleInit {
     private readonly concurrentHosterDownloadsOrchestrator: ConcurrentHosterDownloadsOrchestrator,
   ) {}
 
-  onModuleInit() {
-    this.getDownloads();
+  async onModuleInit() {
+    if (this.shouldPullDownloads()) {
+      await this.getDownloads();
+    }
   }
 
   private readonly logger: Logger = new Logger(DownloadsOrquestrator.name);
