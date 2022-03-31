@@ -6,6 +6,7 @@ import { createMock } from '@golevelup/ts-jest';
 import { getQueueToken } from '@nestjs/bull';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Queue } from 'bull';
+import { ConcurrentHosterDownloadsOrchestrator } from '../concurrent-hoster-downloads.orchestrator';
 import { DownloadsOrquestrator } from '../downloads.orchestrator';
 
 describe(DownloadsOrquestrator.name, () => {
@@ -14,6 +15,8 @@ describe(DownloadsOrquestrator.name, () => {
   const mockedQueue = createMock<Queue<DownloadJobDto>>();
   const mockedHosterQuotasService = createMock<HosterQuotasService>();
   const mockedDownloadsRepository = createMock<DownloadsRepository>();
+  const mockedConcurrentHosterDownloadsOrchestrator =
+    createMock<ConcurrentHosterDownloadsOrchestrator>();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -31,6 +34,10 @@ describe(DownloadsOrquestrator.name, () => {
           provide: HosterQuotasService,
           useValue: mockedHosterQuotasService,
         },
+        {
+          provide: ConcurrentHosterDownloadsOrchestrator,
+          useValue: mockedConcurrentHosterDownloadsOrchestrator,
+        },
       ],
     }).compile();
 
@@ -43,12 +50,17 @@ describe(DownloadsOrquestrator.name, () => {
 
   describe(DownloadsOrquestrator.prototype.pullDownloads.name, () => {
     it('should abort if the active concurrent downloads quota left is 0', async () => {
-      service.queueActiveDownloadsQuotaLeft = jest.fn().mockResolvedValue(0);
+      mockedConcurrentHosterDownloadsOrchestrator.getQuotaLeft = jest
+        .fn()
+        .mockReturnValueOnce(0);
       await service.pullDownloads();
       expect(mockedQueue.add).not.toHaveBeenCalled();
     });
     it('should abort if there are no downloads in database for pulling', async () => {
-      service.queueActiveDownloadsQuotaLeft = jest.fn().mockResolvedValue(1);
+      mockedConcurrentHosterDownloadsOrchestrator.getQuotaLeft = jest
+        .fn()
+        .mockReturnValueOnce(1);
+
       mockedDownloadsRepository.findNextDownload = jest
         .fn()
         .mockResolvedValueOnce(null);

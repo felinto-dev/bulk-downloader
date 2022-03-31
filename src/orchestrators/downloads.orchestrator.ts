@@ -1,13 +1,12 @@
-import { MAX_CONCURRENT_DOWNLOADS_ALLOWED } from '@/consts/app';
 import { DOWNLOADS_PROCESSING_QUEUE } from '@/consts/queues';
 import { DownloadJobDto } from '@/dto/download.job.dto';
 import { DownloadsRepository } from '@/repositories/downloads.repository';
 import { HosterQuotasService } from '@/services/hoster-quotas.service';
-import { sumMapValues } from '@/utils/objects';
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { DownloadStatus } from '@prisma/client';
 import { Job, Queue } from 'bull';
+import { ConcurrentHosterDownloadsOrchestrator } from './concurrent-hoster-downloads.orchestrator';
 
 @Injectable()
 export class DownloadsOrquestrator implements OnModuleInit {
@@ -16,6 +15,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
     private readonly queue: Queue<DownloadJobDto>,
     private readonly downloadsRepository: DownloadsRepository,
     private readonly hosterQuotaService: HosterQuotasService,
+    private readonly concurrentHosterDownloadsOrchestrator: ConcurrentHosterDownloadsOrchestrator,
   ) {}
 
   onModuleInit() {
@@ -23,18 +23,6 @@ export class DownloadsOrquestrator implements OnModuleInit {
   }
 
   private readonly logger: Logger = new Logger(DownloadsOrquestrator.name);
-
-  public readonly hosterConcurrentDownloadsCounter: Map<string, number> =
-    new Map();
-
-  async queueActiveDownloadsQuotaLeft() {
-    const hosterConcurrentDownloadsQuotaLeft = sumMapValues(
-      this.hosterConcurrentDownloadsCounter,
-    );
-    return (
-      MAX_CONCURRENT_DOWNLOADS_ALLOWED - hosterConcurrentDownloadsQuotaLeft
-    );
-  }
 
   /*
    * Pulls the next download from the database and queues it for processing.
@@ -46,7 +34,8 @@ export class DownloadsOrquestrator implements OnModuleInit {
   async pullDownloads() {
     this.logger.verbose('Pulling downloads...');
 
-    const activeDownloadsQuotaLeft = await this.queueActiveDownloadsQuotaLeft();
+    const activeDownloadsQuotaLeft =
+      this.concurrentHosterDownloadsOrchestrator.getQuotaLeft();
     if (activeDownloadsQuotaLeft < 1) {
       this.logger.verbose('No active downloads quota left');
       return;
@@ -59,20 +48,16 @@ export class DownloadsOrquestrator implements OnModuleInit {
     }
 
     while (activeDownloadsQuotaLeft > 0 && nextDownload) {
-      const hosterQuotaLeft = await this.hosterQuotaService.getHosterQuotaLeft(
-        nextDownload.hosterId,
-      );
-      if (hosterQuotaLeft === 0) {
+      const { hosterId, downloadId } = nextDownload;
+      if (await this.hosterQuotaService.hasReachedQuota(hosterId)) {
         this.logger.verbose('Hoster quota reached');
         return;
       }
-      this.hosterConcurrentDownloadsCounter.set(
-        nextDownload.hosterId,
-        (this.hosterConcurrentDownloadsCounter.get(nextDownload.hosterId) ||
-          0) + 1,
+      await this.concurrentHosterDownloadsOrchestrator.increaseHosterConcurrentDownloads(
+        hosterId,
       );
       this.queue.add(nextDownload);
-      this.logger.verbose(`Queued download ${nextDownload.downloadId}`);
+      this.logger.verbose(`Queued download ${downloadId}`);
       nextDownload = await this.downloadsRepository.findNextDownload();
     }
   }
