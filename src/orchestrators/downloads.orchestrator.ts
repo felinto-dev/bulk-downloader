@@ -13,7 +13,7 @@ import { ConcurrentHosterDownloadsOrchestrator } from './concurrent-hoster-downl
 export class DownloadsOrquestrator implements OnModuleInit {
   constructor(
     @InjectQueue(DOWNLOADS_PROCESSING_QUEUE)
-    private readonly queue: Queue<DownloadJobDto>,
+    private readonly downloadsProcessingQueue: Queue<DownloadJobDto>,
     private readonly downloadsRepository: DownloadsRepository,
     private readonly hosterQuotaService: HosterQuotasService,
     private readonly concurrentHosterDownloadsOrchestrator: ConcurrentHosterDownloadsOrchestrator,
@@ -58,13 +58,6 @@ export class DownloadsOrquestrator implements OnModuleInit {
     return true;
   }
 
-  /*
-   * Pulls the next download from the database and queues it for processing.
-
-		1. Should check if the quota left for the queue is 0. If it is, do not look for downloads in database.
-		2. When do not find any downloads in database, abort the function.
-		3. Check if the download hoster has reached its quota. If it has, abort the function.
-   */
   async getDownloads() {
     this.logger.verbose('Pulling downloads...');
 
@@ -80,7 +73,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
 
     while (nextDownload) {
       if (await this.shouldDownload(nextDownload)) {
-        await this.queue.add(nextDownload);
+        await this.downloadsProcessingQueue.add(nextDownload);
         this.logger.verbose(`Queued download ${nextDownload.downloadId}`);
       }
       nextDownload = await this.downloadsRepository.findNextDownload();
