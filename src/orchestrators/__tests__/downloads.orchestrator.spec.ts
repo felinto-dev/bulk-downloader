@@ -134,8 +134,5 @@ describe(DownloadsOrquestrator.name, () => {
       await service.pullDownloads();
       expect(queue.add).toHaveBeenCalledTimes(1);
     });
-    it.todo(
-      'should do not pull the same download when the hoster quota has been reached',
-    );
   });
 });
