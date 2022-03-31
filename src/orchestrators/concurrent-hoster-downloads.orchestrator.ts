@@ -28,4 +28,13 @@ export class ConcurrentHosterDownloadsOrchestrator {
       hosterConcurrentDownloads + 1,
     );
   }
+
+  async incrementQuotaLeft(hosterId: string): Promise<void> {
+    const hosterConcurrentDownloads =
+      this.hosterConcurrentDownloadsCounter.get(hosterId) || 0;
+    this.hosterConcurrentDownloadsCounter.set(
+      hosterId,
+      hosterConcurrentDownloads - 1,
+    );
+  }
 }

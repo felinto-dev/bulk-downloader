@@ -19,20 +19,35 @@ export class DownloadsOrquestrator implements OnModuleInit {
     private readonly concurrentHosterDownloadsOrchestrator: ConcurrentHosterDownloadsOrchestrator,
   ) {}
 
+  /*
+		Start the orchestrator on bootstrap.
+	*/
   async onModuleInit() {
-    if (this.shouldPullDownloads()) {
-      await this.getDownloads();
-    }
+    await this.getDownloads();
   }
 
   private readonly logger: Logger = new Logger(DownloadsOrquestrator.name);
 
+  /*
+		Check if the orchestrator should pull downloads from the database.
+		
+		Should check:
+		- If the orchestrator is not already running
+		- If there are quota left for concurrent downloads
+	*/
   shouldPullDownloads(): boolean {
     const concurrentDownloadsQuotaLeft =
       this.concurrentHosterDownloadsOrchestrator.getQuotaLeft();
     return concurrentDownloadsQuotaLeft > 0;
   }
 
+  /*
+		Check if the download should be downloaded.
+
+		Should check:
+		- If the the hoster has quota left
+		- If the hoster can do +1 concurrent download
+	*/
   async shouldDownload(download: PendingDownload): Promise<boolean> {
     const { hosterId } = download;
 
@@ -56,6 +71,14 @@ export class DownloadsOrquestrator implements OnModuleInit {
     return true;
   }
 
+  /*
+		Get all pending downloads from the database and push them to the queue.
+
+		Should check:
+		- If the orchestrator is not already running
+		- If there are downloads to process
+		- If the download can be downloaded
+	*/
   async getDownloads() {
     this.logger.verbose('Pulling downloads...');
 
@@ -81,6 +104,13 @@ export class DownloadsOrquestrator implements OnModuleInit {
     } while (nextDownload);
   }
 
+  /*
+		Handle the download job completion.
+		
+		1. Should update the download status in the database.
+		2. Should increment the hoster concurrent downloads.
+		3. Should pull the next download from the database and push it to the queue.
+	*/
   async processDownload(
     job: Job<DownloadJobDto>,
     downloadStatus: DownloadStatus,
@@ -90,6 +120,9 @@ export class DownloadsOrquestrator implements OnModuleInit {
       downloadId,
       hosterId,
       downloadStatus,
+    );
+    await this.concurrentHosterDownloadsOrchestrator.incrementQuotaLeft(
+      hosterId,
     );
     await this.getDownloads();
   }
