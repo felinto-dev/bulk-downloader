@@ -13,7 +13,7 @@ import { ConcurrentHosterDownloadsOrchestrator } from './concurrent-hoster-downl
 export class DownloadsOrquestrator implements OnModuleInit {
   constructor(
     @InjectQueue(DOWNLOADS_PROCESSING_QUEUE)
-    private readonly downloadsProcessingQueue: Queue<DownloadJobDto>,
+    private readonly queue: Queue<DownloadJobDto>,
     private readonly downloadsRepository: DownloadsRepository,
     private readonly hosterQuotaService: HosterQuotasService,
     private readonly concurrentHosterDownloadsOrchestrator: ConcurrentHosterDownloadsOrchestrator,
@@ -96,7 +96,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
 
     do {
       if (await this.shouldDownload(nextDownload)) {
-        await this.downloadsProcessingQueue.add(nextDownload);
+        await this.queue.add(nextDownload);
         await this.concurrentHosterDownloadsOrchestrator.decrementQuotaLeft(
           nextDownload.hosterId,
         );
