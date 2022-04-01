@@ -30,13 +30,13 @@ export class DownloadsOrquestrator implements OnModuleInit {
   private readonly logger: Logger = new Logger(DownloadsOrquestrator.name);
 
   /*
-		Check if the orchestrator should pull downloads from the database.
+		Check if the orchestrator should get downloads from the database.
 		
 		Should check:
 		- If the orchestrator is not already running
 		- If there are quota left for concurrent downloads
 	*/
-  shouldPullDownloads(): boolean {
+  shouldGetDownloads(): boolean {
     const concurrentDownloadsQuotaLeft =
       this.concurrentHosterDownloadsOrchestrator.getQuotaLeft();
     return concurrentDownloadsQuotaLeft > 0 && !this.isRunning;
@@ -81,7 +81,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
 		- If the download can be downloaded
 	*/
   async getDownloads() {
-    if (!this.shouldPullDownloads()) {
+    if (!this.shouldGetDownloads()) {
       return;
     }
 
@@ -89,7 +89,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
 
     let nextDownload = await this.downloadsRepository.findNextDownload();
     if (!nextDownload) {
-      this.logger.verbose('No downloads in database for pulling');
+      this.logger.verbose('No pending download found');
       return;
     }
 

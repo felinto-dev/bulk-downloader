@@ -109,7 +109,7 @@ describe(DownloadsOrquestrator.name, () => {
       expect(mockedQueue.add).not.toHaveBeenCalled();
     });
     it('should add the download to the queue', async () => {
-      service.shouldPullDownloads = jest
+      service.shouldGetDownloads = jest
         .fn()
         .mockReturnValueOnce(true)
         .mockReturnValueOnce(true);
