@@ -8,7 +8,7 @@ import { DownloadStatus, HosterAuthenticationMethod } from '@prisma/client';
 export class DownloadsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findNextDownload(): Promise<PendingDownload> {
+  async findPendingDownload(): Promise<PendingDownload> {
     return this.prisma.download.findFirst({
       orderBy: [
         { Hoster: { maxConcurrentDownloads: 'asc' } },

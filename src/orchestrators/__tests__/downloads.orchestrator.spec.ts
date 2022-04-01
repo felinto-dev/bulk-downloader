@@ -104,7 +104,7 @@ describe(DownloadsOrquestrator.name, () => {
       mockedConcurrentHosterDownloadsOrchestrator.getQuotaLeft.mockReturnValueOnce(
         1,
       );
-      mockedDownloadsRepository.findNextDownload.mockResolvedValueOnce(null);
+      mockedDownloadsRepository.findPendingDownload.mockResolvedValueOnce(null);
       await service.getDownloads();
       expect(mockedQueue.add).not.toHaveBeenCalled();
     });
@@ -114,7 +114,7 @@ describe(DownloadsOrquestrator.name, () => {
         .mockReturnValueOnce(true)
         .mockReturnValueOnce(true);
       service.shouldDownload = jest.fn().mockReturnValueOnce(true);
-      mockedDownloadsRepository.findNextDownload
+      mockedDownloadsRepository.findPendingDownload
         .mockResolvedValueOnce({
           hosterId: 'hosterId',
           downloadId: 'downloadId',

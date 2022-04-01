@@ -87,7 +87,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
 
     this.isRunning = true;
 
-    let nextDownload = await this.downloadsRepository.findNextDownload();
+    let nextDownload = await this.downloadsRepository.findPendingDownload();
     if (!nextDownload) {
       this.logger.verbose('No pending download found');
       return;
@@ -101,7 +101,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
         );
         this.logger.verbose(`Queued download ${nextDownload.downloadId}`);
       }
-      nextDownload = await this.downloadsRepository.findNextDownload();
+      nextDownload = await this.downloadsRepository.findPendingDownload();
     } while (nextDownload);
 
     this.isRunning = false;
