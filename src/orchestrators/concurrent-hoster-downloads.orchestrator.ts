@@ -32,9 +32,12 @@ export class ConcurrentHosterDownloadsOrchestrator {
   async incrementQuotaLeft(hosterId: string): Promise<void> {
     const hosterConcurrentDownloads =
       this.hosterConcurrentDownloadsCounter.get(hosterId) || 0;
-    this.hosterConcurrentDownloadsCounter.set(
-      hosterId,
-      hosterConcurrentDownloads - 1,
-    );
+
+    if (hosterConcurrentDownloads > 0) {
+      this.hosterConcurrentDownloadsCounter.set(
+        hosterId,
+        hosterConcurrentDownloads - 1,
+      );
+    }
   }
 }
