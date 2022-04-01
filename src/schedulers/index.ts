@@ -1,3 +1,3 @@
-import { DownloadsScheduler } from './downloads.scheduler';
+import { DownloadsEnqueueScheduler } from './downloads-enqueue.scheduler';
 
-export const SCHEDULES = [DownloadsScheduler];
+export const SCHEDULES = [DownloadsEnqueueScheduler];

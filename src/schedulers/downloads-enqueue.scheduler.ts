@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
-export class DownloadsScheduler {
+export class DownloadsEnqueueScheduler {
   constructor(
     private readonly downloadsOrquestrator: DownloadsEnqueueOrchestrator,
   ) {}
