@@ -1,7 +1,5 @@
 import { DOWNLOADS_SORTING_QUEUE } from '@/consts/queues';
 import { ScheduleDownloadInput } from '@/inputs/schedule-download.input';
-import { ConcurrentHosterDownloadsOrchestrator } from '@/orchestrators/concurrent-hoster-downloads.orchestrator';
-import { DownloadsOrquestrator } from '@/orchestrators/downloads.orchestrator';
 import { DownloadsRepository } from '@/repositories/downloads.repository';
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Logger } from '@nestjs/common';
@@ -14,8 +12,6 @@ export class DownloadsService {
     @InjectQueue(DOWNLOADS_SORTING_QUEUE)
     private readonly queue: Queue<ScheduleDownloadInput>,
     private readonly repository: DownloadsRepository,
-    private readonly downloadsOrchestrator: DownloadsOrquestrator,
-    private readonly concurrentHosterDownloadsOrchestrator: ConcurrentHosterDownloadsOrchestrator,
   ) {}
 
   private readonly logger: Logger = new Logger(DownloadsService.name);
@@ -26,13 +22,6 @@ export class DownloadsService {
     status: DownloadStatus,
   ) {
     await this.repository.changeDownloadStatus(downloadId, hosterId, status);
-
-    if (status === DownloadStatus.PENDING) {
-      await this.downloadsOrchestrator.getDownloads();
-      await this.concurrentHosterDownloadsOrchestrator.decrementQuotaLeft(
-        hosterId,
-      );
-    }
   }
 
   async upsertDownloadRequest(download: ScheduleDownloadInput) {
