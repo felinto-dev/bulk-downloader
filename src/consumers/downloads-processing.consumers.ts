@@ -56,7 +56,7 @@ export class DownloadsProcessingConsumer {
     await this.concurrentHosterDownloadsOrchestrator.decrementQuotaLeft(
       hosterId,
     );
-    await this.downloadsOrchestrator.orchestrateDownloads();
+    await this.downloadsOrchestrator.run();
   }
 
   @OnQueueCompleted()
@@ -70,6 +70,6 @@ export class DownloadsProcessingConsumer {
     await this.concurrentHosterDownloadsOrchestrator.decrementQuotaLeft(
       hosterId,
     );
-    await this.downloadsOrchestrator.orchestrateDownloads();
+    await this.downloadsOrchestrator.run();
   }
 }
