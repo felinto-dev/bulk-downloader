@@ -3,8 +3,8 @@ import { MAX_CONCURRENT_DOWNLOADS_ALLOWED } from '@/consts/app';
 import { DOWNLOADS_PROCESSING_QUEUE } from '@/consts/queues';
 import { DownloadJobDto } from '@/dto/download.job.dto';
 import { DownloadClientInterface } from '@/interfaces/download-client.interface';
-import { DownloadsOrquestrator } from '@/orchestrators/downloads.orchestrator';
 import { DownloadsRepository } from '@/repositories/downloads.repository';
+import { DownloadsService } from '@/services/downloads.service';
 import {
   OnQueueCompleted,
   OnQueueFailed,
@@ -19,11 +19,11 @@ import { Job } from 'bull';
 @Processor(DOWNLOADS_PROCESSING_QUEUE)
 export class DownloadsProcessingConsumer {
   constructor(
-    private readonly downloadsOrquestrator: DownloadsOrquestrator,
     @Inject(DOWNLOAD_CLIENT)
     private readonly downloadClient: DownloadClientInterface,
     private readonly configService: ConfigService,
     private readonly downloadsRepository: DownloadsRepository,
+    private readonly downloadsService: DownloadsService,
   ) {}
 
   @Process({ concurrency: MAX_CONCURRENT_DOWNLOADS_ALLOWED })
@@ -45,16 +45,20 @@ export class DownloadsProcessingConsumer {
 
   @OnQueueFailed()
   async onDownloadFail(job: Job<DownloadJobDto>) {
-    await this.downloadsOrquestrator.processDownload(
-      job,
+    const { downloadId, hosterId } = job.data;
+    await this.downloadsService.changeDownloadStatus(
+      downloadId,
+      hosterId,
       DownloadStatus.FAILED,
     );
   }
 
   @OnQueueCompleted()
   async onDownloadFinished(job: Job<DownloadJobDto>) {
-    await this.downloadsOrquestrator.processDownload(
-      job,
+    const { downloadId, hosterId } = job.data;
+    await this.downloadsService.changeDownloadStatus(
+      downloadId,
+      hosterId,
       DownloadStatus.SUCCESS,
     );
   }

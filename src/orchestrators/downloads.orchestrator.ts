@@ -5,8 +5,7 @@ import { DownloadsRepository } from '@/repositories/downloads.repository';
 import { HosterQuotasService } from '@/services/hoster-quotas.service';
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { DownloadStatus } from '@prisma/client';
-import { Job, Queue } from 'bull';
+import { Queue } from 'bull';
 import { ConcurrentHosterDownloadsOrchestrator } from './concurrent-hoster-downloads.orchestrator';
 
 @Injectable()
@@ -106,28 +105,5 @@ export class DownloadsOrquestrator implements OnModuleInit {
     } while (nextDownload);
 
     this.isRunning = false;
-  }
-
-  /*
-		Handle the download job completion.
-		
-		1. Should update the download status in the database.
-		2. Should increment the hoster concurrent downloads.
-		3. Should pull the next download from the database and push it to the queue.
-	*/
-  async processDownload(
-    job: Job<DownloadJobDto>,
-    downloadStatus: DownloadStatus,
-  ) {
-    const { hosterId, downloadId } = job.data;
-    await this.downloadsRepository.changeDownloadStatus(
-      downloadId,
-      hosterId,
-      downloadStatus,
-    );
-    await this.concurrentHosterDownloadsOrchestrator.incrementQuotaLeft(
-      hosterId,
-    );
-    await this.getDownloads();
   }
 }
