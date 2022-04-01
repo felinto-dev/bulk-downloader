@@ -36,23 +36,25 @@ export class DownloadsOrquestrator implements OnModuleInit {
   }
 
   async run(): Promise<void> {
-    if (await this.canStartRunning()) {
-      this.isOrchestratorRunning = true;
-
-      while (await this.pendingDownloadsIterator.hasMore()) {
-        const nextDownload = await this.pendingDownloadsIterator.next();
-
-        if (await this.canDownloadNow(nextDownload)) {
-          await this.queue.add(nextDownload);
-          await this.concurrentDownloadsOrchestrator.decrementQuotaLeft(
-            nextDownload.hosterId,
-          );
-          this.logger.verbose(`Queued download ${nextDownload.downloadId}`);
-        }
-      }
-
-      this.isOrchestratorRunning = false;
+    if (!(await this.canStartRunning())) {
+      return;
     }
+
+    this.isOrchestratorRunning = true;
+
+    while (await this.pendingDownloadsIterator.hasMore()) {
+      const nextDownload = await this.pendingDownloadsIterator.next();
+
+      if (await this.canDownloadNow(nextDownload)) {
+        await this.queue.add(nextDownload);
+        await this.concurrentDownloadsOrchestrator.decrementQuotaLeft(
+          nextDownload.hosterId,
+        );
+        this.logger.verbose(`Queued download ${nextDownload.downloadId}`);
+      }
+    }
+
+    this.isOrchestratorRunning = false;
   }
 
   async canDownloadNow(download: PendingDownload): Promise<boolean> {
