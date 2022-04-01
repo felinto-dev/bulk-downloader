@@ -55,7 +55,7 @@ describe(DownloadsOrquestrator.name, () => {
     expect(service).toBeDefined();
   });
 
-  describe(DownloadsOrquestrator.prototype.shouldDownload.name, () => {
+  describe(DownloadsOrquestrator.prototype.canDownload.name, () => {
     it('should return false if the hoster quota is reached', async () => {
       const download: PendingDownload = {
         hosterId: 'hosterId',
@@ -64,7 +64,7 @@ describe(DownloadsOrquestrator.name, () => {
         Hoster: { maxConcurrentDownloads: 1 },
       };
       mockedHosterQuotasService.hasReachedQuota.mockResolvedValue(true);
-      const result = await service.shouldDownload(download);
+      const result = await service.canDownload(download);
       expect(result).toBe(false);
     });
     it('should return false if the hoster can not do +1 concurrent download', async () => {
@@ -79,7 +79,7 @@ describe(DownloadsOrquestrator.name, () => {
       mockedConcurrentHosterDownloadsOrchestrator.getHosterConcurrentDownloads.mockResolvedValue(
         concurrentDownloads,
       );
-      const result = await service.shouldDownload(download);
+      const result = await service.canDownload(download);
       expect(result).toBe(false);
     });
     it('should return true when the hoster has not reached its quota and can do +1 concurrent download', async () => {
@@ -94,18 +94,18 @@ describe(DownloadsOrquestrator.name, () => {
       mockedConcurrentHosterDownloadsOrchestrator.getHosterConcurrentDownloads.mockResolvedValue(
         concurrentDownloads,
       );
-      const result = await service.shouldDownload(download);
+      const result = await service.canDownload(download);
       expect(result).toBe(true);
     });
   });
 
-  describe(DownloadsOrquestrator.prototype.getDownloads.name, () => {
+  describe(DownloadsOrquestrator.prototype.orchestrateDownloads.name, () => {
     it('should abort if there are no downloads in database for pulling', async () => {
       mockedConcurrentHosterDownloadsOrchestrator.getQuotaLeft.mockReturnValueOnce(
         1,
       );
       mockedDownloadsService.findPendingDownload.mockResolvedValueOnce(null);
-      await service.getDownloads();
+      await service.orchestrateDownloads();
       expect(mockedQueue.add).not.toHaveBeenCalled();
     });
     it('should add the download to the queue', async () => {
@@ -113,7 +113,7 @@ describe(DownloadsOrquestrator.name, () => {
         .fn()
         .mockReturnValueOnce(true)
         .mockReturnValueOnce(true);
-      service.shouldDownload = jest.fn().mockReturnValueOnce(true);
+      service.canDownload = jest.fn().mockReturnValueOnce(true);
       mockedDownloadsService.findPendingDownload
         .mockResolvedValueOnce({
           hosterId: 'hosterId',
@@ -122,7 +122,7 @@ describe(DownloadsOrquestrator.name, () => {
           Hoster: { maxConcurrentDownloads: 1 },
         })
         .mockReturnValueOnce(null);
-      await service.getDownloads();
+      await service.orchestrateDownloads();
       expect(queue.add).toHaveBeenCalled();
     });
   });

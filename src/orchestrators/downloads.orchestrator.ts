@@ -18,39 +18,22 @@ export class DownloadsOrquestrator implements OnModuleInit {
     private readonly concurrentHosterDownloadsOrchestrator: ConcurrentHosterDownloadsOrchestrator,
   ) {}
 
-  /*
-		Start the orchestrator on bootstrap.
-	*/
   async onModuleInit() {
-    await this.getDownloads();
+    await this.orchestrateDownloads();
   }
 
-  private isRunning = false;
+  private orchestratorIsRunning = false;
 
   private readonly logger: Logger = new Logger(DownloadsOrquestrator.name);
 
-  /*
-		Check if the orchestrator should get downloads from the database.
-		
-		Should check:
-		- If the orchestrator is not already running
-		- If there are quota left for concurrent downloads
-	*/
   // TODO: If the concurrent downloads running is different that the queue active jobs, should wait for the queue to finish.
   shouldGetDownloads(): boolean {
     const concurrentDownloadsQuotaLeft =
       this.concurrentHosterDownloadsOrchestrator.getQuotaLeft();
-    return concurrentDownloadsQuotaLeft > 0 && !this.isRunning;
+    return concurrentDownloadsQuotaLeft > 0 && !this.orchestratorIsRunning;
   }
 
-  /*
-		Check if the download should be downloaded.
-
-		Should check:
-		- If the the hoster has quota left
-		- If the hoster can do +1 concurrent download
-	*/
-  async shouldDownload(download: PendingDownload): Promise<boolean> {
+  async canDownload(download: PendingDownload): Promise<boolean> {
     const { hosterId } = download;
 
     if (await this.hosterQuotaService.hasReachedQuota(hosterId)) {
@@ -73,29 +56,17 @@ export class DownloadsOrquestrator implements OnModuleInit {
     return true;
   }
 
-  /*
-		Get all pending downloads from the database and push them to the queue.
-
-		Should check:
-		- If the orchestrator is not already running
-		- If there are downloads to process
-		- If the download can be downloaded
-	*/
-  async getDownloads() {
-    if (!this.shouldGetDownloads()) {
-      return;
-    }
-
-    this.isRunning = true;
-
+  async orchestrateDownloads(): Promise<void> {
     let nextDownload = await this.downloadsService.findPendingDownload();
-    if (!nextDownload) {
-      this.logger.verbose('No pending download found');
+
+    if (!nextDownload || !this.shouldGetDownloads()) {
       return;
     }
+
+    this.orchestratorIsRunning = true;
 
     do {
-      if (await this.shouldDownload(nextDownload)) {
+      if (await this.canDownload(nextDownload)) {
         await this.queue.add(nextDownload);
         await this.concurrentHosterDownloadsOrchestrator.decrementQuotaLeft(
           nextDownload.hosterId,
@@ -105,6 +76,6 @@ export class DownloadsOrquestrator implements OnModuleInit {
       nextDownload = await this.downloadsService.findPendingDownload();
     } while (nextDownload);
 
-    this.isRunning = false;
+    this.orchestratorIsRunning = false;
   }
 }
