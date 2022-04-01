@@ -25,7 +25,7 @@ export class ConcurrentHosterDownloadsOrchestrator {
     return this.getQuotaLeft() > 0;
   }
 
-  async getHosterConcurrentDownloads(hosterId: string): Promise<number> {
+  async countConcurrentDownloadsByHosterId(hosterId: string): Promise<number> {
     return this.hosterConcurrentDownloadsCounter.get(hosterId) || 0;
   }
 

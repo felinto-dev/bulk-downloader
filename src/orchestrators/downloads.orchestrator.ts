@@ -15,7 +15,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
     private readonly queue: Queue<DownloadJobDto>,
     private readonly downloadsService: DownloadsService,
     private readonly hosterQuotaService: HosterQuotasService,
-    private readonly concurrentHosterDownloadsOrchestrator: ConcurrentHosterDownloadsOrchestrator,
+    private readonly concurrentDownloadsOrchestrator: ConcurrentHosterDownloadsOrchestrator,
   ) {}
 
   async onModuleInit() {
@@ -29,9 +29,9 @@ export class DownloadsOrquestrator implements OnModuleInit {
   async canStartRunning(): Promise<boolean> {
     return (
       !this.isOrchestratorRunning &&
-      this.concurrentHosterDownloadsOrchestrator.hasQuotaLeft() &&
+      this.concurrentDownloadsOrchestrator.hasQuotaLeft() &&
       (await this.queue.getActiveCount()) <=
-        this.concurrentHosterDownloadsOrchestrator.countConcurrentDownloads()
+        this.concurrentDownloadsOrchestrator.countConcurrentDownloads()
     );
   }
 
@@ -44,7 +44,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
       do {
         if (await this.canDownloadNow(nextDownload)) {
           await this.queue.add(nextDownload);
-          await this.concurrentHosterDownloadsOrchestrator.decrementQuotaLeft(
+          await this.concurrentDownloadsOrchestrator.decrementQuotaLeft(
             nextDownload.hosterId,
           );
           this.logger.verbose(`Queued download ${nextDownload.downloadId}`);
@@ -66,7 +66,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
     }
 
     const currentHosterConcurrentDownloads =
-      await this.concurrentHosterDownloadsOrchestrator.getHosterConcurrentDownloads(
+      await this.concurrentDownloadsOrchestrator.countConcurrentDownloadsByHosterId(
         hosterId,
       );
 
