@@ -10,6 +10,10 @@ export class ConcurrentHosterDownloadsOrchestrator {
   public readonly hosterConcurrentDownloadsCounter: Map<string, number> =
     new Map();
 
+  countConcurrentDownloads(): number {
+    return sumMapValues(this.hosterConcurrentDownloadsCounter);
+  }
+
   getQuotaLeft(): number {
     return (
       MAX_CONCURRENT_DOWNLOADS_ALLOWED -

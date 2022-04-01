@@ -26,11 +26,12 @@ export class DownloadsOrquestrator implements OnModuleInit {
 
   private readonly logger: Logger = new Logger(DownloadsOrquestrator.name);
 
-  // TODO: If the concurrent downloads running is greater than the queue active jobs, should wait for the queue to finish.
-  canStartRunning(): boolean {
+  async canStartRunning(): Promise<boolean> {
     return (
       !this.orchestratorIsRunning &&
-      this.concurrentHosterDownloadsOrchestrator.hasQuotaLeft()
+      this.concurrentHosterDownloadsOrchestrator.hasQuotaLeft() &&
+      (await this.queue.getActiveCount()) <=
+        this.concurrentHosterDownloadsOrchestrator.countConcurrentDownloads()
     );
   }
 
