@@ -8,10 +8,10 @@ import { getQueueToken } from '@nestjs/bull';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Queue } from 'bull';
 import { ConcurrentHosterDownloadsOrchestrator } from '../concurrent-hoster-downloads.orchestrator';
-import { DownloadsOrquestrator } from '../downloads.orchestrator';
+import { DownloadsEnqueueOrchestrator } from '../downloads-enqueue.orchestrator';
 
-describe(DownloadsOrquestrator.name, () => {
-  let service: DownloadsOrquestrator;
+describe(DownloadsEnqueueOrchestrator.name, () => {
+  let service: DownloadsEnqueueOrchestrator;
   let queue: Queue<DownloadJobDto>;
 
   const mockedQueue = createMock<Queue<DownloadJobDto>>();
@@ -23,7 +23,7 @@ describe(DownloadsOrquestrator.name, () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        DownloadsOrquestrator,
+        DownloadsEnqueueOrchestrator,
         {
           provide: getQueueToken(DOWNLOADS_PROCESSING_QUEUE),
           useValue: mockedQueue,
@@ -43,7 +43,9 @@ describe(DownloadsOrquestrator.name, () => {
       ],
     }).compile();
 
-    service = module.get<DownloadsOrquestrator>(DownloadsOrquestrator);
+    service = module.get<DownloadsEnqueueOrchestrator>(
+      DownloadsEnqueueOrchestrator,
+    );
     queue = module.get(getQueueToken(DOWNLOADS_PROCESSING_QUEUE));
   });
 
@@ -55,7 +57,7 @@ describe(DownloadsOrquestrator.name, () => {
     expect(service).toBeDefined();
   });
 
-  describe(DownloadsOrquestrator.prototype.canDownloadNow.name, () => {
+  describe(DownloadsEnqueueOrchestrator.prototype.canDownloadNow.name, () => {
     it('should return false if the hoster quota is reached', async () => {
       const download: PendingDownload = {
         hosterId: 'hosterId',
@@ -102,7 +104,7 @@ describe(DownloadsOrquestrator.name, () => {
     });
   });
 
-  describe(DownloadsOrquestrator.prototype.run.name, () => {
+  describe(DownloadsEnqueueOrchestrator.prototype.run.name, () => {
     it('should abort where there are no pending downloads in database', async () => {
       service.canStartRunning = jest.fn().mockResolvedValueOnce(true);
       mockedPendingDownloadsIterator.hasMore.mockResolvedValueOnce(false);

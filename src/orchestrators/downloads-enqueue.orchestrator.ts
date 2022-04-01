@@ -9,7 +9,7 @@ import { Queue } from 'bull';
 import { ConcurrentHosterDownloadsOrchestrator } from './concurrent-hoster-downloads.orchestrator';
 
 @Injectable()
-export class DownloadsOrquestrator implements OnModuleInit {
+export class DownloadsEnqueueOrchestrator implements OnModuleInit {
   constructor(
     @InjectQueue(DOWNLOADS_PROCESSING_QUEUE)
     private readonly queue: Queue<DownloadJobDto>,
@@ -24,7 +24,9 @@ export class DownloadsOrquestrator implements OnModuleInit {
 
   private isOrchestratorRunning = false;
 
-  private readonly logger: Logger = new Logger(DownloadsOrquestrator.name);
+  private readonly logger: Logger = new Logger(
+    DownloadsEnqueueOrchestrator.name,
+  );
 
   async canStartRunning(): Promise<boolean> {
     return (

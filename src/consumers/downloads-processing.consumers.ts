@@ -4,7 +4,7 @@ import { DOWNLOADS_PROCESSING_QUEUE } from '@/consts/queues';
 import { DownloadJobDto } from '@/dto/download.job.dto';
 import { DownloadClientInterface } from '@/interfaces/download-client.interface';
 import { ConcurrentHosterDownloadsOrchestrator } from '@/orchestrators/concurrent-hoster-downloads.orchestrator';
-import { DownloadsOrquestrator } from '@/orchestrators/downloads.orchestrator';
+import { DownloadsEnqueueOrchestrator } from '@/orchestrators/downloads-enqueue.orchestrator';
 import { DownloadsService } from '@/services/downloads.service';
 import {
   OnQueueCompleted,
@@ -25,7 +25,7 @@ export class DownloadsProcessingConsumer {
     private readonly configService: ConfigService,
     private readonly downloadsService: DownloadsService,
     private readonly concurrentHosterDownloadsOrchestrator: ConcurrentHosterDownloadsOrchestrator,
-    private readonly downloadsOrchestrator: DownloadsOrquestrator,
+    private readonly downloadsOrchestrator: DownloadsEnqueueOrchestrator,
   ) {}
 
   @Process({ concurrency: MAX_CONCURRENT_DOWNLOADS_ALLOWED })
