@@ -35,6 +35,28 @@ export class DownloadsOrquestrator implements OnModuleInit {
     );
   }
 
+  async run(): Promise<void> {
+    let nextDownload = await this.downloadsService.findPendingDownload();
+
+    if (nextDownload && this.canStartRunning()) {
+      this.isOrchestratorRunning = true;
+
+      do {
+        if (await this.canDownloadNow(nextDownload)) {
+          await this.queue.add(nextDownload);
+          await this.concurrentHosterDownloadsOrchestrator.decrementQuotaLeft(
+            nextDownload.hosterId,
+          );
+          this.logger.verbose(`Queued download ${nextDownload.downloadId}`);
+        }
+
+        nextDownload = await this.downloadsService.findPendingDownload();
+      } while (nextDownload);
+
+      this.isOrchestratorRunning = false;
+    }
+  }
+
   async canDownloadNow(download: PendingDownload): Promise<boolean> {
     const { hosterId } = download;
 
@@ -56,27 +78,5 @@ export class DownloadsOrquestrator implements OnModuleInit {
     }
 
     return true;
-  }
-
-  async run(): Promise<void> {
-    let nextDownload = await this.downloadsService.findPendingDownload();
-
-    if (nextDownload && this.canStartRunning()) {
-      this.isOrchestratorRunning = true;
-
-      do {
-        if (await this.canDownloadNow(nextDownload)) {
-          await this.queue.add(nextDownload);
-          await this.concurrentHosterDownloadsOrchestrator.decrementQuotaLeft(
-            nextDownload.hosterId,
-          );
-          this.logger.verbose(`Queued download ${nextDownload.downloadId}`);
-        }
-
-        nextDownload = await this.downloadsService.findPendingDownload();
-      } while (nextDownload);
-
-      this.isOrchestratorRunning = false;
-    }
   }
 }
