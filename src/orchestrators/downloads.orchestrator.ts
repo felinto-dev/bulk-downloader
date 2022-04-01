@@ -22,13 +22,13 @@ export class DownloadsOrquestrator implements OnModuleInit {
     await this.run();
   }
 
-  private orchestratorIsRunning = false;
+  private isOrchestratorRunning = false;
 
   private readonly logger: Logger = new Logger(DownloadsOrquestrator.name);
 
   async canStartRunning(): Promise<boolean> {
     return (
-      !this.orchestratorIsRunning &&
+      !this.isOrchestratorRunning &&
       this.concurrentHosterDownloadsOrchestrator.hasQuotaLeft() &&
       (await this.queue.getActiveCount()) <=
         this.concurrentHosterDownloadsOrchestrator.countConcurrentDownloads()
@@ -62,7 +62,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
     let nextDownload = await this.downloadsService.findPendingDownload();
 
     if (nextDownload && this.canStartRunning()) {
-      this.orchestratorIsRunning = true;
+      this.isOrchestratorRunning = true;
 
       do {
         if (await this.canDownloadNow(nextDownload)) {
@@ -76,7 +76,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
         nextDownload = await this.downloadsService.findPendingDownload();
       } while (nextDownload);
 
-      this.orchestratorIsRunning = false;
+      this.isOrchestratorRunning = false;
     }
   }
 }
