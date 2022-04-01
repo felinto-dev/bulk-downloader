@@ -100,11 +100,6 @@ describe(DownloadsOrquestrator.name, () => {
   });
 
   describe(DownloadsOrquestrator.prototype.getDownloads.name, () => {
-    it('should abort if the active concurrent downloads quota left is 0', async () => {
-      service.shouldPullDownloads = jest.fn().mockReturnValueOnce(false);
-      await service.getDownloads();
-      expect(mockedQueue.add).not.toHaveBeenCalled();
-    });
     it('should abort if there are no downloads in database for pulling', async () => {
       mockedConcurrentHosterDownloadsOrchestrator.getQuotaLeft.mockReturnValueOnce(
         1,
