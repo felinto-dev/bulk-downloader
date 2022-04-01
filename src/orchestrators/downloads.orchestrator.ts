@@ -82,11 +82,11 @@ export class DownloadsOrquestrator implements OnModuleInit {
 		- If the download can be downloaded
 	*/
   async getDownloads() {
-    this.isRunning = true;
-
     if (!this.shouldPullDownloads()) {
       return;
     }
+
+    this.isRunning = true;
 
     let nextDownload = await this.downloadsRepository.findNextDownload();
     if (!nextDownload) {
