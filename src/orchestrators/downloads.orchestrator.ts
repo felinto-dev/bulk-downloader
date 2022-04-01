@@ -58,21 +58,22 @@ export class DownloadsOrquestrator implements OnModuleInit {
   }
 
   async canDownloadNow(download: PendingDownload): Promise<boolean> {
-    const { hosterId } = download;
+    const {
+      hosterId,
+      Hoster: { maxConcurrentDownloads },
+    } = download;
 
     if (await this.hosterQuotaService.hasReachedQuota(hosterId)) {
       this.logger.verbose('Hoster quota reached');
       return false;
     }
 
-    const currentHosterConcurrentDownloads =
+    const currentConcurrentDownloads =
       await this.concurrentDownloadsOrchestrator.countConcurrentDownloadsByHosterId(
         hosterId,
       );
 
-    if (
-      currentHosterConcurrentDownloads >= download.Hoster.maxConcurrentDownloads
-    ) {
+    if (currentConcurrentDownloads >= maxConcurrentDownloads) {
       this.logger.verbose('No concurrent downloads quota left');
       return false;
     }
