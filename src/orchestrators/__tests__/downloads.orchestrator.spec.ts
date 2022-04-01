@@ -1,7 +1,7 @@
 import { DOWNLOADS_PROCESSING_QUEUE } from '@/consts/queues';
 import { PendingDownload } from '@/database/interfaces/pending-download';
 import { DownloadJobDto } from '@/dto/download.job.dto';
-import { DownloadsService } from '@/services/downloads.service';
+import { PendingDownloadsIterator } from '@/iterators/pending-download.interator';
 import { HosterQuotasService } from '@/services/hoster-quotas.service';
 import { createMock } from '@golevelup/ts-jest';
 import { getQueueToken } from '@nestjs/bull';
@@ -18,7 +18,7 @@ describe(DownloadsOrquestrator.name, () => {
   const mockedHosterQuotasService = createMock<HosterQuotasService>();
   const mockedConcurrentHosterDownloadsOrchestrator =
     createMock<ConcurrentHosterDownloadsOrchestrator>();
-  const mockedDownloadsService = createMock<DownloadsService>();
+  const mockedPendingDownloadsIterator = createMock<PendingDownloadsIterator>();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -29,16 +29,16 @@ describe(DownloadsOrquestrator.name, () => {
           useValue: mockedQueue,
         },
         {
-          provide: DownloadsService,
-          useValue: mockedDownloadsService,
-        },
-        {
           provide: HosterQuotasService,
           useValue: mockedHosterQuotasService,
         },
         {
           provide: ConcurrentHosterDownloadsOrchestrator,
           useValue: mockedConcurrentHosterDownloadsOrchestrator,
+        },
+        {
+          provide: PendingDownloadsIterator,
+          useValue: mockedPendingDownloadsIterator,
         },
       ],
     }).compile();
@@ -100,21 +100,18 @@ describe(DownloadsOrquestrator.name, () => {
   });
 
   describe(DownloadsOrquestrator.prototype.run.name, () => {
-    it('should abort if there are no downloads in database for pulling', async () => {
-      mockedConcurrentHosterDownloadsOrchestrator.getQuotaLeft.mockReturnValueOnce(
-        1,
-      );
-      mockedDownloadsService.findPendingDownload.mockResolvedValueOnce(null);
+    it('should abort where there are no pending downloads in database', async () => {
+      service.canStartRunning = jest.fn().mockResolvedValueOnce(true);
+      mockedPendingDownloadsIterator.hasMore.mockResolvedValueOnce(false);
       await service.run();
       expect(mockedQueue.add).not.toHaveBeenCalled();
     });
     it('should add the download to the queue', async () => {
-      service.canStartRunning = jest
-        .fn()
-        .mockReturnValueOnce(true)
-        .mockReturnValueOnce(true);
-      service.canDownloadNow = jest.fn().mockReturnValueOnce(true);
-      mockedDownloadsService.findPendingDownload
+      service.canStartRunning = jest.fn().mockResolvedValueOnce(true);
+      mockedPendingDownloadsIterator.hasMore
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+      mockedPendingDownloadsIterator.next
         .mockResolvedValueOnce({
           hosterId: 'hosterId',
           downloadId: 'downloadId',
@@ -122,6 +119,7 @@ describe(DownloadsOrquestrator.name, () => {
           Hoster: { maxConcurrentDownloads: 1 },
         })
         .mockReturnValueOnce(null);
+      service.canDownloadNow = jest.fn().mockResolvedValueOnce(true);
       await service.run();
       expect(queue.add).toHaveBeenCalled();
     });

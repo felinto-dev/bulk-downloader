@@ -1,7 +1,7 @@
 import { DOWNLOADS_PROCESSING_QUEUE } from '@/consts/queues';
 import { PendingDownload } from '@/database/interfaces/pending-download';
 import { DownloadJobDto } from '@/dto/download.job.dto';
-import { DownloadsService } from '@/services/downloads.service';
+import { PendingDownloadsIterator } from '@/iterators/pending-download.interator';
 import { HosterQuotasService } from '@/services/hoster-quotas.service';
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
@@ -13,7 +13,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
   constructor(
     @InjectQueue(DOWNLOADS_PROCESSING_QUEUE)
     private readonly queue: Queue<DownloadJobDto>,
-    private readonly downloadsService: DownloadsService,
+    private readonly pendingDownloadsIterator: PendingDownloadsIterator,
     private readonly hosterQuotaService: HosterQuotasService,
     private readonly concurrentDownloadsOrchestrator: ConcurrentHosterDownloadsOrchestrator,
   ) {}
@@ -36,12 +36,12 @@ export class DownloadsOrquestrator implements OnModuleInit {
   }
 
   async run(): Promise<void> {
-    let nextDownload = await this.downloadsService.findPendingDownload();
-
-    if (nextDownload && this.canStartRunning()) {
+    if (await this.canStartRunning()) {
       this.isOrchestratorRunning = true;
 
-      do {
+      while (await this.pendingDownloadsIterator.hasMore()) {
+        const nextDownload = await this.pendingDownloadsIterator.next();
+
         if (await this.canDownloadNow(nextDownload)) {
           await this.queue.add(nextDownload);
           await this.concurrentDownloadsOrchestrator.decrementQuotaLeft(
@@ -49,9 +49,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
           );
           this.logger.verbose(`Queued download ${nextDownload.downloadId}`);
         }
-
-        nextDownload = await this.downloadsService.findPendingDownload();
-      } while (nextDownload);
+      }
 
       this.isOrchestratorRunning = false;
     }

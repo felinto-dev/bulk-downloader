@@ -10,6 +10,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ADAPTERS } from './adapters';
+import { ITERATORS } from './iterators';
 import { ORCHESTRATORS } from './orchestrators';
 import { SCHEDULES } from './schedulers';
 
@@ -29,6 +30,7 @@ import { SCHEDULES } from './schedulers';
     ...REPOSITORIES,
     ...ORCHESTRATORS,
     ...SCHEDULES,
+    ...ITERATORS,
   ],
 })
 export class AppModule {}
