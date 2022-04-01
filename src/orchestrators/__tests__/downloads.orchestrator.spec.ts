@@ -87,7 +87,7 @@ describe(DownloadsOrquestrator.name, () => {
       await service.getDownloads();
       expect(mockedQueue.add).not.toHaveBeenCalled();
       expect(mockedDownloadsRepository.findNextDownload).toHaveBeenCalledTimes(
-        2,
+        1,
       );
     });
     it('should look for another download when the current hoster concurrent downloads is greater than or equal max concurrent downloads for hoster allowed', async () => {
@@ -120,6 +120,7 @@ describe(DownloadsOrquestrator.name, () => {
         .fn()
         .mockReturnValueOnce(true)
         .mockReturnValueOnce(true);
+      service.shouldDownload = jest.fn().mockReturnValueOnce(true);
       mockedDownloadsRepository.findNextDownload
         .mockResolvedValueOnce({
           hosterId: 'hosterId',
@@ -128,12 +129,8 @@ describe(DownloadsOrquestrator.name, () => {
           Hoster: { maxConcurrentDownloads: 1 },
         })
         .mockReturnValueOnce(null);
-      mockedHosterQuotasService.hasReachedQuota.mockResolvedValueOnce(false);
-      mockedConcurrentHosterDownloadsOrchestrator.getHosterConcurrentDownloads.mockResolvedValueOnce(
-        0,
-      );
       await service.getDownloads();
-      expect(queue.add).toHaveBeenCalledTimes(1);
+      expect(queue.add).toHaveBeenCalled();
     });
   });
 });

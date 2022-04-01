@@ -26,6 +26,8 @@ export class DownloadsOrquestrator implements OnModuleInit {
     await this.getDownloads();
   }
 
+  private isRunning = false;
+
   private readonly logger: Logger = new Logger(DownloadsOrquestrator.name);
 
   /*
@@ -38,7 +40,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
   shouldPullDownloads(): boolean {
     const concurrentDownloadsQuotaLeft =
       this.concurrentHosterDownloadsOrchestrator.getQuotaLeft();
-    return concurrentDownloadsQuotaLeft > 0;
+    return concurrentDownloadsQuotaLeft > 0 && !this.isRunning;
   }
 
   /*
@@ -80,7 +82,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
 		- If the download can be downloaded
 	*/
   async getDownloads() {
-    this.logger.verbose('Pulling downloads...');
+    this.isRunning = true;
 
     if (!this.shouldPullDownloads()) {
       return;
@@ -102,6 +104,8 @@ export class DownloadsOrquestrator implements OnModuleInit {
       }
       nextDownload = await this.downloadsRepository.findNextDownload();
     } while (nextDownload);
+
+    this.isRunning = false;
   }
 
   /*
