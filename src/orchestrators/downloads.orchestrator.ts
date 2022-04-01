@@ -36,6 +36,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
 		- If the orchestrator is not already running
 		- If there are quota left for concurrent downloads
 	*/
+  // TODO: If the concurrent downloads running is different that the queue active jobs, should wait for the queue to finish.
   shouldGetDownloads(): boolean {
     const concurrentDownloadsQuotaLeft =
       this.concurrentHosterDownloadsOrchestrator.getQuotaLeft();
