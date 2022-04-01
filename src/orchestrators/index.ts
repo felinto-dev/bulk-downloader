@@ -1,3 +1,7 @@
-import { DownloadsOrquestrator } from './downloads.orchestrator';
+import { ConcurrentHosterDownloadsOrchestrator } from './concurrent-hoster-downloads.orchestrator';
+import { DownloadsEnqueueOrchestrator } from './downloads-enqueue.orchestrator';
 
-export const ORCHESTRATORS = [DownloadsOrquestrator];
+export const ORCHESTRATORS = [
+  DownloadsEnqueueOrchestrator,
+  ConcurrentHosterDownloadsOrchestrator,
+];

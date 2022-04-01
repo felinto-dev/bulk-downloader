@@ -8,6 +8,27 @@ import { DownloadStatus, HosterAuthenticationMethod } from '@prisma/client';
 export class DownloadsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  async findPendingDownload(): Promise<PendingDownload> {
+    return this.prisma.download.findFirst({
+      orderBy: [
+        { Hoster: { maxConcurrentDownloads: 'asc' } },
+        { priority: 'desc' },
+      ],
+      where: {
+        status: DownloadStatus.PENDING,
+        Hoster: { limits: { quotaRenewsAt: { lt: new Date() } } },
+      },
+      select: {
+        url: true,
+        downloadId: true,
+        hosterId: true,
+        Hoster: {
+          select: { maxConcurrentDownloads: true },
+        },
+      },
+    });
+  }
+
   async upsertDownloadRequest(downloadRequest: ScheduleDownloadInput) {
     const foundDownload = await this.prisma.download.findUnique({
       where: {
@@ -48,10 +69,10 @@ export class DownloadsRepository {
         priority: downloadRequest.priority,
         Hoster: {
           connectOrCreate: {
-            where: { id: downloadRequest.hosterId },
+            where: { hosterId: downloadRequest.hosterId },
             create: {
-              id: downloadRequest.hosterId,
-              name: downloadRequest.hosterId,
+              hosterId: downloadRequest.hosterId,
+              hosterName: downloadRequest.hosterId,
               authenticationMethod: HosterAuthenticationMethod.FREE,
             },
           },
@@ -70,22 +91,10 @@ export class DownloadsRepository {
     });
   }
 
-  async getPendingDownloadsByHosterId(
-    id: string,
-    limit?: number,
-  ): Promise<PendingDownload[]> {
-    return this.prisma.download.findMany({
-      where: { hosterId: id, status: 'PENDING' },
-      orderBy: [{ priority: 'desc' }],
-      take: limit,
-      select: { url: true, downloadId: true, hosterId: true },
-    });
-  }
-
   async changeDownloadStatus(
     downloadId: string,
     hosterId: string,
-    newDownloadStatus: DownloadStatus,
+    status: DownloadStatus,
   ) {
     await this.prisma.download.update({
       where: {
@@ -95,7 +104,7 @@ export class DownloadsRepository {
         },
       },
       data: {
-        status: newDownloadStatus,
+        status: status,
       },
     });
   }

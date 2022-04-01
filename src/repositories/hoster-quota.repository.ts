@@ -1,4 +1,4 @@
-import { HosterLimits } from '@/dto/hoster-limits.dto';
+import { HosterQuotas } from '@/dto/hoster-quotas.dto';
 import { PrismaService } from '@/prisma.service';
 import { startOfDay, startOfHour, startOfMonth } from '@/utils/date';
 import { Injectable } from '@nestjs/common';
@@ -8,10 +8,14 @@ import { PrismaPromise } from '@prisma/client';
 export class HosterQuotaRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getQuotasByHosterId(hosterId: string) {
+  async getQuotasByHosterId(hosterId: string): Promise<HosterQuotas> {
     return this.prisma.hosterQuota.findUnique({
       where: { hosterId },
-      select: { hourly: true, daily: true, monthly: true },
+      select: {
+        hourlyDownloadLimit: true,
+        dailyDownloadLimit: true,
+        monthlyDownloadLimit: true,
+      },
     });
   }
 
@@ -22,19 +26,27 @@ export class HosterQuotaRepository {
     return this.prisma.download.count({
       where: {
         status: { in: ['DOWNLOADING', 'FAILED', 'SUCCESS'] },
-        Hoster: { id: hosterId },
+        Hoster: { hosterId },
         updatedAt: { gte: date },
       },
     });
   }
 
-  async countUsedDownloadsQuota(hosterId: string): Promise<HosterLimits> {
-    const [monthly, daily, hourly] = await Promise.all([
-      this.countUsedDownloadsQuotaByPeriod(hosterId, startOfMonth()),
-      this.countUsedDownloadsQuotaByPeriod(hosterId, startOfDay()),
-      this.countUsedDownloadsQuotaByPeriod(hosterId, startOfHour()),
-    ]);
+  async countUsedDownloadsQuota(hosterId: string): Promise<HosterQuotas> {
+    const [monthlyDownloadLimit, dailyDownloadLimit, hourlyDownloadLimit] =
+      await Promise.all([
+        this.countUsedDownloadsQuotaByPeriod(hosterId, startOfMonth()),
+        this.countUsedDownloadsQuotaByPeriod(hosterId, startOfDay()),
+        this.countUsedDownloadsQuotaByPeriod(hosterId, startOfHour()),
+      ]);
 
-    return { monthly, daily, hourly };
+    return { monthlyDownloadLimit, dailyDownloadLimit, hourlyDownloadLimit };
+  }
+
+  async updateQuotaRenewsAt(hosterId: string, date: Date): Promise<void> {
+    await this.prisma.hosterQuota.update({
+      where: { hosterId },
+      data: { quotaRenewsAt: date },
+    });
   }
 }

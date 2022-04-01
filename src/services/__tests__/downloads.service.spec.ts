@@ -1,5 +1,6 @@
 import { DOWNLOADS_SORTING_QUEUE } from '@/consts/queues';
 import { ScheduleDownloadInput } from '@/inputs/schedule-download.input';
+import { DownloadsRepository } from '@/repositories/downloads.repository';
 import { createMock } from '@golevelup/ts-jest';
 import { getQueueToken } from '@nestjs/bull';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -17,6 +18,10 @@ describe(DownloadsService.name, () => {
         {
           provide: getQueueToken(DOWNLOADS_SORTING_QUEUE),
           useValue: createMock<Queue<ScheduleDownloadInput>>(),
+        },
+        {
+          provide: DownloadsRepository,
+          useValue: createMock<DownloadsRepository>(),
         },
       ],
     }).compile();

@@ -1,7 +1,10 @@
 import { DOWNLOADS_SORTING_QUEUE } from '@/consts/queues';
+import { PendingDownload } from '@/database/interfaces/pending-download';
 import { ScheduleDownloadInput } from '@/inputs/schedule-download.input';
+import { DownloadsRepository } from '@/repositories/downloads.repository';
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Logger } from '@nestjs/common';
+import { DownloadStatus } from '@prisma/client';
 import { Queue } from 'bull';
 
 @Injectable()
@@ -9,9 +12,22 @@ export class DownloadsService {
   constructor(
     @InjectQueue(DOWNLOADS_SORTING_QUEUE)
     private readonly queue: Queue<ScheduleDownloadInput>,
+    private readonly repository: DownloadsRepository,
   ) {}
 
   private readonly logger: Logger = new Logger(DownloadsService.name);
+
+  async findPendingDownload(): Promise<PendingDownload> {
+    return this.repository.findPendingDownload();
+  }
+
+  async changeDownloadStatus(
+    downloadId: string,
+    hosterId: string,
+    status: DownloadStatus,
+  ) {
+    await this.repository.changeDownloadStatus(downloadId, hosterId, status);
+  }
 
   async upsertDownloadRequest(download: ScheduleDownloadInput) {
     this.logger.verbose(
