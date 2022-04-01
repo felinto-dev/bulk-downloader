@@ -1,4 +1,5 @@
 import { DOWNLOADS_SORTING_QUEUE } from '@/consts/queues';
+import { PendingDownload } from '@/database/interfaces/pending-download';
 import { ScheduleDownloadInput } from '@/inputs/schedule-download.input';
 import { DownloadsRepository } from '@/repositories/downloads.repository';
 import { InjectQueue } from '@nestjs/bull';
@@ -15,6 +16,10 @@ export class DownloadsService {
   ) {}
 
   private readonly logger: Logger = new Logger(DownloadsService.name);
+
+  async findPendingDownload(): Promise<PendingDownload> {
+    return this.repository.findPendingDownload();
+  }
 
   async changeDownloadStatus(
     downloadId: string,

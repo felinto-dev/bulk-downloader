@@ -1,7 +1,7 @@
 import { DOWNLOADS_PROCESSING_QUEUE } from '@/consts/queues';
 import { PendingDownload } from '@/database/interfaces/pending-download';
 import { DownloadJobDto } from '@/dto/download.job.dto';
-import { DownloadsRepository } from '@/repositories/downloads.repository';
+import { DownloadsService } from '@/services/downloads.service';
 import { HosterQuotasService } from '@/services/hoster-quotas.service';
 import { createMock } from '@golevelup/ts-jest';
 import { getQueueToken } from '@nestjs/bull';
@@ -16,9 +16,9 @@ describe(DownloadsOrquestrator.name, () => {
 
   const mockedQueue = createMock<Queue<DownloadJobDto>>();
   const mockedHosterQuotasService = createMock<HosterQuotasService>();
-  const mockedDownloadsRepository = createMock<DownloadsRepository>();
   const mockedConcurrentHosterDownloadsOrchestrator =
     createMock<ConcurrentHosterDownloadsOrchestrator>();
+  const mockedDownloadsService = createMock<DownloadsService>();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -29,8 +29,8 @@ describe(DownloadsOrquestrator.name, () => {
           useValue: mockedQueue,
         },
         {
-          provide: DownloadsRepository,
-          useValue: mockedDownloadsRepository,
+          provide: DownloadsService,
+          useValue: mockedDownloadsService,
         },
         {
           provide: HosterQuotasService,
@@ -104,7 +104,7 @@ describe(DownloadsOrquestrator.name, () => {
       mockedConcurrentHosterDownloadsOrchestrator.getQuotaLeft.mockReturnValueOnce(
         1,
       );
-      mockedDownloadsRepository.findPendingDownload.mockResolvedValueOnce(null);
+      mockedDownloadsService.findPendingDownload.mockResolvedValueOnce(null);
       await service.getDownloads();
       expect(mockedQueue.add).not.toHaveBeenCalled();
     });
@@ -114,7 +114,7 @@ describe(DownloadsOrquestrator.name, () => {
         .mockReturnValueOnce(true)
         .mockReturnValueOnce(true);
       service.shouldDownload = jest.fn().mockReturnValueOnce(true);
-      mockedDownloadsRepository.findPendingDownload
+      mockedDownloadsService.findPendingDownload
         .mockResolvedValueOnce({
           hosterId: 'hosterId',
           downloadId: 'downloadId',

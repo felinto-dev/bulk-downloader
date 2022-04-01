@@ -1,7 +1,7 @@
 import { DOWNLOADS_PROCESSING_QUEUE } from '@/consts/queues';
 import { PendingDownload } from '@/database/interfaces/pending-download';
 import { DownloadJobDto } from '@/dto/download.job.dto';
-import { DownloadsRepository } from '@/repositories/downloads.repository';
+import { DownloadsService } from '@/services/downloads.service';
 import { HosterQuotasService } from '@/services/hoster-quotas.service';
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
@@ -13,7 +13,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
   constructor(
     @InjectQueue(DOWNLOADS_PROCESSING_QUEUE)
     private readonly queue: Queue<DownloadJobDto>,
-    private readonly downloadsRepository: DownloadsRepository,
+    private readonly downloadsService: DownloadsService,
     private readonly hosterQuotaService: HosterQuotasService,
     private readonly concurrentHosterDownloadsOrchestrator: ConcurrentHosterDownloadsOrchestrator,
   ) {}
@@ -88,7 +88,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
 
     this.isRunning = true;
 
-    let nextDownload = await this.downloadsRepository.findPendingDownload();
+    let nextDownload = await this.downloadsService.findPendingDownload();
     if (!nextDownload) {
       this.logger.verbose('No pending download found');
       return;
@@ -102,7 +102,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
         );
         this.logger.verbose(`Queued download ${nextDownload.downloadId}`);
       }
-      nextDownload = await this.downloadsRepository.findPendingDownload();
+      nextDownload = await this.downloadsService.findPendingDownload();
     } while (nextDownload);
 
     this.isRunning = false;
