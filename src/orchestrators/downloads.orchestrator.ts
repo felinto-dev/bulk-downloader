@@ -26,7 +26,7 @@ export class DownloadsOrquestrator implements OnModuleInit {
 
   private readonly logger: Logger = new Logger(DownloadsOrquestrator.name);
 
-  // TODO: If the concurrent downloads running is different that the queue active jobs, should wait for the queue to finish.
+  // TODO: If the concurrent downloads running is greater than the queue active jobs, should wait for the queue to finish.
   shouldGetDownloads(): boolean {
     const concurrentDownloadsQuotaLeft =
       this.concurrentHosterDownloadsOrchestrator.getQuotaLeft();
@@ -59,23 +59,21 @@ export class DownloadsOrquestrator implements OnModuleInit {
   async orchestrateDownloads(): Promise<void> {
     let nextDownload = await this.downloadsService.findPendingDownload();
 
-    if (!nextDownload || !this.shouldGetDownloads()) {
-      return;
+    if (nextDownload && this.shouldGetDownloads()) {
+      this.orchestratorIsRunning = true;
+
+      do {
+        if (await this.canDownload(nextDownload)) {
+          await this.queue.add(nextDownload);
+          await this.concurrentHosterDownloadsOrchestrator.decrementQuotaLeft(
+            nextDownload.hosterId,
+          );
+          this.logger.verbose(`Queued download ${nextDownload.downloadId}`);
+        }
+        nextDownload = await this.downloadsService.findPendingDownload();
+      } while (nextDownload);
+
+      this.orchestratorIsRunning = false;
     }
-
-    this.orchestratorIsRunning = true;
-
-    do {
-      if (await this.canDownload(nextDownload)) {
-        await this.queue.add(nextDownload);
-        await this.concurrentHosterDownloadsOrchestrator.decrementQuotaLeft(
-          nextDownload.hosterId,
-        );
-        this.logger.verbose(`Queued download ${nextDownload.downloadId}`);
-      }
-      nextDownload = await this.downloadsService.findPendingDownload();
-    } while (nextDownload);
-
-    this.orchestratorIsRunning = false;
   }
 }
