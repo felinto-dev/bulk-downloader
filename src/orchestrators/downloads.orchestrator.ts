@@ -63,21 +63,18 @@ export class DownloadsOrquestrator implements OnModuleInit {
       Hoster: { maxConcurrentDownloads },
     } = download;
 
-    if (await this.hosterQuotaService.hasReachedQuota(hosterId)) {
-      this.logger.verbose('Hoster quota reached');
-      return false;
-    }
+    const isHosterQuotaReached = await this.hosterQuotaService.hasReachedQuota(
+      hosterId,
+    );
 
     const currentConcurrentDownloads =
       await this.concurrentDownloadsOrchestrator.countConcurrentDownloadsByHosterId(
         hosterId,
       );
 
-    if (currentConcurrentDownloads >= maxConcurrentDownloads) {
-      this.logger.verbose('No concurrent downloads quota left');
-      return false;
-    }
+    const isConcurrentDownloadsLimitReached =
+      currentConcurrentDownloads >= maxConcurrentDownloads;
 
-    return true;
+    return !isHosterQuotaReached && !isConcurrentDownloadsLimitReached;
   }
 }

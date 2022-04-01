@@ -64,6 +64,9 @@ describe(DownloadsOrquestrator.name, () => {
         Hoster: { maxConcurrentDownloads: 1 },
       };
       mockedHosterQuotasService.hasReachedQuota.mockResolvedValue(true);
+      mockedConcurrentHosterDownloadsOrchestrator.countConcurrentDownloadsByHosterId.mockResolvedValue(
+        0,
+      );
       const result = await service.canDownloadNow(download);
       expect(result).toBe(false);
     });
