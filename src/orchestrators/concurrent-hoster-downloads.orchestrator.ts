@@ -16,6 +16,11 @@ export class ConcurrentHosterDownloadsOrchestrator {
       sumMapValues(this.hosterConcurrentDownloadsCounter)
     );
   }
+
+  hasQuotaLeft(): boolean {
+    return this.getQuotaLeft() > 0;
+  }
+
   async getHosterConcurrentDownloads(hosterId: string): Promise<number> {
     return this.hosterConcurrentDownloadsCounter.get(hosterId) || 0;
   }

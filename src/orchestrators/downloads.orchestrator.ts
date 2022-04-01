@@ -28,9 +28,10 @@ export class DownloadsOrquestrator implements OnModuleInit {
 
   // TODO: If the concurrent downloads running is greater than the queue active jobs, should wait for the queue to finish.
   canStartRunning(): boolean {
-    const concurrentDownloadsQuotaLeft =
-      this.concurrentHosterDownloadsOrchestrator.getQuotaLeft();
-    return concurrentDownloadsQuotaLeft > 0 && !this.orchestratorIsRunning;
+    return (
+      !this.orchestratorIsRunning &&
+      this.concurrentHosterDownloadsOrchestrator.hasQuotaLeft()
+    );
   }
 
   async canDownloadNow(download: PendingDownload): Promise<boolean> {
