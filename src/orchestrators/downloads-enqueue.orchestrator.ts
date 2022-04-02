@@ -23,6 +23,8 @@ export class DownloadsEnqueueOrchestrator {
   );
 
   async run(): Promise<void> {
+    this.logger.log(`${DownloadsEnqueueOrchestrator.name} is running...`);
+
     while (await this.pendingDownloadsIterator.hasMore()) {
       const nextDownload = await this.pendingDownloadsIterator.next();
 
