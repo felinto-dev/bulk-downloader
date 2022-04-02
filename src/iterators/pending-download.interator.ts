@@ -7,7 +7,7 @@ import { DownloadStatus } from '@prisma/client';
 export class PendingDownloadsIterator {
   constructor(private readonly prisma: PrismaService) {}
 
-  async hasMore(): Promise<boolean> {
+  async hasNext(): Promise<boolean> {
     return !!this.next();
   }
 

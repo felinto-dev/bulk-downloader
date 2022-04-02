@@ -106,12 +106,12 @@ describe(DownloadsEnqueueOrchestrator.name, () => {
 
   describe(DownloadsEnqueueOrchestrator.prototype.run.name, () => {
     it('should abort where there are no pending downloads in database', async () => {
-      mockedPendingDownloadsIterator.hasMore.mockResolvedValueOnce(false);
+      mockedPendingDownloadsIterator.hasNext.mockResolvedValueOnce(false);
       await service.run();
       expect(mockedQueue.add).not.toHaveBeenCalled();
     });
     it('should add the download to the queue', async () => {
-      mockedPendingDownloadsIterator.hasMore
+      mockedPendingDownloadsIterator.hasNext
         .mockResolvedValueOnce(true)
         .mockResolvedValueOnce(false);
       mockedPendingDownloadsIterator.next
