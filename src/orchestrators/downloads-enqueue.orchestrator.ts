@@ -4,12 +4,12 @@ import { DownloadJobDto } from '@/dto/download.job.dto';
 import { PendingDownloadsIterator } from '@/iterators/pending-download.interator';
 import { HosterQuotasService } from '@/services/hoster-quotas.service';
 import { InjectQueue } from '@nestjs/bull';
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Queue } from 'bull';
 import { ConcurrentHosterDownloadsOrchestrator } from './concurrent-hoster-downloads.orchestrator';
 
 @Injectable()
-export class DownloadsEnqueueOrchestrator implements OnModuleInit {
+export class DownloadsEnqueueOrchestrator {
   constructor(
     @InjectQueue(DOWNLOADS_PROCESSING_QUEUE)
     private readonly queue: Queue<DownloadJobDto>,
@@ -17,10 +17,6 @@ export class DownloadsEnqueueOrchestrator implements OnModuleInit {
     private readonly hosterQuotaService: HosterQuotasService,
     private readonly concurrentDownloadsOrchestrator: ConcurrentHosterDownloadsOrchestrator,
   ) {}
-
-  async onModuleInit() {
-    await this.run();
-  }
 
   private readonly logger: Logger = new Logger(
     DownloadsEnqueueOrchestrator.name,
