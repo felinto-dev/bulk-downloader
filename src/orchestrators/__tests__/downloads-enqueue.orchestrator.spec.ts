@@ -66,7 +66,7 @@ describe(DownloadsEnqueueOrchestrator.name, () => {
         Hoster: { maxConcurrentDownloads: 1 },
       };
       mockedHosterQuotasService.hasReachedQuota.mockResolvedValue(true);
-      mockedConcurrentHosterDownloadsOrchestrator.countConcurrentDownloadsByHosterId.mockResolvedValue(
+      mockedConcurrentHosterDownloadsOrchestrator.countDownloadsInProgress.mockResolvedValue(
         0,
       );
       const result = await service.canDownloadNow(download);
@@ -81,7 +81,7 @@ describe(DownloadsEnqueueOrchestrator.name, () => {
         Hoster: { maxConcurrentDownloads: concurrentDownloads },
       };
       mockedHosterQuotasService.hasReachedQuota.mockResolvedValue(false);
-      mockedConcurrentHosterDownloadsOrchestrator.countConcurrentDownloadsByHosterId.mockResolvedValue(
+      mockedConcurrentHosterDownloadsOrchestrator.countDownloadsInProgress.mockResolvedValue(
         concurrentDownloads,
       );
       const result = await service.canDownloadNow(download);
@@ -96,7 +96,7 @@ describe(DownloadsEnqueueOrchestrator.name, () => {
         Hoster: { maxConcurrentDownloads: concurrentDownloads + 1 },
       };
       mockedHosterQuotasService.hasReachedQuota.mockResolvedValue(false);
-      mockedConcurrentHosterDownloadsOrchestrator.countConcurrentDownloadsByHosterId.mockResolvedValue(
+      mockedConcurrentHosterDownloadsOrchestrator.countDownloadsInProgress.mockResolvedValue(
         concurrentDownloads,
       );
       const result = await service.canDownloadNow(download);

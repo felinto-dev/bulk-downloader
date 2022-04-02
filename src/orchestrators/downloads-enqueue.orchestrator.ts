@@ -30,7 +30,7 @@ export class DownloadsEnqueueOrchestrator {
 
       if (await this.canDownloadNow(nextDownload)) {
         await this.queue.add(nextDownload);
-        await this.concurrentDownloadsOrchestrator.decrementQuotaLeft(
+        await this.concurrentDownloadsOrchestrator.decrementDownloadsInProgress(
           nextDownload.hosterId,
         );
         this.logger.verbose(`Queued download ${nextDownload.downloadId}`);
@@ -49,7 +49,7 @@ export class DownloadsEnqueueOrchestrator {
     );
 
     const currentConcurrentDownloads =
-      await this.concurrentDownloadsOrchestrator.countConcurrentDownloadsByHosterId(
+      await this.concurrentDownloadsOrchestrator.countDownloadsInProgress(
         hosterId,
       );
 

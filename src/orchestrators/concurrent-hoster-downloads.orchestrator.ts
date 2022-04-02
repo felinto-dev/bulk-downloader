@@ -8,6 +8,15 @@ import { Queue } from 'bull';
 
 /*
 	Create a NestJS service that orchestrates the concurent downloads for each hoster.
+
+	Should have the following methods:
+	- getQuotaLeft(hosterId: string): number
+	- incrementQuotaLeft(hosterId: string): void
+	- decrementQuotaLeft(hosterId: string): void
+	- getDownloadsInProgress(hosterId: string): number
+	- incrementDownloadsInProgress(hosterId: string): void
+	- decrementDownloadsInProgress(hosterId: string): void
+	- getDownloadsInProgressForAllHosters(): number
 */
 @Injectable()
 export class ConcurrentHosterDownloadsOrchestrator {
@@ -22,11 +31,12 @@ export class ConcurrentHosterDownloadsOrchestrator {
   async assertConcurrentDownloadsMatchActiveDownloads(): Promise<boolean> {
     const activeDownloads =
       await this.downloadsProcessingQueue.getActiveCount();
-    const activeConcurrentDownloads = this.countConcurrentDownloads();
+    const activeConcurrentDownloads =
+      this.countDownloadsInProgressForAllHosters();
     return activeDownloads <= activeConcurrentDownloads;
   }
 
-  countConcurrentDownloads(): number {
+  countDownloadsInProgressForAllHosters(): number {
     return sumMapValues(this.hosterConcurrentDownloadsCounter);
   }
 
@@ -41,11 +51,11 @@ export class ConcurrentHosterDownloadsOrchestrator {
     return this.getQuotaLeft() > 0;
   }
 
-  async countConcurrentDownloadsByHosterId(hosterId: string): Promise<number> {
+  async countDownloadsInProgress(hosterId: string): Promise<number> {
     return this.hosterConcurrentDownloadsCounter.get(hosterId) || 0;
   }
 
-  async decrementQuotaLeft(hosterId: string): Promise<void> {
+  async decrementDownloadsInProgress(hosterId: string): Promise<void> {
     const hosterConcurrentDownloads =
       this.hosterConcurrentDownloadsCounter.get(hosterId) || 0;
     this.hosterConcurrentDownloadsCounter.set(
@@ -54,7 +64,7 @@ export class ConcurrentHosterDownloadsOrchestrator {
     );
   }
 
-  async incrementQuotaLeft(hosterId: string): Promise<void> {
+  async incrementDownloadsInProgress(hosterId: string): Promise<void> {
     const hosterConcurrentDownloads =
       this.hosterConcurrentDownloadsCounter.get(hosterId) || 0;
 

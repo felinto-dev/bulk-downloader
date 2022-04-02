@@ -58,7 +58,7 @@ export class DownloadsProcessingConsumer {
       hosterId,
       DownloadStatus.FAILED,
     );
-    await this.concurrentHosterDownloadsOrchestrator.decrementQuotaLeft(
+    await this.concurrentHosterDownloadsOrchestrator.decrementDownloadsInProgress(
       hosterId,
     );
     await this.downloadsOrchestratingQueue.add(
@@ -74,7 +74,7 @@ export class DownloadsProcessingConsumer {
       hosterId,
       DownloadStatus.SUCCESS,
     );
-    await this.concurrentHosterDownloadsOrchestrator.decrementQuotaLeft(
+    await this.concurrentHosterDownloadsOrchestrator.decrementDownloadsInProgress(
       hosterId,
     );
     await this.downloadsOrchestratingQueue.add(
