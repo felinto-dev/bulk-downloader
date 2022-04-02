@@ -1,4 +1,5 @@
 import {
+  DOWNLOADS_ORCHESTRATING_QUEUE,
   DOWNLOADS_PROCESSING_QUEUE,
   DOWNLOADS_SORTING_QUEUE,
 } from '@/consts/queues';
@@ -22,5 +23,9 @@ export const BULL_QUEUES: DynamicModule[] = [
   }),
   BullModule.registerQueue({
     name: DOWNLOADS_SORTING_QUEUE,
+  }),
+  BullModule.registerQueue({
+    name: DOWNLOADS_ORCHESTRATING_QUEUE,
+    defaultJobOptions: { removeOnComplete: true, removeOnFail: true },
   }),
 ];
