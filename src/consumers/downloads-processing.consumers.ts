@@ -9,6 +9,7 @@ import { DownloadClientInterface } from '@/interfaces/download-client.interface'
 import { ConcurrentHosterDownloadsOrchestrator } from '@/orchestrators/concurrent-hoster-downloads.orchestrator';
 import { DownloadsService } from '@/services/downloads.service';
 import {
+  InjectQueue,
   OnQueueCompleted,
   OnQueueFailed,
   Process,
@@ -28,7 +29,7 @@ export class DownloadsProcessingConsumer {
     private readonly configService: ConfigService,
     private readonly downloadsService: DownloadsService,
     private readonly concurrentHosterDownloadsOrchestrator: ConcurrentHosterDownloadsOrchestrator,
-    @Inject(DOWNLOADS_ORCHESTRATING_QUEUE)
+    @InjectQueue(DOWNLOADS_ORCHESTRATING_QUEUE)
     private readonly downloadsOrchestratingQueue: Queue,
   ) {}
 
