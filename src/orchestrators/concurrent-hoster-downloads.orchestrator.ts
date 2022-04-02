@@ -1,14 +1,30 @@
 import { MAX_CONCURRENT_DOWNLOADS_ALLOWED } from '@/consts/app';
+import { DOWNLOADS_PROCESSING_QUEUE } from '@/consts/queues';
+import { DownloadJobDto } from '@/dto/download.job.dto';
 import { sumMapValues } from '@/utils/objects';
+import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
+import { Queue } from 'bull';
 
 /*
 	Create a NestJS service that orchestrates the concurent downloads for each hoster.
 */
 @Injectable()
 export class ConcurrentHosterDownloadsOrchestrator {
+  constructor(
+    @InjectQueue(DOWNLOADS_PROCESSING_QUEUE)
+    private readonly downloadsProcessingQueue: Queue<DownloadJobDto>,
+  ) {}
+
   public readonly hosterConcurrentDownloadsCounter: Map<string, number> =
     new Map();
+
+  async assertConcurrentDownloadsMatchActiveDownloads(): Promise<boolean> {
+    const activeDownloads =
+      await this.downloadsProcessingQueue.getActiveCount();
+    const activeConcurrentDownloads = this.countConcurrentDownloads();
+    return activeDownloads <= activeConcurrentDownloads;
+  }
 
   countConcurrentDownloads(): number {
     return sumMapValues(this.hosterConcurrentDownloadsCounter);

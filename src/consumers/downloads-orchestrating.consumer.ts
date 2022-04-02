@@ -1,4 +1,5 @@
 import { DOWNLOADS_ORCHESTRATING_QUEUE } from '@/consts/queues';
+import { ConcurrentHosterDownloadsOrchestrator } from '@/orchestrators/concurrent-hoster-downloads.orchestrator';
 import { DownloadsEnqueueOrchestrator } from '@/orchestrators/downloads-enqueue.orchestrator';
 import { Process, Processor } from '@nestjs/bull';
 
@@ -11,6 +12,7 @@ export enum DownloadsOrchestratorTasks {
 export class DownloadsOrchestratingConsumer {
   constructor(
     private readonly downloadsEnqueueOrchestrator: DownloadsEnqueueOrchestrator,
+    private readonly concurrentHosterDownloadsOrchestrator: ConcurrentHosterDownloadsOrchestrator,
   ) {}
 
   @Process({
@@ -18,7 +20,17 @@ export class DownloadsOrchestratingConsumer {
     concurrency: 1,
   })
   async orchestrateDownloads() {
-    await this.downloadsEnqueueOrchestrator.run();
+    const concurrentHosterDownloadsOrchestratorHasQuotaLeft =
+      this.concurrentHosterDownloadsOrchestrator.hasQuotaLeft();
+    const assertConcurrentDownloadsMatchActiveDownloads =
+      await this.concurrentHosterDownloadsOrchestrator.assertConcurrentDownloadsMatchActiveDownloads();
+
+    if (
+      concurrentHosterDownloadsOrchestratorHasQuotaLeft &&
+      assertConcurrentDownloadsMatchActiveDownloads
+    ) {
+      await this.downloadsEnqueueOrchestrator.run();
+    }
   }
 
   // TODO: Clean up stale jobs (e.g. downloads that has the status of 'downloading')

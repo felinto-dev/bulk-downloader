@@ -22,28 +22,11 @@ export class DownloadsEnqueueOrchestrator implements OnModuleInit {
     await this.run();
   }
 
-  private isOrchestratorRunning = false;
-
   private readonly logger: Logger = new Logger(
     DownloadsEnqueueOrchestrator.name,
   );
 
-  async canStartRunning(): Promise<boolean> {
-    return (
-      !this.isOrchestratorRunning &&
-      this.concurrentDownloadsOrchestrator.hasQuotaLeft() &&
-      (await this.queue.getActiveCount()) <=
-        this.concurrentDownloadsOrchestrator.countConcurrentDownloads()
-    );
-  }
-
   async run(): Promise<void> {
-    if (!(await this.canStartRunning())) {
-      return;
-    }
-
-    this.isOrchestratorRunning = true;
-
     while (await this.pendingDownloadsIterator.hasMore()) {
       const nextDownload = await this.pendingDownloadsIterator.next();
 
@@ -55,8 +38,6 @@ export class DownloadsEnqueueOrchestrator implements OnModuleInit {
         this.logger.verbose(`Queued download ${nextDownload.downloadId}`);
       }
     }
-
-    this.isOrchestratorRunning = false;
   }
 
   async canDownloadNow(download: PendingDownload): Promise<boolean> {
