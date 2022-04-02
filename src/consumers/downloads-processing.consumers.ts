@@ -1,10 +1,12 @@
 import { DOWNLOAD_CLIENT } from '@/adapters/tokens';
 import { MAX_CONCURRENT_DOWNLOADS_ALLOWED } from '@/consts/app';
-import { DOWNLOADS_PROCESSING_QUEUE } from '@/consts/queues';
+import {
+  DOWNLOADS_ORCHESTRATING_QUEUE,
+  DOWNLOADS_PROCESSING_QUEUE,
+} from '@/consts/queues';
 import { DownloadJobDto } from '@/dto/download.job.dto';
 import { DownloadClientInterface } from '@/interfaces/download-client.interface';
 import { ConcurrentHosterDownloadsOrchestrator } from '@/orchestrators/concurrent-hoster-downloads.orchestrator';
-import { DownloadsEnqueueOrchestrator } from '@/orchestrators/downloads-enqueue.orchestrator';
 import { DownloadsService } from '@/services/downloads.service';
 import {
   OnQueueCompleted,
@@ -15,7 +17,8 @@ import {
 import { Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DownloadStatus } from '@prisma/client';
-import { Job } from 'bull';
+import { Job, Queue } from 'bull';
+import { DownloadsOrchestratorTasks } from './downloads-orchestrating.consumer';
 
 @Processor(DOWNLOADS_PROCESSING_QUEUE)
 export class DownloadsProcessingConsumer {
@@ -25,7 +28,8 @@ export class DownloadsProcessingConsumer {
     private readonly configService: ConfigService,
     private readonly downloadsService: DownloadsService,
     private readonly concurrentHosterDownloadsOrchestrator: ConcurrentHosterDownloadsOrchestrator,
-    private readonly downloadsOrchestrator: DownloadsEnqueueOrchestrator,
+    @Inject(DOWNLOADS_ORCHESTRATING_QUEUE)
+    private readonly downloadsOrchestratingQueue: Queue,
   ) {}
 
   @Process({ concurrency: MAX_CONCURRENT_DOWNLOADS_ALLOWED })
@@ -56,7 +60,9 @@ export class DownloadsProcessingConsumer {
     await this.concurrentHosterDownloadsOrchestrator.decrementQuotaLeft(
       hosterId,
     );
-    await this.downloadsOrchestrator.run();
+    await this.downloadsOrchestratingQueue.add(
+      DownloadsOrchestratorTasks.RUN_ORCHESTRATOR,
+    );
   }
 
   @OnQueueCompleted()
@@ -70,6 +76,8 @@ export class DownloadsProcessingConsumer {
     await this.concurrentHosterDownloadsOrchestrator.decrementQuotaLeft(
       hosterId,
     );
-    await this.downloadsOrchestrator.run();
+    await this.downloadsOrchestratingQueue.add(
+      DownloadsOrchestratorTasks.RUN_ORCHESTRATOR,
+    );
   }
 }
