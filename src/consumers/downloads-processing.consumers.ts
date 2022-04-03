@@ -7,6 +7,7 @@ import {
 import { DownloadJobDto } from '@/dto/download.job.dto';
 import { DownloadClientInterface } from '@/interfaces/download-client.interface';
 import { DownloadsService } from '@/services/downloads.service';
+import { HosterQuotasService } from '@/services/hoster-quotas.service';
 import { HosterDownloadsConcurrencyValidator } from '@/validators/concurrent-hoster-downloads.validator';
 import {
   InjectQueue,
@@ -19,7 +20,7 @@ import {
 import { Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DownloadStatus } from '@prisma/client';
-import { Job, Queue } from 'bull';
+import { Job, JobPromise, Queue } from 'bull';
 import { DownloadsOrchestratorTasks } from './downloads-orchestrating.consumer';
 
 @Processor(DOWNLOADS_PROCESSING_QUEUE)
@@ -32,11 +33,28 @@ export class DownloadsProcessingConsumer {
     private readonly concurrentHosterDownloadsOrchestrator: HosterDownloadsConcurrencyValidator,
     @InjectQueue(DOWNLOADS_ORCHESTRATING_QUEUE)
     private readonly downloadsOrchestratingQueue: Queue,
+    private readonly hosterQuotaService: HosterQuotasService,
   ) {}
 
   @OnQueueActive()
-  async onDownloadStarted(job: Job<DownloadJobDto>) {
-    const { hosterId, downloadId } = job.data;
+  async onDownloadStarted(job: Job<DownloadJobDto>, jobPromise: JobPromise) {
+    const { hosterId } = job.data;
+    const hasHosterReachedQuota = await this.hosterQuotaService.hasReachedQuota(
+      hosterId,
+    );
+    const hasHosterReachedConcurrentDownloadsLimit =
+      await this.concurrentHosterDownloadsOrchestrator.hasReachedConcurrentDownloadsLimit(
+        hosterId,
+      );
+
+    if (hasHosterReachedQuota || hasHosterReachedConcurrentDownloadsLimit) {
+      jobPromise.cancel();
+    }
+  }
+
+  @Process({ concurrency: MAX_CONCURRENT_DOWNLOADS_ALLOWED })
+  async onDownload(job: Job<DownloadJobDto>) {
+    const { url, downloadId, hosterId } = job.data;
     await this.concurrentHosterDownloadsOrchestrator.incrementQuotaLeft(
       hosterId,
     );
@@ -45,11 +63,6 @@ export class DownloadsProcessingConsumer {
       hosterId,
       DownloadStatus.DOWNLOADING,
     );
-  }
-
-  @Process({ concurrency: MAX_CONCURRENT_DOWNLOADS_ALLOWED })
-  async onDownload(job: Job<DownloadJobDto>) {
-    const { url } = job.data;
     await this.downloadClient.download({
       downloadUrl: url,
       saveLocation: await this.configService.get('app.downloads_directory'),
