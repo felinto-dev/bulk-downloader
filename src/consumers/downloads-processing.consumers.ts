@@ -8,7 +8,7 @@ import { DownloadJobDto } from '@/dto/download.job.dto';
 import { DownloadClientInterface } from '@/interfaces/download-client.interface';
 import { DownloadsService } from '@/services/downloads.service';
 import { HosterQuotasService } from '@/services/hoster-quotas.service';
-import { HosterDownloadsConcurrencyValidator } from '@/validators/concurrent-hoster-downloads.validator';
+import { DownloadsConcurrencyManager } from '@/validators/concurrent-hoster-downloads.validator';
 import {
   InjectQueue,
   OnQueueActive,
@@ -30,7 +30,7 @@ export class DownloadsProcessingConsumer {
     private readonly downloadClient: DownloadClientInterface,
     private readonly configService: ConfigService,
     private readonly downloadsService: DownloadsService,
-    private readonly hosterDownloadsConcurrencyValidator: HosterDownloadsConcurrencyValidator,
+    private readonly hosterDownloadsConcurrencyValidator: DownloadsConcurrencyManager,
     @InjectQueue(DOWNLOADS_ORCHESTRATING_QUEUE)
     private readonly downloadsOrchestratingQueue: Queue,
     private readonly hosterQuotaService: HosterQuotasService,

@@ -8,7 +8,7 @@ import { Injectable } from '@nestjs/common';
 import { Queue } from 'bull';
 
 @Injectable()
-export class HosterDownloadsConcurrencyValidator {
+export class DownloadsConcurrencyManager {
   constructor(
     @InjectQueue(DOWNLOADS_PROCESSING_QUEUE)
     private readonly downloadsProcessingQueue: Queue<DownloadJobDto>,

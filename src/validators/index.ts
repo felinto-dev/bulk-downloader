@@ -1,3 +1,3 @@
-import { HosterDownloadsConcurrencyValidator } from './concurrent-hoster-downloads.validator';
+import { DownloadsConcurrencyManager } from './concurrent-hoster-downloads.validator';
 
-export const VALIDATORS = [HosterDownloadsConcurrencyValidator];
+export const VALIDATORS = [DownloadsConcurrencyManager];
