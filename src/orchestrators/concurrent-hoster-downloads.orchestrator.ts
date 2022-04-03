@@ -46,18 +46,18 @@ export class ConcurrentHosterDownloadsOrchestrator {
     return hasQuotaLeft && assertConcurrentDownloadsMatchActiveDownloads;
   }
 
-  getQuotaLeft(): number {
+  private getQuotaLeft(): number {
     return (
       MAX_CONCURRENT_DOWNLOADS_ALLOWED -
       sumMapValues(this.hosterConcurrentDownloadsCounter)
     );
   }
 
-  hasQuotaLeft(): boolean {
+  private hasQuotaLeft(): boolean {
     return this.getQuotaLeft() > 0;
   }
 
-  async countDownloadsInProgress(hosterId: string): Promise<number> {
+  private async countDownloadsInProgress(hosterId: string): Promise<number> {
     return this.hosterConcurrentDownloadsCounter.get(hosterId) || 0;
   }
 
