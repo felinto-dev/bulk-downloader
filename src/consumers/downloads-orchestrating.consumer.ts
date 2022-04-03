@@ -1,6 +1,6 @@
 import { DOWNLOADS_ORCHESTRATING_QUEUE } from '@/consts/queues';
-import { HosterDownloadsConcurrencyValidator } from '@/orchestrators/concurrent-hoster-downloads.validator';
 import { DownloadsEnqueueOrchestrator } from '@/orchestrators/downloads-enqueue.orchestrator';
+import { HosterDownloadsConcurrencyValidator } from '@/validators/concurrent-hoster-downloads.validator';
 import { Process, Processor } from '@nestjs/bull';
 
 export enum DownloadsOrchestratorTasks {

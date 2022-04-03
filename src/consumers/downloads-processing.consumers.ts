@@ -6,8 +6,8 @@ import {
 } from '@/consts/queues';
 import { DownloadJobDto } from '@/dto/download.job.dto';
 import { DownloadClientInterface } from '@/interfaces/download-client.interface';
-import { HosterDownloadsConcurrencyValidator } from '@/orchestrators/concurrent-hoster-downloads.validator';
 import { DownloadsService } from '@/services/downloads.service';
+import { HosterDownloadsConcurrencyValidator } from '@/validators/concurrent-hoster-downloads.validator';
 import {
   InjectQueue,
   OnQueueActive,

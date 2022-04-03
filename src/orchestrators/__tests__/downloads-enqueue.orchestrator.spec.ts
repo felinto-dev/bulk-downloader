@@ -7,7 +7,7 @@ import { createMock } from '@golevelup/ts-jest';
 import { getQueueToken } from '@nestjs/bull';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Queue } from 'bull';
-import { HosterDownloadsConcurrencyValidator } from '../concurrent-hoster-downloads.validator';
+import { HosterDownloadsConcurrencyValidator } from '../../validators/concurrent-hoster-downloads.validator';
 import { DownloadsEnqueueOrchestrator } from '../downloads-enqueue.orchestrator';
 
 describe(DownloadsEnqueueOrchestrator.name, () => {
