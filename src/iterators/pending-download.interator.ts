@@ -20,15 +20,9 @@ export class PendingDownloadsIterator {
       where: {
         status: DownloadStatus.PENDING,
         // TODO: Not look for hosters that have reached their concurrency limit
-        Hoster: {
-          limits: { quotaRenewsAt: { lt: new Date() } },
-        },
+        Hoster: { limits: { quotaRenewsAt: { lt: new Date() } } },
       },
-      select: {
-        url: true,
-        downloadId: true,
-        hosterId: true,
-      },
+      select: { url: true, downloadId: true, hosterId: true },
     });
   }
 }
