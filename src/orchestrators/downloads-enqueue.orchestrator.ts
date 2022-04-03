@@ -36,23 +36,15 @@ export class DownloadsEnqueueOrchestrator {
   }
 
   async canDownloadNow(download: PendingDownload): Promise<boolean> {
-    const {
-      hosterId,
-      Hoster: { maxConcurrentDownloads },
-    } = download;
-
-    const isHosterQuotaReached = await this.hosterQuotaService.hasReachedQuota(
+    const { hosterId } = download;
+    const hasHosterReachedQuota = await this.hosterQuotaService.hasReachedQuota(
       hosterId,
     );
-
-    const currentConcurrentDownloads =
-      await this.concurrentDownloadsOrchestrator.countDownloadsInProgress(
+    const hasHosterReachedConcurrentDownloadsLimit =
+      await this.concurrentDownloadsOrchestrator.hasReachedConcurrentDownloadsLimit(
         hosterId,
       );
 
-    const isConcurrentDownloadsLimitReached =
-      currentConcurrentDownloads >= maxConcurrentDownloads;
-
-    return !isHosterQuotaReached && !isConcurrentDownloadsLimitReached;
+    return !(hasHosterReachedQuota || hasHosterReachedConcurrentDownloadsLimit);
   }
 }

@@ -31,4 +31,11 @@ export class HostersRepository {
       include: { limits: true },
     });
   }
+
+  getMaxConcurrentDownloads(hosterId: string) {
+    return this.prisma.hoster.findUnique({
+      where: { hosterId },
+      select: { maxConcurrentDownloads: true },
+    });
+  }
 }

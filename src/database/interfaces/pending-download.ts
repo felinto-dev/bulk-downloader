@@ -5,7 +5,6 @@ const pendingDownload = Prisma.validator<Prisma.DownloadArgs>()({
     url: true,
     downloadId: true,
     hosterId: true,
-    Hoster: { select: { maxConcurrentDownloads: true } },
   },
 });
 

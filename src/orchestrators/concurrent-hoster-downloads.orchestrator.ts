@@ -1,6 +1,7 @@
 import { MAX_CONCURRENT_DOWNLOADS_ALLOWED } from '@/consts/app';
 import { DOWNLOADS_PROCESSING_QUEUE } from '@/consts/queues';
 import { DownloadJobDto } from '@/dto/download.job.dto';
+import { HostersService } from '@/services/hosters.service';
 import { sumMapValues } from '@/utils/objects';
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
@@ -23,6 +24,7 @@ export class ConcurrentHosterDownloadsOrchestrator {
   constructor(
     @InjectQueue(DOWNLOADS_PROCESSING_QUEUE)
     private readonly downloadsProcessingQueue: Queue<DownloadJobDto>,
+    private readonly hostersService: HostersService,
   ) {}
 
   public readonly hosterConcurrentDownloadsCounter: Map<string, number> =
@@ -74,5 +76,16 @@ export class ConcurrentHosterDownloadsOrchestrator {
         hosterConcurrentDownloads - 1,
       );
     }
+  }
+
+  async hasReachedConcurrentDownloadsLimit(hosterId: string): Promise<boolean> {
+    const maxConcurrentDownloads =
+      await this.hostersService.getMaxConcurrentDownloads(hosterId);
+
+    const currentConcurrentDownloads = await this.countDownloadsInProgress(
+      hosterId,
+    );
+
+    return currentConcurrentDownloads >= maxConcurrentDownloads;
   }
 }

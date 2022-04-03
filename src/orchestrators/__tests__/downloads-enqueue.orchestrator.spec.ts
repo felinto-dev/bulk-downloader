@@ -58,48 +58,34 @@ describe(DownloadsEnqueueOrchestrator.name, () => {
   });
 
   describe(DownloadsEnqueueOrchestrator.prototype.canDownloadNow.name, () => {
+    const mockedPendingDownload: PendingDownload = {
+      downloadId: 'downloadId',
+      hosterId: 'hosterId',
+      url: 'url',
+    };
+
     it('should return false if the hoster quota is reached', async () => {
-      const download: PendingDownload = {
-        hosterId: 'hosterId',
-        downloadId: 'downloadId',
-        url: 'url',
-        Hoster: { maxConcurrentDownloads: 1 },
-      };
       mockedHosterQuotasService.hasReachedQuota.mockResolvedValue(true);
-      mockedConcurrentHosterDownloadsOrchestrator.countDownloadsInProgress.mockResolvedValue(
-        0,
+      mockedConcurrentHosterDownloadsOrchestrator.hasReachedConcurrentDownloadsLimit.mockResolvedValue(
+        false,
       );
-      const result = await service.canDownloadNow(download);
+      const result = await service.canDownloadNow(mockedPendingDownload);
       expect(result).toBe(false);
     });
     it('should return false if the hoster can not do +1 concurrent download', async () => {
-      const concurrentDownloads = 1;
-      const download: PendingDownload = {
-        hosterId: 'hosterId',
-        downloadId: 'downloadId',
-        url: 'url',
-        Hoster: { maxConcurrentDownloads: concurrentDownloads },
-      };
       mockedHosterQuotasService.hasReachedQuota.mockResolvedValue(false);
-      mockedConcurrentHosterDownloadsOrchestrator.countDownloadsInProgress.mockResolvedValue(
-        concurrentDownloads,
+      mockedConcurrentHosterDownloadsOrchestrator.hasReachedConcurrentDownloadsLimit.mockResolvedValue(
+        true,
       );
-      const result = await service.canDownloadNow(download);
+      const result = await service.canDownloadNow(mockedPendingDownload);
       expect(result).toBe(false);
     });
-    it('should return true when the hoster has not reached its quota and can do +1 concurrent download', async () => {
-      const concurrentDownloads = 0;
-      const download: PendingDownload = {
-        hosterId: 'hosterId',
-        downloadId: 'downloadId',
-        url: 'url',
-        Hoster: { maxConcurrentDownloads: concurrentDownloads + 1 },
-      };
+    it('should return true when the hoster has not reached quota and neither concurrent downloads limit', async () => {
       mockedHosterQuotasService.hasReachedQuota.mockResolvedValue(false);
-      mockedConcurrentHosterDownloadsOrchestrator.countDownloadsInProgress.mockResolvedValue(
-        concurrentDownloads,
+      mockedConcurrentHosterDownloadsOrchestrator.hasReachedConcurrentDownloadsLimit.mockResolvedValue(
+        false,
       );
-      const result = await service.canDownloadNow(download);
+      const result = await service.canDownloadNow(mockedPendingDownload);
       expect(result).toBe(true);
     });
   });
@@ -119,7 +105,6 @@ describe(DownloadsEnqueueOrchestrator.name, () => {
           hosterId: 'hosterId',
           downloadId: 'downloadId',
           url: 'url',
-          Hoster: { maxConcurrentDownloads: 1 },
         })
         .mockReturnValueOnce(null);
       service.canDownloadNow = jest.fn().mockResolvedValueOnce(true);

@@ -9,4 +9,9 @@ export class HostersService {
   async upsertHoster(hoster: UpsertHosterInput) {
     return this.hostersRepository.upsertHoster(hoster);
   }
+
+  async getMaxConcurrentDownloads(hosterId: string): Promise<number> {
+    return (await this.hostersRepository.getMaxConcurrentDownloads(hosterId))
+      .maxConcurrentDownloads;
+  }
 }
