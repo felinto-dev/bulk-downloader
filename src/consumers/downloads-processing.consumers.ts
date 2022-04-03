@@ -6,9 +6,9 @@ import {
 } from '@/consts/queues';
 import { DownloadJobDto } from '@/dto/download.job.dto';
 import { DownloadClientInterface } from '@/interfaces/download-client.interface';
+import { HosterConcurrencyManager } from '@/managers/hoster-concurrency.manager';
 import { DownloadsService } from '@/services/downloads.service';
 import { HosterQuotasService } from '@/services/hoster-quotas.service';
-import { DownloadsConcurrencyManager } from '@/validators/concurrent-hoster-downloads.validator';
 import {
   InjectQueue,
   OnQueueActive,
@@ -30,10 +30,10 @@ export class DownloadsProcessingConsumer {
     private readonly downloadClient: DownloadClientInterface,
     private readonly configService: ConfigService,
     private readonly downloadsService: DownloadsService,
-    private readonly hosterDownloadsConcurrencyValidator: DownloadsConcurrencyManager,
     @InjectQueue(DOWNLOADS_ORCHESTRATING_QUEUE)
     private readonly downloadsOrchestratingQueue: Queue,
     private readonly hosterQuotaService: HosterQuotasService,
+    private readonly hosterConcurrencyManager: HosterConcurrencyManager,
   ) {}
 
   @OnQueueActive()
@@ -42,12 +42,12 @@ export class DownloadsProcessingConsumer {
     const hasHosterReachedQuota = await this.hosterQuotaService.hasReachedQuota(
       hosterId,
     );
-    const hasHosterReachedConcurrentDownloadsLimit =
-      await this.hosterDownloadsConcurrencyValidator.hasReachedConcurrentDownloadsLimit(
+    const hasReachedMaxConcurrentDownloads =
+      await this.hosterConcurrencyManager.hasReachedMaxConcurrentDownloads(
         hosterId,
       );
 
-    if (hasHosterReachedQuota || hasHosterReachedConcurrentDownloadsLimit) {
+    if (hasHosterReachedQuota || hasReachedMaxConcurrentDownloads) {
       jobPromise.cancel();
     }
   }
@@ -55,7 +55,7 @@ export class DownloadsProcessingConsumer {
   @Process({ concurrency: MAX_CONCURRENT_DOWNLOADS_ALLOWED })
   async onDownload(job: Job<DownloadJobDto>) {
     const { url, downloadId, hosterId } = job.data;
-    await this.hosterDownloadsConcurrencyValidator.incrementQuotaLeft(hosterId);
+    await this.hosterConcurrencyManager.incrementDownloadsInProgress(hosterId);
     await this.downloadsService.changeDownloadStatus(
       downloadId,
       hosterId,
@@ -78,7 +78,7 @@ export class DownloadsProcessingConsumer {
       hosterId,
       DownloadStatus.FAILED,
     );
-    await this.hosterDownloadsConcurrencyValidator.decrementQuotaLeft(hosterId);
+    await this.hosterConcurrencyManager.decrementDownloadsInProgress(hosterId);
     await this.downloadsOrchestratingQueue.add(
       DownloadsOrchestratorTasks.RUN_ORCHESTRATOR,
     );
@@ -92,7 +92,7 @@ export class DownloadsProcessingConsumer {
       hosterId,
       DownloadStatus.SUCCESS,
     );
-    await this.hosterDownloadsConcurrencyValidator.decrementQuotaLeft(hosterId);
+    await this.hosterConcurrencyManager.decrementDownloadsInProgress(hosterId);
     await this.downloadsOrchestratingQueue.add(
       DownloadsOrchestratorTasks.RUN_ORCHESTRATOR,
     );
