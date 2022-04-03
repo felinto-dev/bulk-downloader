@@ -10,6 +10,7 @@ import { ConcurrentHosterDownloadsOrchestrator } from '@/orchestrators/concurren
 import { DownloadsService } from '@/services/downloads.service';
 import {
   InjectQueue,
+  OnQueueActive,
   OnQueueCompleted,
   OnQueueFailed,
   Process,
@@ -32,6 +33,14 @@ export class DownloadsProcessingConsumer {
     @InjectQueue(DOWNLOADS_ORCHESTRATING_QUEUE)
     private readonly downloadsOrchestratingQueue: Queue,
   ) {}
+
+  @OnQueueActive()
+  async onDownloadStarted(job: Job<DownloadJobDto>) {
+    const { hosterId } = job.data;
+    await this.concurrentHosterDownloadsOrchestrator.incrementDownloadsInProgress(
+      hosterId,
+    );
+  }
 
   @Process({ concurrency: MAX_CONCURRENT_DOWNLOADS_ALLOWED })
   async onDownload(job: Job<DownloadJobDto>) {
