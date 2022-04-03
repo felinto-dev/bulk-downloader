@@ -18,16 +18,32 @@ export class ConcurrentHosterDownloadsOrchestrator {
   private readonly hosterConcurrentDownloadsCounter: Map<string, number> =
     new Map();
 
-  async assertConcurrentDownloadsMatchActiveDownloads(): Promise<boolean> {
-    const activeDownloads =
-      await this.downloadsProcessingQueue.getActiveCount();
-    const activeConcurrentDownloads =
-      this.countDownloadsInProgressForAllHosters();
-    return activeDownloads <= activeConcurrentDownloads;
+  private async countActiveDownloadsOnQueue(): Promise<number> {
+    return this.downloadsProcessingQueue.getActiveCount();
   }
 
-  countDownloadsInProgressForAllHosters(): number {
+  private async countActiveDownloadsManagedByThisOrchestrator(): Promise<number> {
     return sumMapValues(this.hosterConcurrentDownloadsCounter);
+  }
+
+  /*
+		This method should assert that the number of downloads in progress on the queue is lower or equal to the number of concurrent downloads allowed for the hoster.
+		This is to prevent the orchestrator from running when the hoster has reached its concurrent downloads limit.
+	*/
+  private async assertConcurrentDownloadsMatchActiveDownloads(): Promise<boolean> {
+    const activeDownloads = await this.countActiveDownloadsOnQueue();
+    const activeDownloadsManagedByThisOrchestrator =
+      await this.countActiveDownloadsManagedByThisOrchestrator();
+
+    return activeDownloads <= activeDownloadsManagedByThisOrchestrator;
+  }
+
+  async canOrchestratorRun(): Promise<boolean> {
+    const hasQuotaLeft = this.hasQuotaLeft();
+    const assertConcurrentDownloadsMatchActiveDownloads =
+      await this.assertConcurrentDownloadsMatchActiveDownloads();
+
+    return hasQuotaLeft && assertConcurrentDownloadsMatchActiveDownloads;
   }
 
   getQuotaLeft(): number {

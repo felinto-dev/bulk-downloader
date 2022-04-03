@@ -20,15 +20,7 @@ export class DownloadsOrchestratingConsumer {
     concurrency: 1,
   })
   async orchestrateDownloads() {
-    const concurrentHosterDownloadsOrchestratorHasQuotaLeft =
-      this.concurrentHosterDownloadsOrchestrator.hasQuotaLeft();
-    const assertConcurrentDownloadsMatchActiveDownloads =
-      await this.concurrentHosterDownloadsOrchestrator.assertConcurrentDownloadsMatchActiveDownloads();
-
-    if (
-      concurrentHosterDownloadsOrchestratorHasQuotaLeft &&
-      assertConcurrentDownloadsMatchActiveDownloads
-    ) {
+    if (this.concurrentHosterDownloadsOrchestrator.canOrchestratorRun()) {
       await this.downloadsEnqueueOrchestrator.run();
     }
   }
