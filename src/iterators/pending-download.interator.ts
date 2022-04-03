@@ -28,9 +28,6 @@ export class PendingDownloadsIterator {
         url: true,
         downloadId: true,
         hosterId: true,
-        Hoster: {
-          select: { maxConcurrentDownloads: true },
-        },
       },
     });
   }
