@@ -12,7 +12,7 @@ import { HosterDownloadsConcurrencyValidator } from '../validators/concurrent-ho
 export class DownloadsEnqueueOrchestrator {
   constructor(
     @InjectQueue(DOWNLOADS_PROCESSING_QUEUE)
-    private readonly queue: Queue<DownloadJobDto>,
+    private readonly downloadsProcessingQueue: Queue<DownloadJobDto>,
     private readonly pendingDownloadsIterator: PendingDownloadsIterator,
     private readonly hosterQuotaService: HosterQuotasService,
     private readonly concurrentDownloadsOrchestrator: HosterDownloadsConcurrencyValidator,
@@ -29,9 +29,9 @@ export class DownloadsEnqueueOrchestrator {
       const nextDownload = await this.pendingDownloadsIterator.next();
 
       if (await this.canDownloadNow(nextDownload)) {
-        await this.queue.add(nextDownload);
+        await this.downloadsProcessingQueue.add(nextDownload);
         this.logger.log(
-          `Added download ${nextDownload.downloadId} from hoster ${nextDownload.hosterId} to the queue`,
+          `Added download ${nextDownload.downloadId} from hoster ${nextDownload.hosterId} to the downloads processing queue`,
         );
       }
     }
