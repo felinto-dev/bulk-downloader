@@ -46,7 +46,7 @@ export class ConcurrentHosterDownloadsOrchestrator {
     return hasQuotaLeft && assertConcurrentDownloadsMatchActiveDownloads;
   }
 
-  private getQuotaLeft(): number {
+  private getConcurrentDownloadsQuotaLeftCount(): number {
     return (
       MAX_CONCURRENT_DOWNLOADS_ALLOWED -
       sumMapValues(this.hosterConcurrentDownloadsCounter)
@@ -54,14 +54,14 @@ export class ConcurrentHosterDownloadsOrchestrator {
   }
 
   private hasQuotaLeft(): boolean {
-    return this.getQuotaLeft() > 0;
+    return this.getConcurrentDownloadsQuotaLeftCount() > 0;
   }
 
   private async countDownloadsInProgress(hosterId: string): Promise<number> {
     return this.hosterConcurrentDownloadsCounter.get(hosterId) || 0;
   }
 
-  async decrementDownloadsInProgress(hosterId: string): Promise<void> {
+  async decrementQuotaLeft(hosterId: string): Promise<void> {
     const hosterConcurrentDownloads =
       this.hosterConcurrentDownloadsCounter.get(hosterId) || 0;
     this.hosterConcurrentDownloadsCounter.set(
@@ -70,9 +70,14 @@ export class ConcurrentHosterDownloadsOrchestrator {
     );
   }
 
-  async incrementDownloadsInProgress(hosterId: string): Promise<void> {
+  async incrementQuotaLeft(hosterId: string): Promise<void> {
+    const maxConcurrentDownloads = await this.getMaxConcurrentDownloads(
+      hosterId,
+    );
+
     const hosterConcurrentDownloads =
-      this.hosterConcurrentDownloadsCounter.get(hosterId) || 0;
+      this.hosterConcurrentDownloadsCounter.get(hosterId) ||
+      maxConcurrentDownloads;
 
     if (hosterConcurrentDownloads > 0) {
       this.hosterConcurrentDownloadsCounter.set(
@@ -82,9 +87,14 @@ export class ConcurrentHosterDownloadsOrchestrator {
     }
   }
 
+  async getMaxConcurrentDownloads(hosterId: string): Promise<number> {
+    return this.hostersService.getMaxConcurrentDownloads(hosterId);
+  }
+
   async hasReachedConcurrentDownloadsLimit(hosterId: string): Promise<boolean> {
-    const maxConcurrentDownloads =
-      await this.hostersService.getMaxConcurrentDownloads(hosterId);
+    const maxConcurrentDownloads = await this.getMaxConcurrentDownloads(
+      hosterId,
+    );
 
     const currentConcurrentDownloads = await this.countDownloadsInProgress(
       hosterId,

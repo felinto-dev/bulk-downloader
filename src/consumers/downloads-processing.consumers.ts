@@ -37,7 +37,7 @@ export class DownloadsProcessingConsumer {
   @OnQueueActive()
   async onDownloadStarted(job: Job<DownloadJobDto>) {
     const { hosterId, downloadId } = job.data;
-    await this.concurrentHosterDownloadsOrchestrator.incrementDownloadsInProgress(
+    await this.concurrentHosterDownloadsOrchestrator.incrementQuotaLeft(
       hosterId,
     );
     await this.downloadsService.changeDownloadStatus(
@@ -67,7 +67,7 @@ export class DownloadsProcessingConsumer {
       hosterId,
       DownloadStatus.FAILED,
     );
-    await this.concurrentHosterDownloadsOrchestrator.decrementDownloadsInProgress(
+    await this.concurrentHosterDownloadsOrchestrator.decrementQuotaLeft(
       hosterId,
     );
     await this.downloadsOrchestratingQueue.add(
@@ -83,7 +83,7 @@ export class DownloadsProcessingConsumer {
       hosterId,
       DownloadStatus.SUCCESS,
     );
-    await this.concurrentHosterDownloadsOrchestrator.decrementDownloadsInProgress(
+    await this.concurrentHosterDownloadsOrchestrator.decrementQuotaLeft(
       hosterId,
     );
     await this.downloadsOrchestratingQueue.add(
