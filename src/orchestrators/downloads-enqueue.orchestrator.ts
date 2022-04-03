@@ -6,7 +6,7 @@ import { HosterQuotasService } from '@/services/hoster-quotas.service';
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Logger } from '@nestjs/common';
 import { Queue } from 'bull';
-import { ConcurrentHosterDownloadsOrchestrator } from './concurrent-hoster-downloads.orchestrator';
+import { HosterDownloadsConcurrencyValidator } from './concurrent-hoster-downloads.validator';
 
 @Injectable()
 export class DownloadsEnqueueOrchestrator {
@@ -15,7 +15,7 @@ export class DownloadsEnqueueOrchestrator {
     private readonly queue: Queue<DownloadJobDto>,
     private readonly pendingDownloadsIterator: PendingDownloadsIterator,
     private readonly hosterQuotaService: HosterQuotasService,
-    private readonly concurrentDownloadsOrchestrator: ConcurrentHosterDownloadsOrchestrator,
+    private readonly concurrentDownloadsOrchestrator: HosterDownloadsConcurrencyValidator,
   ) {}
 
   private readonly logger: Logger = new Logger(

@@ -1,5 +1,5 @@
 import { DOWNLOADS_ORCHESTRATING_QUEUE } from '@/consts/queues';
-import { ConcurrentHosterDownloadsOrchestrator } from '@/orchestrators/concurrent-hoster-downloads.orchestrator';
+import { HosterDownloadsConcurrencyValidator } from '@/orchestrators/concurrent-hoster-downloads.validator';
 import { DownloadsEnqueueOrchestrator } from '@/orchestrators/downloads-enqueue.orchestrator';
 import { Process, Processor } from '@nestjs/bull';
 
@@ -12,7 +12,7 @@ export enum DownloadsOrchestratorTasks {
 export class DownloadsOrchestratingConsumer {
   constructor(
     private readonly downloadsEnqueueOrchestrator: DownloadsEnqueueOrchestrator,
-    private readonly concurrentHosterDownloadsOrchestrator: ConcurrentHosterDownloadsOrchestrator,
+    private readonly concurrentHosterDownloadsOrchestrator: HosterDownloadsConcurrencyValidator,
   ) {}
 
   @Process({

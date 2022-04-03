@@ -7,7 +7,7 @@ import { createMock } from '@golevelup/ts-jest';
 import { getQueueToken } from '@nestjs/bull';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Queue } from 'bull';
-import { ConcurrentHosterDownloadsOrchestrator } from '../concurrent-hoster-downloads.orchestrator';
+import { HosterDownloadsConcurrencyValidator } from '../concurrent-hoster-downloads.validator';
 import { DownloadsEnqueueOrchestrator } from '../downloads-enqueue.orchestrator';
 
 describe(DownloadsEnqueueOrchestrator.name, () => {
@@ -17,7 +17,7 @@ describe(DownloadsEnqueueOrchestrator.name, () => {
   const mockedQueue = createMock<Queue<DownloadJobDto>>();
   const mockedHosterQuotasService = createMock<HosterQuotasService>();
   const mockedConcurrentHosterDownloadsOrchestrator =
-    createMock<ConcurrentHosterDownloadsOrchestrator>();
+    createMock<HosterDownloadsConcurrencyValidator>();
   const mockedPendingDownloadsIterator = createMock<PendingDownloadsIterator>();
 
   beforeEach(async () => {
@@ -33,7 +33,7 @@ describe(DownloadsEnqueueOrchestrator.name, () => {
           useValue: mockedHosterQuotasService,
         },
         {
-          provide: ConcurrentHosterDownloadsOrchestrator,
+          provide: HosterDownloadsConcurrencyValidator,
           useValue: mockedConcurrentHosterDownloadsOrchestrator,
         },
         {

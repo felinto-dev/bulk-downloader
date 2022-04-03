@@ -8,32 +8,28 @@ import { Injectable } from '@nestjs/common';
 import { Queue } from 'bull';
 
 @Injectable()
-export class ConcurrentHosterDownloadsOrchestrator {
+export class HosterDownloadsConcurrencyValidator {
   constructor(
     @InjectQueue(DOWNLOADS_PROCESSING_QUEUE)
     private readonly downloadsProcessingQueue: Queue<DownloadJobDto>,
     private readonly hostersService: HostersService,
   ) {}
 
-  private readonly hosterConcurrentDownloadsCounter: Map<string, number> =
+  private readonly activeHosterDownloadsCounter: Map<string, number> =
     new Map();
 
   private async countActiveDownloadsOnQueue(): Promise<number> {
     return this.downloadsProcessingQueue.getActiveCount();
   }
 
-  private async countActiveDownloadsManagedByThisOrchestrator(): Promise<number> {
-    return sumMapValues(this.hosterConcurrentDownloadsCounter);
+  private async countActiveDownloads(): Promise<number> {
+    return sumMapValues(this.activeHosterDownloadsCounter);
   }
 
-  /*
-		This method should assert that the number of downloads in progress on the queue is lower or equal to the number of concurrent downloads allowed for the hoster.
-		This is to prevent the orchestrator from running when the hoster has reached its concurrent downloads limit.
-	*/
-  private async assertConcurrentDownloadsMatchActiveDownloads(): Promise<boolean> {
+  private async validateConcurrentDownloads(): Promise<boolean> {
     const activeDownloads = await this.countActiveDownloadsOnQueue();
     const activeDownloadsManagedByThisOrchestrator =
-      await this.countActiveDownloadsManagedByThisOrchestrator();
+      await this.countActiveDownloads();
 
     return activeDownloads <= activeDownloadsManagedByThisOrchestrator;
   }
@@ -41,30 +37,32 @@ export class ConcurrentHosterDownloadsOrchestrator {
   async canOrchestratorRun(): Promise<boolean> {
     const hasQuotaLeft = this.hasQuotaLeft();
     const assertConcurrentDownloadsMatchActiveDownloads =
-      await this.assertConcurrentDownloadsMatchActiveDownloads();
+      await this.validateConcurrentDownloads();
 
     return hasQuotaLeft && assertConcurrentDownloadsMatchActiveDownloads;
   }
 
-  private getConcurrentDownloadsQuotaLeftCount(): number {
+  private getRemainingQuota(): number {
     return (
       MAX_CONCURRENT_DOWNLOADS_ALLOWED -
-      sumMapValues(this.hosterConcurrentDownloadsCounter)
+      sumMapValues(this.activeHosterDownloadsCounter)
     );
   }
 
   private hasQuotaLeft(): boolean {
-    return this.getConcurrentDownloadsQuotaLeftCount() > 0;
+    return this.getRemainingQuota() > 0;
   }
 
-  private async countDownloadsInProgress(hosterId: string): Promise<number> {
-    return this.hosterConcurrentDownloadsCounter.get(hosterId) || 0;
+  private async countActiveDownloadsByHosterId(
+    hosterId: string,
+  ): Promise<number> {
+    return this.activeHosterDownloadsCounter.get(hosterId) || 0;
   }
 
   async decrementQuotaLeft(hosterId: string): Promise<void> {
     const hosterConcurrentDownloads =
-      this.hosterConcurrentDownloadsCounter.get(hosterId) || 0;
-    this.hosterConcurrentDownloadsCounter.set(
+      this.activeHosterDownloadsCounter.get(hosterId) || 0;
+    this.activeHosterDownloadsCounter.set(
       hosterId,
       hosterConcurrentDownloads + 1,
     );
@@ -76,11 +74,10 @@ export class ConcurrentHosterDownloadsOrchestrator {
     );
 
     const hosterConcurrentDownloads =
-      this.hosterConcurrentDownloadsCounter.get(hosterId) ||
-      maxConcurrentDownloads;
+      this.activeHosterDownloadsCounter.get(hosterId) || maxConcurrentDownloads;
 
     if (hosterConcurrentDownloads > 0) {
-      this.hosterConcurrentDownloadsCounter.set(
+      this.activeHosterDownloadsCounter.set(
         hosterId,
         hosterConcurrentDownloads - 1,
       );
@@ -96,9 +93,8 @@ export class ConcurrentHosterDownloadsOrchestrator {
       hosterId,
     );
 
-    const currentConcurrentDownloads = await this.countDownloadsInProgress(
-      hosterId,
-    );
+    const currentConcurrentDownloads =
+      await this.countActiveDownloadsByHosterId(hosterId);
 
     return currentConcurrentDownloads >= maxConcurrentDownloads;
   }
