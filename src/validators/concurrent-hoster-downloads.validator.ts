@@ -18,20 +18,6 @@ export class HosterDownloadsConcurrencyValidator {
   private readonly activeHosterDownloadsCounter: Map<string, number> =
     new Map();
 
-  /*
-		Create a method for validate if active downloads count on downloads processing queue is less or equal than active downloads count managed by this orchestrator
-
-		The purpose of this method is to prevent orchestrator from running if there are more active downloads than allowed by the hoster
-
-		Steps:
-			1. Get active downloads count on downloads processing queue
-			2. Get active downloads count managed by this orchestrator
-			3. Compare both counts
-			4. Return true if active downloads count on downloads processing queue is less or equal than active downloads count managed by this orchestrator
-
-		When this method should be called?
-			1. When orchestrator is about to run
-	*/
   private async validateConcurrentDownloads(): Promise<boolean> {
     const activeDownloadsCountOnDownloadsProcessingQueue =
       await this.downloadsProcessingQueue.getActiveCount();
