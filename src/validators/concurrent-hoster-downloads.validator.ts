@@ -18,18 +18,18 @@ export class HosterDownloadsConcurrencyValidator {
   private readonly activeHosterDownloadsCounter: Map<string, number> =
     new Map();
 
-  private async countActiveDownloadsOnQueue(): Promise<number> {
+  private async getActiveDownloadsOnQueueCount(): Promise<number> {
     return this.downloadsProcessingQueue.getActiveCount();
   }
 
-  private async countActiveDownloads(): Promise<number> {
+  private async getActiveDownloadsCount(): Promise<number> {
     return sumMapValues(this.activeHosterDownloadsCounter);
   }
 
   private async validateConcurrentDownloads(): Promise<boolean> {
-    const activeDownloads = await this.countActiveDownloadsOnQueue();
+    const activeDownloads = await this.getActiveDownloadsOnQueueCount();
     const activeDownloadsManagedByThisOrchestrator =
-      await this.countActiveDownloads();
+      await this.getActiveDownloadsCount();
 
     return activeDownloads <= activeDownloadsManagedByThisOrchestrator;
   }
