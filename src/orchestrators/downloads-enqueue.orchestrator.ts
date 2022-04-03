@@ -30,7 +30,9 @@ export class DownloadsEnqueueOrchestrator {
 
       if (await this.canDownloadNow(nextDownload)) {
         await this.queue.add(nextDownload);
-        this.logger.verbose(`Queued download ${nextDownload.downloadId}`);
+        this.logger.log(
+          `Added download ${nextDownload.downloadId} from hoster ${nextDownload.hosterId} to the queue`,
+        );
       }
     }
   }
