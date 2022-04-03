@@ -45,11 +45,6 @@ export class DownloadsProcessingConsumer {
   @Process({ concurrency: MAX_CONCURRENT_DOWNLOADS_ALLOWED })
   async onDownload(job: Job<DownloadJobDto>) {
     const { url, downloadId, hosterId } = job.data;
-    await this.downloadsService.changeDownloadStatus(
-      downloadId,
-      hosterId,
-      DownloadStatus.SUCCESS,
-    );
     await this.downloadClient.download({
       downloadUrl: url,
       saveLocation: await this.configService.get('app.downloads_directory'),
@@ -57,6 +52,11 @@ export class DownloadsProcessingConsumer {
       onDownloadProgress: (updatedDownloadProgress: number) =>
         job.progress(updatedDownloadProgress),
     });
+    await this.downloadsService.changeDownloadStatus(
+      downloadId,
+      hosterId,
+      DownloadStatus.SUCCESS,
+    );
   }
 
   @OnQueueFailed()
