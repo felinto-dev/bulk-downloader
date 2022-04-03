@@ -7,18 +7,6 @@ import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 import { Queue } from 'bull';
 
-/*
-	Create a NestJS service that orchestrates the concurent downloads for each hoster.
-
-	Should have the following methods:
-	- getQuotaLeft(hosterId: string): number
-	- incrementQuotaLeft(hosterId: string): void
-	- decrementQuotaLeft(hosterId: string): void
-	- getDownloadsInProgress(hosterId: string): number
-	- incrementDownloadsInProgress(hosterId: string): void
-	- decrementDownloadsInProgress(hosterId: string): void
-	- getDownloadsInProgressForAllHosters(): number
-*/
 @Injectable()
 export class ConcurrentHosterDownloadsOrchestrator {
   constructor(
@@ -27,7 +15,7 @@ export class ConcurrentHosterDownloadsOrchestrator {
     private readonly hostersService: HostersService,
   ) {}
 
-  public readonly hosterConcurrentDownloadsCounter: Map<string, number> =
+  private readonly hosterConcurrentDownloadsCounter: Map<string, number> =
     new Map();
 
   async assertConcurrentDownloadsMatchActiveDownloads(): Promise<boolean> {
