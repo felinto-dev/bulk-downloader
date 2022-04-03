@@ -30,7 +30,7 @@ export class DownloadsProcessingConsumer {
     private readonly downloadClient: DownloadClientInterface,
     private readonly configService: ConfigService,
     private readonly downloadsService: DownloadsService,
-    private readonly concurrentHosterDownloadsOrchestrator: HosterDownloadsConcurrencyValidator,
+    private readonly hosterDownloadsConcurrencyValidator: HosterDownloadsConcurrencyValidator,
     @InjectQueue(DOWNLOADS_ORCHESTRATING_QUEUE)
     private readonly downloadsOrchestratingQueue: Queue,
     private readonly hosterQuotaService: HosterQuotasService,
@@ -43,7 +43,7 @@ export class DownloadsProcessingConsumer {
       hosterId,
     );
     const hasHosterReachedConcurrentDownloadsLimit =
-      await this.concurrentHosterDownloadsOrchestrator.hasReachedConcurrentDownloadsLimit(
+      await this.hosterDownloadsConcurrencyValidator.hasReachedConcurrentDownloadsLimit(
         hosterId,
       );
 
@@ -55,9 +55,7 @@ export class DownloadsProcessingConsumer {
   @Process({ concurrency: MAX_CONCURRENT_DOWNLOADS_ALLOWED })
   async onDownload(job: Job<DownloadJobDto>) {
     const { url, downloadId, hosterId } = job.data;
-    await this.concurrentHosterDownloadsOrchestrator.incrementQuotaLeft(
-      hosterId,
-    );
+    await this.hosterDownloadsConcurrencyValidator.incrementQuotaLeft(hosterId);
     await this.downloadsService.changeDownloadStatus(
       downloadId,
       hosterId,
@@ -80,9 +78,7 @@ export class DownloadsProcessingConsumer {
       hosterId,
       DownloadStatus.FAILED,
     );
-    await this.concurrentHosterDownloadsOrchestrator.decrementQuotaLeft(
-      hosterId,
-    );
+    await this.hosterDownloadsConcurrencyValidator.decrementQuotaLeft(hosterId);
     await this.downloadsOrchestratingQueue.add(
       DownloadsOrchestratorTasks.RUN_ORCHESTRATOR,
     );
@@ -96,9 +92,7 @@ export class DownloadsProcessingConsumer {
       hosterId,
       DownloadStatus.SUCCESS,
     );
-    await this.concurrentHosterDownloadsOrchestrator.decrementQuotaLeft(
-      hosterId,
-    );
+    await this.hosterDownloadsConcurrencyValidator.decrementQuotaLeft(hosterId);
     await this.downloadsOrchestratingQueue.add(
       DownloadsOrchestratorTasks.RUN_ORCHESTRATOR,
     );
