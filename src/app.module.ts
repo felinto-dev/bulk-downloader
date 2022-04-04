@@ -11,9 +11,9 @@ import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ADAPTERS } from './adapters';
 import { ITERATORS } from './iterators';
+import { MANAGERS } from './managers';
 import { ORCHESTRATORS } from './orchestrators';
 import { SCHEDULES } from './schedulers';
-import { VALIDATORS } from './validators';
 
 @Module({
   imports: [
@@ -32,7 +32,7 @@ import { VALIDATORS } from './validators';
     ...ORCHESTRATORS,
     ...SCHEDULES,
     ...ITERATORS,
-    ...VALIDATORS,
+    ...MANAGERS,
   ],
 })
 export class AppModule {}

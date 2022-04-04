@@ -1,4 +1,6 @@
+import { MAX_CONCURRENT_DOWNLOADS_ALLOWED } from '@/consts/app';
 import { HostersService } from '@/services/hosters.service';
+import { sumMapValues } from '@/utils/objects';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
@@ -7,7 +9,13 @@ export class HosterConcurrencyManager {
 
   private readonly downloadsInProgressByHoster: Map<string, number> = new Map();
 
-  public async hasReachedMaxConcurrentDownloads(
+  async hasReachedMaxConcurrentDownloadsForAllHosters(): Promise<boolean> {
+    const currentDownloads = sumMapValues(this.downloadsInProgressByHoster);
+    const maxConcurrentDownloads = MAX_CONCURRENT_DOWNLOADS_ALLOWED;
+    return currentDownloads >= maxConcurrentDownloads;
+  }
+
+  async hasHosterReachedMaxConcurrentDownloads(
     hosterId: string,
   ): Promise<boolean> {
     const currentDownloads =
@@ -17,13 +25,13 @@ export class HosterConcurrencyManager {
     return currentDownloads >= maxConcurrentDownloads;
   }
 
-  public async incrementDownloadsInProgress(hosterId: string): Promise<void> {
+  async incrementDownloadsInProgress(hosterId: string): Promise<void> {
     const currentDownloads =
       this.downloadsInProgressByHoster.get(hosterId) || 0;
     this.downloadsInProgressByHoster.set(hosterId, currentDownloads + 1);
   }
 
-  public async decrementDownloadsInProgress(hosterId: string): Promise<void> {
+  async decrementDownloadsInProgress(hosterId: string): Promise<void> {
     const currentDownloads = this.downloadsInProgressByHoster.get(hosterId);
 
     if (!currentDownloads) {

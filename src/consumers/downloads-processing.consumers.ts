@@ -43,7 +43,7 @@ export class DownloadsProcessingConsumer {
       hosterId,
     );
     const hasReachedMaxConcurrentDownloads =
-      await this.hosterConcurrencyManager.hasReachedMaxConcurrentDownloads(
+      await this.hosterConcurrencyManager.hasHosterReachedMaxConcurrentDownloads(
         hosterId,
       );
 
