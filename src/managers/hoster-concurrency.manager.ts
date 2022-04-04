@@ -9,7 +9,7 @@ export class HosterConcurrencyManager {
 
   private readonly downloadsInProgressByHoster: Map<string, number> = new Map();
 
-  async hasReachedMaxConcurrentDownloadsForAllHosters(): Promise<boolean> {
+  async hasReachedMaxConcurrentDownloads(): Promise<boolean> {
     const currentDownloads = sumMapValues(this.downloadsInProgressByHoster);
     const maxConcurrentDownloads = MAX_CONCURRENT_DOWNLOADS_ALLOWED;
     return currentDownloads >= maxConcurrentDownloads;

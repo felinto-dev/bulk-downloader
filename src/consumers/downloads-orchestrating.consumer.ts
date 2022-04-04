@@ -19,7 +19,7 @@ export class DownloadsOrchestratingConsumer {
   @OnQueueActive({ name: DownloadsOrchestratorTasks.RUN_ORCHESTRATOR })
   async canOrchestratorRun(_, jobPromise: JobPromise): Promise<void> {
     const hasReachedMaxConcurrentDownloadsForAllHosters =
-      this.hosterConcurrencyManager.hasReachedMaxConcurrentDownloadsForAllHosters();
+      this.hosterConcurrencyManager.hasReachedMaxConcurrentDownloads();
 
     if (hasReachedMaxConcurrentDownloadsForAllHosters) {
       jobPromise.cancel();
