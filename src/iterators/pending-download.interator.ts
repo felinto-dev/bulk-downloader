@@ -8,7 +8,7 @@ export class PendingDownloadsIterator {
   constructor(private readonly prisma: PrismaService) {}
 
   async hasNext(): Promise<boolean> {
-    return !!this.next();
+    return !!(await this.next());
   }
 
   async next(): Promise<PendingDownload> {
