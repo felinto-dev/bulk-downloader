@@ -2,7 +2,7 @@ import { DOWNLOADS_ORCHESTRATING_QUEUE } from '@/consts/queues';
 import { HosterConcurrencyManager } from '@/managers/hoster-concurrency.manager';
 import { DownloadsEnqueueOrchestrator } from '@/orchestrators/downloads-enqueue.orchestrator';
 import { OnQueueActive, Process, Processor } from '@nestjs/bull';
-import { JobPromise } from 'bull';
+import { Job, JobPromise } from 'bull';
 
 export enum DownloadsOrchestratorTasks {
   RUN_ORCHESTRATOR = 'run-orchestrator',
@@ -17,7 +17,7 @@ export class DownloadsOrchestratingConsumer {
   ) {}
 
   @OnQueueActive({ name: DownloadsOrchestratorTasks.RUN_ORCHESTRATOR })
-  async canOrchestratorRun(_, jobPromise: JobPromise): Promise<void> {
+  async canOrchestratorRun(_: Job, jobPromise: JobPromise): Promise<void> {
     const hasReachedMaxConcurrentDownloadsGlobalLimit =
       this.hosterConcurrencyManager.hasReachedMaxConcurrentDownloadsGlobalLimit();
 
