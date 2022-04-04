@@ -5,16 +5,13 @@ import {
 } from '@/consts/queues';
 import { BullModule, SharedBullAsyncConfiguration } from '@nestjs/bull';
 import { DynamicModule } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 
 export const bullConfig: SharedBullAsyncConfiguration = {
-  useFactory: async (configService: ConfigService) => ({
+  useFactory: async () => ({
     redis: {
-      host: configService.get('queue.host'),
-      port: +configService.get('queue.port'),
+      host: process.env.BULL_DB_HOST,
     },
   }),
-  inject: [ConfigService],
 };
 
 export const BULL_QUEUES: DynamicModule[] = [
