@@ -17,7 +17,7 @@ export class HosterConcurrencyManager {
     return currentDownloads >= maxConcurrentDownloads;
   }
 
-  async hasHosterReachedMaxConcurrentDownloads(
+  async hasHosterReachedMaxConcurrentDownloadsByHosterId(
     hosterId: string,
   ): Promise<boolean> {
     const currentDownloads =

@@ -1,29 +1,51 @@
 import { sumMapValues } from '@/utils/objects';
-import { Injectable } from '@nestjs/common';
+import {
+  CACHE_MANAGER,
+  Inject,
+  Injectable,
+  OnModuleInit,
+} from '@nestjs/common';
+import { Cache } from 'cache-manager';
 
 @Injectable()
-export class DownloadsInProgressManager {
-  // TODO: Should use a redis for share the hoster's downloads in progress state between the workers
-  private readonly downloadsInProgressByHoster: Map<string, number> = new Map();
+export class DownloadsInProgressManager implements OnModuleInit {
+  constructor(@Inject(CACHE_MANAGER) private readonly cacheManager: Cache) {}
+
+  private readonly downloadsInProgressByHoster: Promise<Map<string, number>> =
+    this.cacheManager.get<Map<string, number>>('downloadsInProgressByHoster');
+
+  async onModuleInit() {
+    const downloadsInProgressByHosterNotDefined = !(await this
+      .downloadsInProgressByHoster);
+
+    if (downloadsInProgressByHosterNotDefined) {
+      this.cacheManager.set('downloadsInProgressByHoster', new Map());
+    }
+  }
 
   async countDownloadsInProgress(): Promise<number> {
-    return sumMapValues(this.downloadsInProgressByHoster);
+    return sumMapValues(await this.downloadsInProgressByHoster);
   }
 
   async countDownloadsInProgressByHosterId(hosterId: string): Promise<number> {
     const currentDownloads =
-      this.downloadsInProgressByHoster.get(hosterId) || 0;
+      (await this.downloadsInProgressByHoster).get(hosterId) || 0;
     return currentDownloads;
   }
 
   async incrementDownloadsInProgress(hosterId: string): Promise<void> {
     const currentDownloads =
-      this.downloadsInProgressByHoster.get(hosterId) || 0;
-    this.downloadsInProgressByHoster.set(hosterId, currentDownloads + 1);
+      (await this.downloadsInProgressByHoster).get(hosterId) || 0;
+    (await this.downloadsInProgressByHoster).set(
+      hosterId,
+      currentDownloads + 1,
+    );
   }
 
   async decrementDownloadsInProgress(hosterId: string): Promise<void> {
-    const currentDownloads = this.downloadsInProgressByHoster.get(hosterId);
+    const currentDownloads = (await this.downloadsInProgressByHoster).get(
+      hosterId,
+    );
 
     if (!currentDownloads) {
       throw new Error(
@@ -31,6 +53,9 @@ export class DownloadsInProgressManager {
       );
     }
 
-    this.downloadsInProgressByHoster.set(hosterId, currentDownloads - 1);
+    (await this.downloadsInProgressByHoster).set(
+      hosterId,
+      currentDownloads - 1,
+    );
   }
 }
