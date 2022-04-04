@@ -1,7 +1,6 @@
 import { validate } from '@/env.validation';
 import { ConfigModuleOptions } from '@nestjs/config';
 import appConfig from './app.config';
-import queueConfig from './queue.config';
 
 // TODO: Use TypeScript type-checking for configService using InjectKey()
 export const configModuleConfig: ConfigModuleOptions = {
@@ -9,6 +8,6 @@ export const configModuleConfig: ConfigModuleOptions = {
   cache: true,
   expandVariables: true,
   isGlobal: true,
-  load: [queueConfig, appConfig],
+  load: [appConfig],
   validate,
 };

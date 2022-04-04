@@ -1,5 +1,5 @@
 import { plainToClass } from 'class-transformer';
-import { IsEnum, IsNotEmpty, IsPort, validateSync } from 'class-validator';
+import { IsEnum, IsPort, validateSync } from 'class-validator';
 
 enum Environment {
   Development = 'development',
@@ -14,12 +14,6 @@ class EnvironmentVariables {
 
   @IsPort()
   PORT: string;
-
-  @IsNotEmpty()
-  REDIS_HOST: string;
-
-  @IsPort()
-  REDIS_PORT: string;
 }
 
 export function validate(config: Record<string, unknown>) {

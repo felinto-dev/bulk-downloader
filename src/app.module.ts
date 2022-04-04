@@ -6,9 +6,10 @@ import { PrismaService } from '@/prisma.service';
 import { REPOSITORIES } from '@/repositories';
 import { SERVICES } from '@/services';
 import { BullModule } from '@nestjs/bull';
-import { Module } from '@nestjs/common';
+import { CacheModule, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
+import * as redisStore from 'cache-manager-redis-store';
 import { ADAPTERS } from './adapters';
 import { ITERATORS } from './iterators';
 import { MANAGERS } from './managers';
@@ -17,6 +18,10 @@ import { SCHEDULES } from './schedulers';
 
 @Module({
   imports: [
+    CacheModule.register({
+      store: redisStore,
+      host: process.env.CURRENT_DOWNLOADS_IN_PROGRESS_DB_HOST,
+    }),
     ConfigModule.forRoot(configModuleConfig),
     ScheduleModule.forRoot(),
     BullModule.forRootAsync(bullConfig),
