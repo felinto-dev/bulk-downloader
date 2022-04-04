@@ -11,15 +11,18 @@ import { Cache } from 'cache-manager';
 export class DownloadsInProgressManager implements OnModuleInit {
   constructor(@Inject(CACHE_MANAGER) private readonly cacheManager: Cache) {}
 
-  private readonly downloadsInProgressByHoster: Promise<Map<string, number>> =
-    this.cacheManager.get<Map<string, number>>('downloadsInProgressByHoster');
+  get downloadsInProgressByHoster() {
+    return this.cacheManager.get<Map<string, number>>(
+      'downloadsInProgressByHoster',
+    );
+  }
 
   async onModuleInit() {
     const downloadsInProgressByHosterNotDefined = !(await this
       .downloadsInProgressByHoster);
 
     if (downloadsInProgressByHosterNotDefined) {
-      this.cacheManager.set('downloadsInProgressByHoster', new Map());
+      await this.cacheManager.set('downloadsInProgressByHoster', new Map());
     }
   }
 
