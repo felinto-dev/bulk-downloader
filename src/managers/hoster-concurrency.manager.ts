@@ -7,6 +7,7 @@ import { Injectable } from '@nestjs/common';
 export class HosterConcurrencyManager {
   constructor(private readonly hostersService: HostersService) {}
 
+  // TODO: Should use a redis for share the hoster's downloads in progress state between the workers
   private readonly downloadsInProgressByHoster: Map<string, number> = new Map();
 
   async hasReachedMaxConcurrentDownloadsGlobalLimit(): Promise<boolean> {
