@@ -1,17 +1,18 @@
 import { MAX_CONCURRENT_DOWNLOADS_ALLOWED } from '@/consts/app';
 import { HostersService } from '@/services/hosters.service';
-import { sumMapValues } from '@/utils/objects';
 import { Injectable } from '@nestjs/common';
+import { DownloadsInProgressManager } from './downloads-in-progress.manager';
 
 @Injectable()
 export class HosterConcurrencyManager {
-  constructor(private readonly hostersService: HostersService) {}
-
-  // TODO: Should use a redis for share the hoster's downloads in progress state between the workers
-  private readonly downloadsInProgressByHoster: Map<string, number> = new Map();
+  constructor(
+    private readonly hostersService: HostersService,
+    private readonly downloadsInProgressManager: DownloadsInProgressManager,
+  ) {}
 
   async hasReachedMaxConcurrentDownloadsGlobalLimit(): Promise<boolean> {
-    const currentDownloads = sumMapValues(this.downloadsInProgressByHoster);
+    const currentDownloads =
+      await this.downloadsInProgressManager.countDownloadsInProgress();
     const maxConcurrentDownloads = MAX_CONCURRENT_DOWNLOADS_ALLOWED;
     return currentDownloads >= maxConcurrentDownloads;
   }
@@ -20,25 +21,11 @@ export class HosterConcurrencyManager {
     hosterId: string,
   ): Promise<boolean> {
     const currentDownloads =
-      this.downloadsInProgressByHoster.get(hosterId) || 0;
+      await this.downloadsInProgressManager.countDownloadsInProgressByHosterId(
+        hosterId,
+      );
     const maxConcurrentDownloads =
       await this.hostersService.getMaxConcurrentDownloads(hosterId);
     return currentDownloads >= maxConcurrentDownloads;
-  }
-
-  async incrementDownloadsInProgress(hosterId: string): Promise<void> {
-    const currentDownloads =
-      this.downloadsInProgressByHoster.get(hosterId) || 0;
-    this.downloadsInProgressByHoster.set(hosterId, currentDownloads + 1);
-  }
-
-  async decrementDownloadsInProgress(hosterId: string): Promise<void> {
-    const currentDownloads = this.downloadsInProgressByHoster.get(hosterId);
-
-    if (!currentDownloads) {
-      throw new Error(`No downloads in progress for hoster ${hosterId}`);
-    }
-
-    this.downloadsInProgressByHoster.set(hosterId, currentDownloads - 1);
   }
 }

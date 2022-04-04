@@ -6,6 +6,7 @@ import {
 } from '@/consts/queues';
 import { DownloadJobDto } from '@/dto/download.job.dto';
 import { DownloadClientInterface } from '@/interfaces/download-client.interface';
+import { DownloadsInProgressManager } from '@/managers/downloads-in-progress.manager';
 import { HosterConcurrencyManager } from '@/managers/hoster-concurrency.manager';
 import { DownloadsService } from '@/services/downloads.service';
 import { HosterQuotasService } from '@/services/hoster-quotas.service';
@@ -34,6 +35,7 @@ export class DownloadsProcessingConsumer {
     private readonly downloadsOrchestratingQueue: Queue,
     private readonly hosterQuotaService: HosterQuotasService,
     private readonly hosterConcurrencyManager: HosterConcurrencyManager,
+    private readonly downloadsInProgressManager: DownloadsInProgressManager,
   ) {}
 
   @OnQueueActive()
@@ -55,7 +57,9 @@ export class DownloadsProcessingConsumer {
   @Process({ concurrency: MAX_CONCURRENT_DOWNLOADS_ALLOWED })
   async onDownload(job: Job<DownloadJobDto>) {
     const { url, downloadId, hosterId } = job.data;
-    await this.hosterConcurrencyManager.incrementDownloadsInProgress(hosterId);
+    await this.downloadsInProgressManager.incrementDownloadsInProgress(
+      hosterId,
+    );
     await this.downloadsService.changeDownloadStatus(
       downloadId,
       hosterId,
@@ -78,7 +82,9 @@ export class DownloadsProcessingConsumer {
       hosterId,
       DownloadStatus.FAILED,
     );
-    await this.hosterConcurrencyManager.decrementDownloadsInProgress(hosterId);
+    await this.downloadsInProgressManager.decrementDownloadsInProgress(
+      hosterId,
+    );
     await this.downloadsOrchestratingQueue.add(
       DownloadsOrchestratorTasks.RUN_ORCHESTRATOR,
     );
@@ -92,7 +98,9 @@ export class DownloadsProcessingConsumer {
       hosterId,
       DownloadStatus.SUCCESS,
     );
-    await this.hosterConcurrencyManager.decrementDownloadsInProgress(hosterId);
+    await this.downloadsInProgressManager.decrementDownloadsInProgress(
+      hosterId,
+    );
     await this.downloadsOrchestratingQueue.add(
       DownloadsOrchestratorTasks.RUN_ORCHESTRATOR,
     );
