@@ -1,52 +1,34 @@
-import { sumMapValues } from '@/utils/objects';
-import {
-  CACHE_MANAGER,
-  Inject,
-  Injectable,
-  OnModuleInit,
-} from '@nestjs/common';
-import { Cache } from 'cache-manager';
+import { DownloadsInProgressRepository } from '@/repositories/downloads-in-progress.repository';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class DownloadsInProgressManager implements OnModuleInit {
-  constructor(@Inject(CACHE_MANAGER) private readonly cacheManager: Cache) {}
-
-  get downloadsInProgressByHoster() {
-    return this.cacheManager.get<Map<string, number>>(
-      'downloadsInProgressByHoster',
-    );
-  }
-
-  async onModuleInit() {
-    const downloadsInProgressByHosterNotDefined = !(await this
-      .downloadsInProgressByHoster);
-
-    if (downloadsInProgressByHosterNotDefined) {
-      await this.cacheManager.set('downloadsInProgressByHoster', new Map());
-    }
-  }
+export class DownloadsInProgressManager {
+  constructor(
+    private readonly downloadInProgressRepository: DownloadsInProgressRepository,
+  ) {}
 
   async countDownloadsInProgress(): Promise<number> {
-    return sumMapValues(await this.downloadsInProgressByHoster);
+    return this.downloadInProgressRepository.sum();
   }
 
   async countDownloadsInProgressByHosterId(hosterId: string): Promise<number> {
-    const currentDownloads =
-      (await this.downloadsInProgressByHoster).get(hosterId) || 0;
+    const currentDownloads = await this.downloadInProgressRepository.get(
+      hosterId,
+      0,
+    );
     return currentDownloads;
   }
 
   async incrementDownloadsInProgress(hosterId: string): Promise<void> {
-    const currentDownloads =
-      (await this.downloadsInProgressByHoster).get(hosterId) || 0;
-    (await this.downloadsInProgressByHoster).set(
+    const currentDownloads = await this.downloadInProgressRepository.get(
       hosterId,
-      currentDownloads + 1,
+      0,
     );
+    await this.downloadInProgressRepository.set(hosterId, currentDownloads + 1);
   }
 
   async decrementDownloadsInProgress(hosterId: string): Promise<void> {
-    const currentDownloads = (await this.downloadsInProgressByHoster).get(
+    const currentDownloads = await this.downloadInProgressRepository.get(
       hosterId,
     );
 
@@ -56,9 +38,6 @@ export class DownloadsInProgressManager implements OnModuleInit {
       );
     }
 
-    (await this.downloadsInProgressByHoster).set(
-      hosterId,
-      currentDownloads - 1,
-    );
+    await this.downloadInProgressRepository.set(hosterId, currentDownloads - 1);
   }
 }

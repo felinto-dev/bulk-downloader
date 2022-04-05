@@ -1,11 +1,10 @@
-export const convertMaptoJson = (map: Map<unknown, unknown>) =>
-  Object.fromEntries(map);
+export const convertMaptoJson = (map: Map<any, any>) => Object.fromEntries(map);
 
-export const convertMaptoJsonStringify = (map: Map<unknown, unknown>) =>
-  JSON.stringify(convertMaptoJson(map));
-
-export const convertObjectEntriesToMap = (obj: Record<string, unknown>) =>
+export const convertObjectEntriesToMap = (obj: Record<any, any>) =>
   new Map(Object.entries(obj));
 
-export const convertObjectEntriesInStringToMap = (obj: string) =>
+export const parseMap = (obj: string) =>
   convertObjectEntriesToMap(JSON.parse(obj));
+
+export const serializeMap = (map: Map<any, any>) =>
+  JSON.stringify(convertMaptoJson(map));
