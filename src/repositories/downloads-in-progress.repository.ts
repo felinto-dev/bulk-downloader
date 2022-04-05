@@ -22,11 +22,11 @@ export class DownloadsInProgressRepository implements OnModuleInit {
     return parseMap(map);
   }
 
-  private serialize(map: Map<string, number>) {
+  private serialize(map: Map<string, number>): string {
     return serializeMap(map);
   }
 
-  async sum() {
+  async sum(): Promise<number> {
     const map = this.parse(await this.cacheManager.get<string>(this.key));
     return sumMapValues(map);
   }
@@ -36,7 +36,7 @@ export class DownloadsInProgressRepository implements OnModuleInit {
     return map.get(hosterId) || defaultValue;
   }
 
-  async set(hosterId: string, value: number) {
+  async set(hosterId: string, value: number): Promise<void> {
     const map = this.parse(await this.cacheManager.get<string>(this.key));
     map.set(hosterId, value);
     await this.cacheManager.set(this.key, this.serialize(map));
