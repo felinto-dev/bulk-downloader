@@ -6,7 +6,7 @@ import { Injectable } from '@nestjs/common';
 import Downloader from 'nodejs-file-downloader';
 
 @Injectable()
-export class NodeJsFileDownloader implements DownloadClientInterface {
+export class NodeJsFileDownloaderAdapter implements DownloadClientInterface {
   async download(params: DownloadParams) {
     const downloader = new Downloader({
       url: params.downloadUrl,
