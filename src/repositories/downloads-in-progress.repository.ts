@@ -13,7 +13,9 @@ export class DownloadsInProgressRepository implements OnModuleInit {
   constructor(@Inject(CACHE_MANAGER) private readonly cacheManager: Cache) {}
 
   async onModuleInit() {
-    await this.cacheManager.set(this.key, this.serialize(new Map()));
+    if (!(await this.cacheManager.get(this.key))) {
+      await this.cacheManager.set(this.key, this.serialize(new Map()));
+    }
   }
 
   private readonly key = 'downloads_in_progress_by_hoster';
