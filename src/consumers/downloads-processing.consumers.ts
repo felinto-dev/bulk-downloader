@@ -36,7 +36,7 @@ export class DownloadsProcessingConsumer {
   ) {}
 
   @Process({ concurrency: MAX_CONCURRENT_DOWNLOADS_ALLOWED })
-  async onDownload(job: Job<DownloadJobDto>) {
+  async handleDownload(job: Job<DownloadJobDto>) {
     const { url, downloadId, hosterId } = job.data;
 
     if (!(await this.canDownloadNowValidator.validate(hosterId))) {
