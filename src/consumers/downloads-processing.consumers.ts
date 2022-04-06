@@ -7,9 +7,8 @@ import {
 import { DownloadJobDto } from '@/dto/download.job.dto';
 import { DownloadClientInterface } from '@/interfaces/download-client.interface';
 import { DownloadsInProgressManager } from '@/managers/downloads-in-progress.manager';
-import { HosterConcurrencyManager } from '@/managers/hoster-concurrency.manager';
 import { DownloadsService } from '@/services/downloads.service';
-import { HosterQuotasService } from '@/services/hoster-quotas.service';
+import { CanDownloadNowValidator } from '@/validators/can-download-now-validator';
 import {
   InjectQueue,
   OnQueueCompleted,
@@ -32,24 +31,15 @@ export class DownloadsProcessingConsumer {
     private readonly downloadsService: DownloadsService,
     @InjectQueue(DOWNLOADS_ORCHESTRATING_QUEUE)
     private readonly downloadsOrchestratingQueue: Queue,
-    private readonly hosterQuotaService: HosterQuotasService,
-    private readonly hosterConcurrencyManager: HosterConcurrencyManager,
     private readonly downloadsInProgressManager: DownloadsInProgressManager,
+    private readonly canDownloadNowValidator: CanDownloadNowValidator,
   ) {}
 
   @Process({ concurrency: MAX_CONCURRENT_DOWNLOADS_ALLOWED })
   async onDownload(job: Job<DownloadJobDto>) {
     const { url, downloadId, hosterId } = job.data;
 
-    const hasHosterReachedQuota = await this.hosterQuotaService.hasReachedQuota(
-      hosterId,
-    );
-    const hasReachedMaxConcurrentDownloads =
-      await this.hosterConcurrencyManager.hasHosterReachedMaxConcurrentDownloadsByHosterId(
-        hosterId,
-      );
-
-    if (hasHosterReachedQuota || hasReachedMaxConcurrentDownloads) {
+    if (!(await this.canDownloadNowValidator.validate(hosterId))) {
       return;
     }
 
