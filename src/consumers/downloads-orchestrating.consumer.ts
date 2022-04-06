@@ -15,19 +15,21 @@ export class DownloadsOrchestratingConsumer {
     private readonly hosterConcurrencyManager: HosterConcurrencyManager,
   ) {}
 
+  private async canOrchestrateRun(): Promise<boolean> {
+    const hasReachedMaxConcurrentDownloadsGlobalLimit =
+      this.hosterConcurrencyManager.hasReachedMaxConcurrentDownloadsGlobalLimit();
+
+    return !hasReachedMaxConcurrentDownloadsGlobalLimit;
+  }
+
   @Process({
     name: DownloadsOrchestratorTasks.RUN_ORCHESTRATOR,
     concurrency: 1,
   })
   async runOrchestrator() {
-    const hasReachedMaxConcurrentDownloadsGlobalLimit =
-      this.hosterConcurrencyManager.hasReachedMaxConcurrentDownloadsGlobalLimit();
-
-    if (hasReachedMaxConcurrentDownloadsGlobalLimit) {
-      return;
+    if (this.canOrchestrateRun()) {
+      await this.downloadsEnqueueOrchestrator.run();
     }
-
-    await this.downloadsEnqueueOrchestrator.run();
   }
 
   // TODO: Clean up stale jobs (e.g. downloads that has the status of 'downloading')
