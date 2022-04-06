@@ -15,6 +15,7 @@ import { ITERATORS } from './iterators';
 import { MANAGERS } from './managers';
 import { ORCHESTRATORS } from './orchestrators';
 import { SCHEDULES } from './schedulers';
+import { VALIDATORS } from './validators';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { SCHEDULES } from './schedulers';
     ...SCHEDULES,
     ...ITERATORS,
     ...MANAGERS,
+    ...VALIDATORS,
   ],
 })
 export class AppModule {}
