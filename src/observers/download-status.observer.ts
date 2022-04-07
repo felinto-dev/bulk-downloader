@@ -1,3 +1,4 @@
+import { DownloadStatusEvent } from '@/events/download-status-changed.event';
 import { DownloadsService } from '@/services/downloads.service';
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
@@ -7,7 +8,7 @@ import { DownloadStatus } from '@prisma/client';
 export class DownloadStatusObserver {
   constructor(private readonly downloadsService: DownloadsService) {}
 
-  @OnEvent('download.started')
+  @OnEvent(DownloadStatusEvent.STARTED)
   async handleDownloadStartedEvent(hosterId: string, downloadId: string) {
     await this.downloadsService.changeDownloadStatus(
       downloadId,
@@ -16,7 +17,7 @@ export class DownloadStatusObserver {
     );
   }
 
-  @OnEvent('download.failed')
+  @OnEvent(DownloadStatusEvent.FAILED)
   async handleDownloadFailedEvent(hosterId: string, downloadId: string) {
     await this.downloadsService.changeDownloadStatus(
       downloadId,
@@ -25,7 +26,7 @@ export class DownloadStatusObserver {
     );
   }
 
-  @OnEvent('download.finished')
+  @OnEvent(DownloadStatusEvent.FINISHED)
   async handleDownloadFinishedEvent(hosterId: string, downloadId: string) {
     await this.downloadsService.changeDownloadStatus(
       downloadId,

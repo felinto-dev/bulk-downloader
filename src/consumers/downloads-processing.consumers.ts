@@ -2,7 +2,10 @@ import { DOWNLOAD_CLIENT } from '@/adapters/tokens';
 import { MAX_CONCURRENT_DOWNLOADS_ALLOWED } from '@/consts/app';
 import { DOWNLOADS_PROCESSING_QUEUE } from '@/consts/queues';
 import { DownloadJobDto } from '@/dto/download.job.dto';
-import { DownloadStatusChangedEvent } from '@/events/download-status-changed.event';
+import {
+  DownloadStatusChangedEvent,
+  DownloadStatusEvent,
+} from '@/events/download-status-changed.event';
 import { DownloadClientInterface } from '@/interfaces/download-client.interface';
 import { HosterConcurrencyManager } from '@/managers/hoster-concurrency.manager';
 import { DownloadObserver } from '@/observers/download.observer';
@@ -48,7 +51,11 @@ export class DownloadsProcessingConsumer {
     }
 
     await this.downloadObserver.onDownloadStarted(hosterId, downloadId);
-    await this.emitDownloadStatusChangedEvent(hosterId, downloadId, 'started');
+    await this.emitDownloadStatusChangedEvent(
+      hosterId,
+      downloadId,
+      DownloadStatusEvent.STARTED,
+    );
 
     await this.downloadClient.download({
       downloadUrl: url,
@@ -63,24 +70,32 @@ export class DownloadsProcessingConsumer {
   async handleDownloadFailed(job: Job<DownloadJobDto>) {
     const { downloadId, hosterId } = job.data;
     await this.downloadObserver.onDownloadFailed(hosterId, downloadId);
-    await this.emitDownloadStatusChangedEvent(hosterId, downloadId, 'failed');
+    await this.emitDownloadStatusChangedEvent(
+      hosterId,
+      downloadId,
+      DownloadStatusEvent.FAILED,
+    );
   }
 
   @OnQueueCompleted()
   async handleDownloadFinished(job: Job<DownloadJobDto>) {
     const { downloadId, hosterId } = job.data;
     await this.downloadObserver.onDownloadFinished(hosterId, downloadId);
-    await this.emitDownloadStatusChangedEvent(hosterId, downloadId, 'finished');
+    await this.emitDownloadStatusChangedEvent(
+      hosterId,
+      downloadId,
+      DownloadStatusEvent.FINISHED,
+    );
   }
 
   private async emitDownloadStatusChangedEvent(
     hosterId: string,
     downloadId: string,
-    status: string,
+    status: DownloadStatusEvent,
   ) {
     const downloadStatusChangedEvent = new DownloadStatusChangedEvent();
     downloadStatusChangedEvent.downloadId = downloadId;
     downloadStatusChangedEvent.hosterId = hosterId;
-    this.eventEmitter.emit(`download.${status}`, downloadStatusChangedEvent);
+    this.eventEmitter.emit(status, downloadStatusChangedEvent);
   }
 }
