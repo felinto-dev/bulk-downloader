@@ -2,6 +2,7 @@ import { DOWNLOAD_CLIENT } from '@/adapters/tokens';
 import { MAX_CONCURRENT_DOWNLOADS_ALLOWED } from '@/consts/app';
 import { DOWNLOADS_PROCESSING_QUEUE } from '@/consts/queues';
 import { DownloadJobDto } from '@/dto/download.job.dto';
+import { DownloadStatusChangedEvent } from '@/events/download-status-changed.event';
 import { DownloadClientInterface } from '@/interfaces/download-client.interface';
 import { HosterConcurrencyManager } from '@/managers/hoster-concurrency.manager';
 import { DownloadObserver } from '@/observers/download.observer';
@@ -14,6 +15,7 @@ import {
 } from '@nestjs/bull';
 import { Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { DoneCallback, Job } from 'bull';
 
 @Processor(DOWNLOADS_PROCESSING_QUEUE)
@@ -25,6 +27,7 @@ export class DownloadsProcessingConsumer {
     private readonly hosterQuotaService: HosterQuotasService,
     private readonly hosterConcurrencyManager: HosterConcurrencyManager,
     private readonly downloadObserver: DownloadObserver,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   @Process({ concurrency: MAX_CONCURRENT_DOWNLOADS_ALLOWED })
@@ -45,6 +48,7 @@ export class DownloadsProcessingConsumer {
     }
 
     await this.downloadObserver.onDownloadStarted(hosterId, downloadId);
+    await this.emitDownloadStatusChangedEvent(hosterId, downloadId, 'started');
 
     await this.downloadClient.download({
       downloadUrl: url,
@@ -59,11 +63,24 @@ export class DownloadsProcessingConsumer {
   async handleDownloadFailed(job: Job<DownloadJobDto>) {
     const { downloadId, hosterId } = job.data;
     await this.downloadObserver.onDownloadFailed(hosterId, downloadId);
+    await this.emitDownloadStatusChangedEvent(hosterId, downloadId, 'failed');
   }
 
   @OnQueueCompleted()
   async handleDownloadFinished(job: Job<DownloadJobDto>) {
     const { downloadId, hosterId } = job.data;
     await this.downloadObserver.onDownloadFinished(hosterId, downloadId);
+    await this.emitDownloadStatusChangedEvent(hosterId, downloadId, 'finished');
+  }
+
+  private async emitDownloadStatusChangedEvent(
+    hosterId: string,
+    downloadId: string,
+    status: string,
+  ) {
+    const downloadStatusChangedEvent = new DownloadStatusChangedEvent();
+    downloadStatusChangedEvent.downloadId = downloadId;
+    downloadStatusChangedEvent.hosterId = hosterId;
+    this.eventEmitter.emit(`download.${status}`, downloadStatusChangedEvent);
   }
 }

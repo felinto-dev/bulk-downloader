@@ -8,6 +8,7 @@ import { SERVICES } from '@/services';
 import { BullModule } from '@nestjs/bull';
 import { CacheModule, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
 import * as redisStore from 'cache-manager-redis-store';
 import { ADAPTERS } from './adapters';
@@ -20,6 +21,7 @@ import { VALIDATORS } from './validators';
 
 @Module({
   imports: [
+    EventEmitterModule.forRoot({ maxListeners: 5 }),
     CacheModule.register({
       store: redisStore,
       host: process.env.CURRENT_DOWNLOADS_IN_PROGRESS_DB_HOST,
