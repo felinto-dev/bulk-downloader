@@ -20,7 +20,7 @@ import {
 import { Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DownloadStatus } from '@prisma/client';
-import { Job, Queue } from 'bull';
+import { DoneCallback, Job, Queue } from 'bull';
 import { DownloadsOrchestratorTasks } from './downloads-orchestrating.consumer';
 
 @Processor(DOWNLOADS_PROCESSING_QUEUE)
@@ -38,7 +38,7 @@ export class DownloadsProcessingConsumer {
   ) {}
 
   @Process({ concurrency: MAX_CONCURRENT_DOWNLOADS_ALLOWED })
-  async handleDownload(job: Job<DownloadJobDto>) {
+  async handleDownload(job: Job<DownloadJobDto>, done: DoneCallback) {
     const { url, downloadId, hosterId } = job.data;
 
     const hasHosterReachedQuota = await this.hosterQuotaService.hasReachedQuota(
@@ -46,7 +46,7 @@ export class DownloadsProcessingConsumer {
     );
 
     if (hasHosterReachedQuota) {
-      return;
+      done();
     }
 
     const hasReachedMaxConcurrentDownloads =
@@ -55,7 +55,7 @@ export class DownloadsProcessingConsumer {
       );
 
     if (hasReachedMaxConcurrentDownloads) {
-      return;
+      done();
     }
 
     await this.downloadsInProgressManager.incrementDownloadsInProgress(
