@@ -8,7 +8,6 @@ import {
 } from '@/events/download-status-changed.event';
 import { DownloadClientInterface } from '@/interfaces/download-client.interface';
 import { HosterConcurrencyManager } from '@/managers/hoster-concurrency.manager';
-import { DownloadObserver } from '@/observers/download.observer';
 import { HosterQuotasService } from '@/services/hoster-quotas.service';
 import {
   OnQueueCompleted,
@@ -29,7 +28,6 @@ export class DownloadsProcessingConsumer {
     private readonly configService: ConfigService,
     private readonly hosterQuotaService: HosterQuotasService,
     private readonly hosterConcurrencyManager: HosterConcurrencyManager,
-    private readonly downloadObserver: DownloadObserver,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -50,7 +48,6 @@ export class DownloadsProcessingConsumer {
       done();
     }
 
-    await this.downloadObserver.onDownloadStarted(hosterId, downloadId);
     await this.emitDownloadStatusChangedEvent(
       hosterId,
       downloadId,
@@ -69,7 +66,6 @@ export class DownloadsProcessingConsumer {
   @OnQueueFailed()
   async handleDownloadFailed(job: Job<DownloadJobDto>) {
     const { downloadId, hosterId } = job.data;
-    await this.downloadObserver.onDownloadFailed(hosterId, downloadId);
     await this.emitDownloadStatusChangedEvent(
       hosterId,
       downloadId,
@@ -80,7 +76,6 @@ export class DownloadsProcessingConsumer {
   @OnQueueCompleted()
   async handleDownloadFinished(job: Job<DownloadJobDto>) {
     const { downloadId, hosterId } = job.data;
-    await this.downloadObserver.onDownloadFinished(hosterId, downloadId);
     await this.emitDownloadStatusChangedEvent(
       hosterId,
       downloadId,
