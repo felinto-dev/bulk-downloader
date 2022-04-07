@@ -1,9 +1,10 @@
+import { DOWNLOAD_CLIENT } from '@/adapters/tokens';
 import {
   DownloadClientInterface,
   DownloadParams,
 } from '@/interfaces/download-client.interface';
 import { HosterQuotasService } from '@/services/hoster-quotas.service';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { HosterConcurrencyManager } from './hoster-concurrency.manager';
 
 @Injectable()
@@ -11,6 +12,7 @@ export class DownloadManager {
   constructor(
     private readonly hosterConcurrencyManager: HosterConcurrencyManager,
     private readonly hosterQuotaService: HosterQuotasService,
+    @Inject(DOWNLOAD_CLIENT)
     private readonly downloadClient: DownloadClientInterface,
   ) {}
 
