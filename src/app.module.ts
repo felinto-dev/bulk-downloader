@@ -13,6 +13,7 @@ import * as redisStore from 'cache-manager-redis-store';
 import { ADAPTERS } from './adapters';
 import { ITERATORS } from './iterators';
 import { MANAGERS } from './managers';
+import { OBSERVERS } from './observers';
 import { ORCHESTRATORS } from './orchestrators';
 import { SCHEDULES } from './schedulers';
 import { VALIDATORS } from './validators';
@@ -40,6 +41,7 @@ import { VALIDATORS } from './validators';
     ...ITERATORS,
     ...MANAGERS,
     ...VALIDATORS,
+    ...OBSERVERS,
   ],
 })
 export class AppModule {}

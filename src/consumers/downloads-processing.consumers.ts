@@ -1,17 +1,12 @@
 import { DOWNLOAD_CLIENT } from '@/adapters/tokens';
 import { MAX_CONCURRENT_DOWNLOADS_ALLOWED } from '@/consts/app';
-import {
-  DOWNLOADS_ORCHESTRATING_QUEUE,
-  DOWNLOADS_PROCESSING_QUEUE,
-} from '@/consts/queues';
+import { DOWNLOADS_PROCESSING_QUEUE } from '@/consts/queues';
 import { DownloadJobDto } from '@/dto/download.job.dto';
 import { DownloadClientInterface } from '@/interfaces/download-client.interface';
-import { DownloadsInProgressManager } from '@/managers/downloads-in-progress.manager';
 import { HosterConcurrencyManager } from '@/managers/hoster-concurrency.manager';
-import { DownloadsService } from '@/services/downloads.service';
+import { DownloadObserver } from '@/observers/download.observer';
 import { HosterQuotasService } from '@/services/hoster-quotas.service';
 import {
-  InjectQueue,
   OnQueueCompleted,
   OnQueueFailed,
   Process,
@@ -19,9 +14,7 @@ import {
 } from '@nestjs/bull';
 import { Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { DownloadStatus } from '@prisma/client';
-import { DoneCallback, Job, Queue } from 'bull';
-import { DownloadsOrchestratorTasks } from './downloads-orchestrating.consumer';
+import { DoneCallback, Job } from 'bull';
 
 @Processor(DOWNLOADS_PROCESSING_QUEUE)
 export class DownloadsProcessingConsumer {
@@ -29,43 +22,30 @@ export class DownloadsProcessingConsumer {
     @Inject(DOWNLOAD_CLIENT)
     private readonly downloadClient: DownloadClientInterface,
     private readonly configService: ConfigService,
-    private readonly downloadsService: DownloadsService,
-    @InjectQueue(DOWNLOADS_ORCHESTRATING_QUEUE)
-    private readonly downloadsOrchestratingQueue: Queue,
-    private readonly downloadsInProgressManager: DownloadsInProgressManager,
     private readonly hosterQuotaService: HosterQuotasService,
     private readonly hosterConcurrencyManager: HosterConcurrencyManager,
+    private readonly downloadObserver: DownloadObserver,
   ) {}
 
   @Process({ concurrency: MAX_CONCURRENT_DOWNLOADS_ALLOWED })
   async handleDownload(job: Job<DownloadJobDto>, done: DoneCallback) {
     const { url, downloadId, hosterId } = job.data;
 
-    const hasHosterReachedQuota = await this.hosterQuotaService.hasReachedQuota(
-      hosterId,
-    );
-
-    if (hasHosterReachedQuota) {
-      done();
-    }
-
     const hasReachedMaxConcurrentDownloads =
       await this.hosterConcurrencyManager.hasHosterReachedMaxConcurrentDownloadsByHosterId(
         hosterId,
       );
 
-    if (hasReachedMaxConcurrentDownloads) {
+    const hasHosterReachedQuota = await this.hosterQuotaService.hasReachedQuota(
+      hosterId,
+    );
+
+    if (hasReachedMaxConcurrentDownloads || hasHosterReachedQuota) {
       done();
     }
 
-    await this.downloadsInProgressManager.incrementDownloadsInProgress(
-      hosterId,
-    );
-    await this.downloadsService.changeDownloadStatus(
-      downloadId,
-      hosterId,
-      DownloadStatus.DOWNLOADING,
-    );
+    await this.downloadObserver.onDownloadStarted(hosterId, downloadId);
+
     await this.downloadClient.download({
       downloadUrl: url,
       saveLocation: await this.configService.get('app.downloads_directory'),
@@ -76,34 +56,14 @@ export class DownloadsProcessingConsumer {
   }
 
   @OnQueueFailed()
-  async onDownloadFail(job: Job<DownloadJobDto>) {
+  async handleDownloadFailed(job: Job<DownloadJobDto>) {
     const { downloadId, hosterId } = job.data;
-    await this.downloadsService.changeDownloadStatus(
-      downloadId,
-      hosterId,
-      DownloadStatus.FAILED,
-    );
-    await this.downloadsInProgressManager.decrementDownloadsInProgress(
-      hosterId,
-    );
-    await this.downloadsOrchestratingQueue.add(
-      DownloadsOrchestratorTasks.RUN_ORCHESTRATOR,
-    );
+    await this.downloadObserver.onDownloadFailed(hosterId, downloadId);
   }
 
   @OnQueueCompleted()
-  async onDownloadFinished(job: Job<DownloadJobDto>) {
+  async handleDownloadFinished(job: Job<DownloadJobDto>) {
     const { downloadId, hosterId } = job.data;
-    await this.downloadsService.changeDownloadStatus(
-      downloadId,
-      hosterId,
-      DownloadStatus.SUCCESS,
-    );
-    await this.downloadsInProgressManager.decrementDownloadsInProgress(
-      hosterId,
-    );
-    await this.downloadsOrchestratingQueue.add(
-      DownloadsOrchestratorTasks.RUN_ORCHESTRATOR,
-    );
+    await this.downloadObserver.onDownloadFinished(hosterId, downloadId);
   }
 }
