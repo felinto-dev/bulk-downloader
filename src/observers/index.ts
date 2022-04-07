@@ -1,3 +1,3 @@
-import { DownloadObserver } from './download.observer';
+import { DownloadStatusObserver } from './download-status.observer';
 
-export const OBSERVERS = [DownloadObserver];
+export const OBSERVERS = [DownloadStatusObserver];
