@@ -12,6 +12,7 @@ import {
   Process,
   Processor,
 } from '@nestjs/bull';
+import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Job } from 'bull';
@@ -24,6 +25,10 @@ export class DownloadsProcessingConsumer {
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
+  private readonly logger: Logger = new Logger(
+    DownloadsProcessingConsumer.name,
+  );
+
   @Process({ concurrency: MAX_CONCURRENT_DOWNLOADS_ALLOWED })
   async handleDownload(job: Job<DownloadJobDto>) {
     const { url, downloadId, hosterId } = job.data;
@@ -33,6 +38,8 @@ export class DownloadsProcessingConsumer {
       downloadId,
       DownloadStatusEvent.STARTED,
     );
+
+    this.logger.verbose(`Downloading ${url}`);
 
     await this.downloadManager.startDownload(hosterId, {
       downloadUrl: url,

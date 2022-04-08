@@ -16,7 +16,9 @@ export class DownloadManager {
     private readonly downloadClient: DownloadClientInterface,
   ) {}
 
-  async startDownload(hosterId: string, downloadParams: DownloadParams) {
+  private async isHosterAvailableToDownload(
+    hosterId: string,
+  ): Promise<boolean> {
     const hasReachedMaxConcurrentDownloads =
       await this.hosterConcurrencyManager.hasHosterReachedMaxConcurrentDownloadsByHosterId(
         hosterId,
@@ -26,10 +28,12 @@ export class DownloadManager {
       hosterId,
     );
 
-    if (hasReachedMaxConcurrentDownloads || hasHosterReachedQuota) {
-      return;
-    }
+    return !(hasReachedMaxConcurrentDownloads || hasHosterReachedQuota);
+  }
 
-    await this.downloadClient.download(downloadParams);
+  async startDownload(hosterId: string, downloadParams: DownloadParams) {
+    if (this.isHosterAvailableToDownload(hosterId)) {
+      await this.downloadClient.download(downloadParams);
+    }
   }
 }
