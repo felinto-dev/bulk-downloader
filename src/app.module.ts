@@ -17,7 +17,6 @@ import { MANAGERS } from './managers';
 import { OBSERVERS } from './observers';
 import { ORCHESTRATORS } from './orchestrators';
 import { SCHEDULES } from './schedulers';
-import { VALIDATORS } from './validators';
 
 @Module({
   imports: [
@@ -42,7 +41,6 @@ import { VALIDATORS } from './validators';
     ...SCHEDULES,
     ...ITERATORS,
     ...MANAGERS,
-    ...VALIDATORS,
     ...OBSERVERS,
   ],
 })
