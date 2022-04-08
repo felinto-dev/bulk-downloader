@@ -1,6 +1,9 @@
 import { DOWNLOADS_ORCHESTRATING_QUEUE } from '@/consts/queues';
 import { DownloadsOrchestratorTasks } from '@/consumers/downloads-orchestrating.consumer';
-import { DownloadStatusEvent } from '@/events/download-status-changed.event';
+import {
+  DownloadStatusChangedEvent,
+  DownloadStatusEvent,
+} from '@/events/download-status-changed.event';
 import { DownloadsInProgressManager } from '@/managers/downloads-in-progress.manager';
 import { DownloadsService } from '@/services/downloads.service';
 import { InjectQueue } from '@nestjs/bull';
@@ -19,7 +22,10 @@ export class DownloadStatusObserver {
   ) {}
 
   @OnEvent(DownloadStatusEvent.STARTED)
-  async handleDownloadStartedEvent(hosterId: string, downloadId: string) {
+  async handleDownloadStartedEvent({
+    hosterId,
+    downloadId,
+  }: DownloadStatusChangedEvent) {
     await this.downloadsInProgressManager.incrementDownloadsInProgress(
       hosterId,
     );
@@ -31,7 +37,10 @@ export class DownloadStatusObserver {
   }
 
   @OnEvent(DownloadStatusEvent.FAILED)
-  async handleDownloadFailedEvent(hosterId: string, downloadId: string) {
+  async handleDownloadFailedEvent({
+    hosterId,
+    downloadId,
+  }: DownloadStatusChangedEvent) {
     await this.downloadsInProgressManager.decrementDownloadsInProgress(
       hosterId,
     );
@@ -44,7 +53,10 @@ export class DownloadStatusObserver {
   }
 
   @OnEvent(DownloadStatusEvent.FINISHED)
-  async handleDownloadFinishedEvent(hosterId: string, downloadId: string) {
+  async handleDownloadFinishedEvent({
+    hosterId,
+    downloadId,
+  }: DownloadStatusChangedEvent) {
     await this.downloadsService.changeDownloadStatus(
       hosterId,
       downloadId,
