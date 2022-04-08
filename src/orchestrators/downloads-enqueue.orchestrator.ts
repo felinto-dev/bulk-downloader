@@ -21,11 +21,11 @@ export class DownloadsEnqueueOrchestrator {
     this.logger.log(`${DownloadsEnqueueOrchestrator.name} is running...`);
 
     while (await this.pendingDownloadsIterator.hasNext()) {
-      const nextDownload = await this.pendingDownloadsIterator.next();
+      const download = await this.pendingDownloadsIterator.next();
 
-      await this.downloadsProcessingQueue.add(nextDownload);
+      await this.downloadsProcessingQueue.add(download);
       this.logger.log(
-        `Added download ${nextDownload.downloadId} from hoster ${nextDownload.hosterId} to the downloads processing queue`,
+        `Added download ${download.downloadId} from hoster ${download.hosterId} to the downloads processing queue`,
       );
     }
   }
