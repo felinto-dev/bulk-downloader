@@ -1,22 +1,16 @@
-import { DOWNLOADS_ORCHESTRATING_QUEUE } from '@/consts/queues';
-import { DownloadsOrchestratorTasks } from '@/consumers/downloads-orchestrating.consumer';
 import {
   DownloadStatusChangedEvent,
   DownloadStatusEvent,
 } from '@/events/download-status-changed.event';
 import { DownloadsInProgressManager } from '@/managers/downloads-in-progress.manager';
 import { DownloadsService } from '@/services/downloads.service';
-import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { DownloadStatus } from '@prisma/client';
-import { Queue } from 'bull';
 
 @Injectable()
 export class DownloadStatusObserver {
   constructor(
-    @InjectQueue(DOWNLOADS_ORCHESTRATING_QUEUE)
-    private readonly downloadsOrchestratingQueue: Queue,
     private readonly downloadsService: DownloadsService,
     private readonly downloadsInProgressManager: DownloadsInProgressManager,
   ) {}
@@ -49,7 +43,6 @@ export class DownloadStatusObserver {
       downloadId,
       DownloadStatus.FAILED,
     );
-    await this.runOrchestrator();
   }
 
   @OnEvent(DownloadStatusEvent.FINISHED)
@@ -64,13 +57,6 @@ export class DownloadStatusObserver {
     );
     await this.downloadsInProgressManager.decrementDownloadsInProgress(
       hosterId,
-    );
-    await this.runOrchestrator();
-  }
-
-  private async runOrchestrator() {
-    await this.downloadsOrchestratingQueue.add(
-      DownloadsOrchestratorTasks.RUN_ORCHESTRATOR,
     );
   }
 }

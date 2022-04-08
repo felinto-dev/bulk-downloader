@@ -1,3 +1,4 @@
+import { DownloadsOrchestratorService } from './downloads-orchestrator.service';
 import { DownloadsRequestsService } from './downloads-requests.service';
 import { DownloadsService } from './downloads.service';
 import { HosterQuotasService } from './hoster-quotas.service';
@@ -8,4 +9,5 @@ export const SERVICES = [
   HosterQuotasService,
   DownloadsService,
   DownloadsRequestsService,
+  DownloadsOrchestratorService,
 ];

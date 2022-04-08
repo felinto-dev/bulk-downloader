@@ -1,15 +1,11 @@
-import { DOWNLOADS_ORCHESTRATING_QUEUE } from '@/consts/queues';
-import { DownloadsOrchestratorTasks } from '@/consumers/downloads-orchestrating.consumer';
-import { InjectQueue } from '@nestjs/bull';
+import { DownloadsOrchestratorService } from '@/services/downloads-orchestrator.service';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { Queue } from 'bull';
 
 @Injectable()
 export class DownloadsEnqueueScheduler implements OnModuleInit {
   constructor(
-    @InjectQueue(DOWNLOADS_ORCHESTRATING_QUEUE)
-    private readonly downloadsOrchestratingQueue: Queue,
+    private readonly downloadsOrchestratorService: DownloadsOrchestratorService,
   ) {}
 
   async onModuleInit() {
@@ -18,8 +14,6 @@ export class DownloadsEnqueueScheduler implements OnModuleInit {
 
   @Cron(CronExpression.EVERY_30_MINUTES)
   async runOrchestrator() {
-    await this.downloadsOrchestratingQueue.add(
-      DownloadsOrchestratorTasks.RUN_ORCHESTRATOR,
-    );
+    await this.downloadsOrchestratorService.run();
   }
 }
