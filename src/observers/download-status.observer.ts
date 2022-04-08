@@ -24,8 +24,8 @@ export class DownloadStatusObserver {
       hosterId,
     );
     await this.downloadsService.changeDownloadStatus(
-      downloadId,
       hosterId,
+      downloadId,
       DownloadStatus.DOWNLOADING,
     );
   }
@@ -36,8 +36,8 @@ export class DownloadStatusObserver {
       hosterId,
     );
     await this.downloadsService.changeDownloadStatus(
-      downloadId,
       hosterId,
+      downloadId,
       DownloadStatus.FAILED,
     );
     await this.runOrchestrator();
@@ -46,8 +46,8 @@ export class DownloadStatusObserver {
   @OnEvent(DownloadStatusEvent.FINISHED)
   async handleDownloadFinishedEvent(hosterId: string, downloadId: string) {
     await this.downloadsService.changeDownloadStatus(
-      downloadId,
       hosterId,
+      downloadId,
       DownloadStatus.SUCCESS,
     );
     await this.downloadsInProgressManager.decrementDownloadsInProgress(

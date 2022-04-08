@@ -92,15 +92,15 @@ export class DownloadsRepository {
   }
 
   async changeDownloadStatus(
-    downloadId: string,
     hosterId: string,
+    downloadId: string,
     status: DownloadStatus,
   ) {
     await this.prisma.download.update({
       where: {
         downloadIdByHoster: {
-          downloadId,
           hosterId,
+          downloadId,
         },
       },
       data: {

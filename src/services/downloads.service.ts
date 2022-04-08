@@ -12,10 +12,10 @@ export class DownloadsService {
   }
 
   async changeDownloadStatus(
-    downloadId: string,
     hosterId: string,
+    downloadId: string,
     status: DownloadStatus,
   ) {
-    await this.repository.changeDownloadStatus(downloadId, hosterId, status);
+    await this.repository.changeDownloadStatus(hosterId, downloadId, status);
   }
 }
